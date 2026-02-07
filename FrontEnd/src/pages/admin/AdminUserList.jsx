@@ -51,7 +51,7 @@ const AdminUserList = () => {
     const filteredUsers = users.filter(user => {
         const matchSearch = user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             user.fullName?.toLowerCase().includes(searchTerm.toLowerCase());
-        const userRole = user.roles || user.role;
+        const userRole = user.role;
         const matchRole = !filterRole || userRole === filterRole;
         return matchSearch && matchRole;
     });
@@ -95,13 +95,13 @@ const AdminUserList = () => {
                 </div>
                 <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 text-center">
                     <p className="text-3xl font-bold text-purple-600">
-                        {users.filter(u => (u.roles || u.role) === 'ADMIN').length}
+                        {users.filter(u => u.role === 'ADMIN').length}
                     </p>
                     <p className="text-sm text-slate-500">Admin</p>
                 </div>
                 <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 text-center">
                     <p className="text-3xl font-bold text-blue-600">
-                        {users.filter(u => (u.roles || u.role) === 'USER').length}
+                        {users.filter(u => u.role === 'USER').length}
                     </p>
                     <p className="text-sm text-slate-500">User</p>
                 </div>
@@ -165,11 +165,11 @@ const AdminUserList = () => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        {getRoleBadge(user.roles || user.role)}
+                                        {getRoleBadge(user.role)}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <select
-                                            value={user.roles || user.role}
+                                            value={user.role}
                                             onChange={(e) => handleRoleChange(user.id, e.target.value)}
                                             className="px-3 py-1 border border-slate-300 rounded-lg text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none"
                                         >

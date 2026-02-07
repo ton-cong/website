@@ -6,17 +6,19 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductRequest {
 
     private String name;
-    private Integer categoryId;
+    private String categoryName;  // Changed from categoryId to categoryName
     private String description;
     private String specifications;
-    private Double price;          // Changed from BigDecimal to match entity
-    private Double salePrice;      // Changed from BigDecimal to match entity
+    private BigDecimal price;          // Changed to BigDecimal to match entity
+    private BigDecimal salePrice;      // Changed to BigDecimal to match entity
     private Integer stock;
     private MultipartFile imageFile;
     private String brand;

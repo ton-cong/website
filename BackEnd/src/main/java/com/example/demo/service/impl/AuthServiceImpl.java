@@ -84,7 +84,7 @@ public class AuthServiceImpl implements AuthService {
         UserResponse userResponse = UserResponse.builder()
                 .id(user.getId())
                 .email(user.getEmail())
-                .roles(user.getRole())
+                .role(user.getRole())
                 .build();
 
         return AuthResponseDTO.builder()
@@ -112,8 +112,17 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // mapper cập nhật field
+        // mapper cập nhật field (email, fullName, phone)
         userMapper.toUpdateUserDto(request, user);
+
+        // Xử lý role thủ công vì gửi từ frontend là String
+        if (request.getRole() != null && !request.getRole().isEmpty()) {
+            try {
+                user.setRole(Role.valueOf(request.getRole().toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                throw new RuntimeException("Invalid role: " + request.getRole());
+            }
+        }
 
         // LƯU lại DB
         userRepository.save(user);

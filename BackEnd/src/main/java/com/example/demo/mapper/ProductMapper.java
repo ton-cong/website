@@ -1,10 +1,14 @@
 package com.example.demo.mapper;
 
+import org.mapstruct.BeanMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
+
 import com.example.demo.dto.request.ProductRequest;
 import com.example.demo.dto.response.ProductResponse;
 import com.example.demo.entity.Product;
-import com.example.demo.enums.ProductStatus;
-import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface ProductMapper {

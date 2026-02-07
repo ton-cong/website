@@ -25,8 +25,8 @@ const CheckoutPage = () => {
     };
 
     const calculateTotal = () => {
-        if (!cart?.cartItems) return 0;
-        return cart.totalPrice || cart.cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+        if (!cart?.items) return 0;
+        return cart.totalPrice || cart.items.reduce((total, item) => total + (item.price * item.quantity), 0);
     };
 
     const handleSubmit = async (e) => {
@@ -70,7 +70,7 @@ const CheckoutPage = () => {
         }
     };
 
-    if (!cart?.cartItems?.length) {
+    if (!cart?.items?.length) {
         return (
             <div className="max-w-2xl mx-auto py-16 text-center">
                 <div className="text-6xl mb-4">🛒</div>
@@ -135,7 +135,7 @@ const CheckoutPage = () => {
                 <div className="bg-white p-6 rounded-2xl shadow-lg border border-slate-100 h-fit">
                     <h2 className="text-xl font-semibold text-slate-900 mb-6">Đơn hàng của bạn</h2>
                     <div className="space-y-4">
-                        {cart.cartItems.map((item) => (
+                        {cart.items.map((item) => (
                             <div key={item.id} className="flex justify-between items-center py-2 border-b border-slate-100">
                                 <div className="flex items-center gap-3">
                                     <img

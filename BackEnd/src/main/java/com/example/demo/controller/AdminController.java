@@ -46,8 +46,8 @@ public class AdminController {
         apiResponse.setResult(authService.getUserById(id));
         return apiResponse;
     }
-    @PostMapping("update/{id}")
-    private ApiResponse<UserResponse> updateUser(@PathVariable Integer id, @Valid @RequestBody UpdateUserDTO updateUserDTO) {
+    @PostMapping("/update/{id}")
+    public ApiResponse<UserResponse> updateUser(@PathVariable Integer id, @Valid @RequestBody UpdateUserDTO updateUserDTO) {
         ApiResponse<UserResponse> apiResponse = new ApiResponse<>();
         apiResponse.setResult(authService.updateUser(id, updateUserDTO));
         return apiResponse;

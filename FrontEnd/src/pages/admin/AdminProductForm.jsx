@@ -43,9 +43,46 @@ const AdminProductForm = () => {
     const fetchCategories = async () => {
         try {
             const response = await categoryApi.getAll();
-            setCategories(response?.result || response || []);
+            let categoriesData = response?.result || response || [];
+
+            console.log("📋 RAW API Response:", response);
+            console.log("📋 Categories extracted:", categoriesData);
+
+            // If categories is wrapped in another object, unwrap it
+            if (categoriesData && typeof categoriesData === 'object' && !Array.isArray(categoriesData)) {
+                console.log("⚠️ Categories is not an array, attempting to extract...");
+                categoriesData = categoriesData.result || categoriesData.data || [];
+            }
+
+            // Ensure it's an array
+            if (!Array.isArray(categoriesData)) {
+                console.error("❌ Categories is not an array:", categoriesData);
+                categoriesData = [];
+            }
+
+            // Normalize categories - ensure each has an id field
+            const normalizedCategories = categoriesData.map((cat, index) => {
+                // Try different possible field names for ID
+                const categoryId = cat.id || cat.categoryId || cat.ID || cat.CategoryId;
+
+                if (!categoryId && index === 0) {
+                    console.error("❌ Category missing ID! Available keys:", Object.keys(cat));
+                    console.error("❌ Full category object:", cat);
+                }
+
+                return {
+                    ...cat,
+                    id: categoryId, // Ensure 'id' field exists
+                    name: cat.name || cat.categoryName || cat.Name
+                };
+            });
+
+            console.log("✅ Normalized categories:", normalizedCategories.map(c => ({ id: c.id, name: c.name })));
+
+            setCategories(normalizedCategories);
         } catch (error) {
-            console.error(error);
+            console.error("❌ Failed to load categories:", error);
+            toast.error("Không thể tải danh mục");
         }
     };
 
@@ -80,12 +117,14 @@ const AdminProductForm = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
+        console.log(`📝 Form field changed: ${name} = ${value}`);
         setFormData({ ...formData, [name]: value });
     };
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
+            console.log("🖼️ Image selected:", file.name);
             setFormData({ ...formData, image: file });
             setImagePreview(URL.createObjectURL(file));
         }
@@ -93,38 +132,85 @@ const AdminProductForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        console.log("=== FORM SUBMIT STARTED ===");
+        console.log("Form Data:", formData);
+
+        // Validate category is selected
+        if (!formData.categoryId || formData.categoryId === '') {
+            console.error("❌ Category validation failed");
+            toast.error("Vui lòng chọn danh mục sản phẩm");
+            return;
+        }
+
+        // Validate price
+        const priceNum = parseFloat(formData.price);
+        console.log("Price:", formData.price, "Parsed:", priceNum, "IsNaN:", isNaN(priceNum));
+
+        if (!formData.price || isNaN(priceNum) || priceNum <= 0) {
+            console.error("❌ Price validation failed");
+            toast.error("Vui lòng nhập giá sản phẩm hợp lệ");
+            return;
+        }
+
+        console.log("✅ Validation passed, creating FormData...");
         setLoading(true);
 
         try {
             // Create FormData for multipart upload
             const data = new FormData();
             data.append('name', formData.name);
-            data.append('categoryId', formData.categoryId);
+            // Send category NAME instead of ID
+            data.append('categoryName', formData.categoryId); // categoryId field contains the name now
             data.append('description', formData.description || '');
             data.append('specifications', formData.specifications || '');
-            data.append('price', formData.price);
-            if (formData.salePrice) data.append('salePrice', formData.salePrice);
-            data.append('stock', formData.stock || 0);
+            data.append('price', priceNum);
+
+            // Handle salePrice
+            if (formData.salePrice) {
+                const salePriceNum = parseFloat(formData.salePrice);
+                if (!isNaN(salePriceNum) && salePriceNum > 0) {
+                    data.append('salePrice', salePriceNum);
+                }
+            }
+
+            // Handle stock
+            const stockNum = parseInt(formData.stock || 0, 10);
+            data.append('stock', isNaN(stockNum) ? 0 : stockNum);
+
             data.append('brand', formData.brand || '');
             data.append('cpu', formData.cpu || '');
             data.append('ram', formData.ram || '');
             data.append('storage', formData.storage || '');
             data.append('screen', formData.screen || '');
             data.append('status', formData.status);
+
             if (formData.image) {
+                console.log("📷 Adding image:", formData.image.name);
                 data.append('imageFile', formData.image);
             }
 
+            // Log FormData contents
+            console.log("📦 FormData contents:");
+            for (let [key, value] of data.entries()) {
+                console.log(`  ${key}:`, value);
+            }
+
+
             if (isEditing) {
+                console.log("🔄 Updating product with ID:", id);
                 await productApi.update(id, data);
                 toast.success("Cập nhật sản phẩm thành công!");
             } else {
-                await productApi.create(data);
+                console.log("➕ Creating new product...");
+                const response = await productApi.create(data);
+                console.log("✅ Product created successfully:", response);
                 toast.success("Tạo sản phẩm thành công!");
             }
             navigate('/admin/products');
         } catch (error) {
-            console.error(error);
+            console.error("❌ Error submitting product:", error);
+            console.error("Error response:", error.response?.data);
             toast.error(error.response?.data?.message || "Lỗi khi lưu sản phẩm");
         } finally {
             setLoading(false);
@@ -143,6 +229,17 @@ const AdminProductForm = () => {
                 <h1 className="text-2xl font-bold text-slate-900">
                     {isEditing ? 'Sửa sản phẩm' : 'Thêm sản phẩm mới'}
                 </h1>
+                {/* Debug button */}
+                <button
+                    type="button"
+                    onClick={() => {
+                        console.log("🔍 DEBUG - Current formData:", formData);
+                        console.log("🔍 DEBUG - Categories:", categories);
+                    }}
+                    className="ml-auto px-3 py-1 text-xs bg-gray-200 rounded"
+                >
+                    Debug Console
+                </button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -162,7 +259,12 @@ const AdminProductForm = () => {
                                 />
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">Danh mục *</label>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">
+                                            Danh mục *
+                                            <span className="ml-2 text-xs text-gray-500">
+                                                ({categories.length} danh mục)
+                                            </span>
+                                        </label>
                                         <select
                                             name="categoryId"
                                             value={formData.categoryId}
@@ -171,9 +273,15 @@ const AdminProductForm = () => {
                                             className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none"
                                         >
                                             <option value="">Chọn danh mục</option>
-                                            {categories.map((cat, idx) => (
-                                                <option key={cat.id || `cat-${idx}`} value={cat.id}>{cat.name}</option>
-                                            ))}
+                                            {categories.map((cat, idx) => {
+                                                // Use name as value since backend now expects categoryName
+                                                // and id might be null
+                                                return (
+                                                    <option key={cat.id || `cat-${idx}`} value={cat.name}>
+                                                        {cat.name}
+                                                    </option>
+                                                );
+                                            })}
                                         </select>
                                     </div>
                                     <Input

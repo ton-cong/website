@@ -35,13 +35,13 @@ public class ProductServiceImpl implements ProductService {
         
         Product product = productMapper.toEntity(request);
 
-        // Xử lý category
-        if (request.getCategoryId() == null) {
-            throw new RuntimeException("categoryId is required");
+        // Xử lý category - tìm theo tên
+        if (request.getCategoryName() == null || request.getCategoryName().trim().isEmpty()) {
+            throw new RuntimeException("Category name is required");
         }
         
-        Category category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Category not found with id: " + request.getCategoryId()));
+        Category category = categoryRepository.findByName(request.getCategoryName().trim())
+                .orElseThrow(() -> new RuntimeException("Category not found with name: " + request.getCategoryName()));
         product.setCategory(category);
 
         // Xử lý status từ String sang Enum
@@ -80,9 +80,9 @@ public class ProductServiceImpl implements ProductService {
         productMapper.update(product, request);
 
         // Cập nhật category nếu đổi
-        if (request.getCategoryId() != null) {
-            Category category = categoryRepository.findById(request.getCategoryId())
-                    .orElseThrow(() -> new RuntimeException("Category not found"));
+        if (request.getCategoryName() != null && !request.getCategoryName().trim().isEmpty()) {
+            Category category = categoryRepository.findByName(request.getCategoryName().trim())
+                    .orElseThrow(() -> new RuntimeException("Category not found with name: " + request.getCategoryName()));
             product.setCategory(category);
         }
 

@@ -6,8 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Set;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,5 +14,5 @@ public class UserResponse {
     private long id;
     private String email;
     private String fullName;
-    private Role roles;
+    private Role role;  // Changed from 'roles' to match User entity
 }

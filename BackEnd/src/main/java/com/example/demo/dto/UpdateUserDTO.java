@@ -16,5 +16,7 @@ public class UpdateUserDTO {
     private String fullName;
 
     private String phone;
+    
+    private String role;  // Accept as String, will convert to enum in service
 
 }

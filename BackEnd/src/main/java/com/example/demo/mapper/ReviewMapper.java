@@ -1,10 +1,11 @@
 package com.example.demo.mapper;
 
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+
 import com.example.demo.dto.request.ReviewRequest;
 import com.example.demo.dto.response.ReviewResponse;
 import com.example.demo.entity.Review;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface ReviewMapper {

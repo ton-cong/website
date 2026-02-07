@@ -1,12 +1,13 @@
 package com.example.demo.mapper;
 
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+
 import com.example.demo.dto.request.OrderRequest;
 import com.example.demo.dto.response.OrderItemResponse;
 import com.example.demo.dto.response.OrderResponse;
 import com.example.demo.entity.Order;
 import com.example.demo.entity.OrderItem;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface OrderMapper {

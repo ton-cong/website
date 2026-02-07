@@ -12,7 +12,7 @@ const CartPage = () => {
 
     if (cartLoading) return <div className="text-center py-20">Đang tải giỏ hàng...</div>;
 
-    if (!cart || !cart.cartItems || cart.cartItems.length === 0) {
+    if (!cart || !cart.items || cart.items.length === 0) {
         return (
             <div className="text-center py-20 space-y-4">
                 <div className="bg-slate-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -29,7 +29,7 @@ const CartPage = () => {
         );
     }
 
-    const subtotal = cart.totalPrice || cart.cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const subtotal = cart.totalPrice || cart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
     const handleCheckout = () => {
         if (!isAuthenticated) {
@@ -45,13 +45,13 @@ const CartPage = () => {
             <h1 className="text-3xl font-bold text-slate-900 mb-8 flex items-center">
                 Giỏ hàng của bạn
                 <span className="ml-3 text-lg font-normal text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
-                    {cart.cartItems.length} sản phẩm
+                    {cart.items.length} sản phẩm
                 </span>
             </h1>
 
             <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                 <div className="divide-y divide-slate-100">
-                    {cart.cartItems.map((item) => (
+                    {cart.items.map((item) => (
                         <div key={item.id} className="p-6 flex items-center md:items-start space-x-6 hover:bg-slate-50 transition-colors">
                             {/* Product Image */}
                             <div className="w-24 h-24 bg-slate-100 rounded-lg flex-shrink-0 overflow-hidden">
