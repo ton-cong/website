@@ -1,0 +1,20 @@
+package com.example.demo.mapper;
+
+import com.example.demo.dto.request.ReviewRequest;
+import com.example.demo.dto.response.ReviewResponse;
+import com.example.demo.entity.Review;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+
+@Mapper(componentModel = "spring")
+public interface ReviewMapper {
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "user", ignore = true)
+    @Mapping(target = "product", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    Review toEntity(ReviewRequest request);
+
+    @Mapping(target = "userName", source = "user.fullName")
+    @Mapping(target = "productId", source = "product.id")
+    ReviewResponse toResponse(Review review);
+}
