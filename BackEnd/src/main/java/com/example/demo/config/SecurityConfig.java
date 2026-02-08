@@ -57,6 +57,7 @@ public class SecurityConfig {
                         .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/products/**", "/api/category/**").hasRole("ADMIN")
 
                         .requestMatchers("/api/auth/changePass").authenticated()
+                        .requestMatchers("/api/auth/profile/update").authenticated()
 
                         .anyRequest().authenticated()
                 )

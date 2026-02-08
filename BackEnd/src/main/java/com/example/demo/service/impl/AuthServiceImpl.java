@@ -178,4 +178,24 @@ public class AuthServiceImpl implements AuthService {
 
         return userMapper.toUserResponse(user);
     }
+
+    @Override
+    public UserResponse updateUserByEmail(String email, UpdateUserDTO request) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        // Update only allowed fields (not role, not email)
+        if (request.getFullName() != null && !request.getFullName().isEmpty()) {
+            user.setFullName(request.getFullName());
+        }
+        if (request.getPhone() != null) {
+            user.setPhone(request.getPhone());
+        }
+        if (request.getAddress() != null) {
+            user.setAddress(request.getAddress());
+        }
+
+        userRepository.save(user);
+        return userMapper.toUserResponse(user);
+    }
 }

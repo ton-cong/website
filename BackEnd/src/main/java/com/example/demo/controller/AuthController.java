@@ -72,5 +72,13 @@ public class AuthController {
         apiResponse.setResult(authService.forgetPass(request));
         return apiResponse;
     }
+
+    @PostMapping("/profile/update")
+    public ApiResponse<UserResponse> updateProfile(@RequestBody UpdateUserDTO request) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        ApiResponse<UserResponse> apiResponse = new ApiResponse<>();
+        apiResponse.setResult(authService.updateUserByEmail(email, request));
+        return apiResponse;
+    }
 }
 

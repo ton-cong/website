@@ -80,8 +80,8 @@ const ProfilePage = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            // Call API to update user profile
-            await adminApi.updateUser(user.id, {
+            // Call API to update user profile using auth endpoint (not admin)
+            await authApi.updateProfile({
                 fullName: profile.fullName,
                 phone: profile.phone,
                 address: profile.address,

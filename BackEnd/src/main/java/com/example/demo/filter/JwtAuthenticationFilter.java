@@ -46,11 +46,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         log.debug("🔍 JWT Filter - Path: {} Method: {}", path, method);
 
-        // Skip public endpoints - allow GET requests to products/category/reviews without JWT
-        if (path.startsWith("/api/auth/") ||
-            (method.equals("GET") && (path.startsWith("/api/products") || 
-                                      path.startsWith("/api/category") || 
-                                      path.startsWith("/api/reviews")))) {
+        // Skip ONLY truly public endpoints - login, register, forgetPass
+        // Other /api/auth/* endpoints like changePass and profile/update need JWT processing
+        boolean isPublicAuthEndpoint = path.equals("/api/auth/login") ||
+                                       path.equals("/api/auth/register") ||
+                                       path.equals("/api/auth/forgetPass");
+        
+        boolean isPublicGetEndpoint = method.equals("GET") && 
+                                      (path.startsWith("/api/products") || 
+                                       path.startsWith("/api/category") || 
+                                       path.startsWith("/api/reviews"));
+        
+        if (isPublicAuthEndpoint || isPublicGetEndpoint) {
             filterChain.doFilter(request, response);
             return;
         }

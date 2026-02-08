@@ -17,6 +17,10 @@ const authApi = {
     // Forget Password - Backend: POST /api/auth/forgetPass
     // Backend expects: { email: "..." } and sends new password via email
     forgetPassword: (email) => axiosClient.post('/auth/forgetPass', { email }),
+
+    // Update Profile - Backend: POST /api/auth/profile/update
+    // For authenticated users to update their own profile
+    updateProfile: (profileData) => axiosClient.post('/auth/profile/update', profileData),
 };
 
 export default authApi;

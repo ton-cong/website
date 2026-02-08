@@ -14,5 +14,7 @@ public class UserResponse {
     private long id;
     private String email;
     private String fullName;
+    private String phone;
+    private String address;
     private Role role;  // Changed from 'roles' to match User entity
 }

@@ -20,4 +20,5 @@ public interface AuthService {
     UserResponse getUserByEmail(String email);
     UserResponse changePassword(String email,ChangePasswordRequest request);
     UserResponse forgetPass(ForgetPasswordRequest request );
+    UserResponse updateUserByEmail(String email, UpdateUserDTO request);
 }
