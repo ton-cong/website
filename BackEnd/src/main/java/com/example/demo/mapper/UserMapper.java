@@ -5,8 +5,10 @@ import com.example.demo.dto.request.RegisterRequestDTO;
 import com.example.demo.dto.response.UserResponse;
 import com.example.demo.entity.User;
 import com.example.demo.enums.Role;
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
 import java.util.Set;
 
@@ -14,5 +16,6 @@ import java.util.Set;
 public interface UserMapper {
     User toUser(RegisterRequestDTO request);
     UserResponse toUserResponse(User user );
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void toUpdateUserDto(UpdateUserDTO dto, @MappingTarget User user);
 }
