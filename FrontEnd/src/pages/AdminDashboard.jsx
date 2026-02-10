@@ -10,15 +10,18 @@ import {
     ShoppingBagIcon,
     UsersIcon,
     TagIcon,
-    CurrencyDollarIcon
+    CurrencyDollarIcon,
+    StarIcon
 } from '@heroicons/react/24/outline';
 import AdminProductList from './admin/AdminProductList';
 import AdminProductForm from './admin/AdminProductForm';
 import AdminOrderList from './admin/AdminOrderList';
 import AdminUserList from './admin/AdminUserList';
 import AdminCategoryList from './admin/AdminCategoryList';
+import AdminReviewList from './admin/AdminReviewList';
 
 const AdminDashboard = () => {
+    // ... hooks ...
     const { user, isAuthenticated, isAdmin, loading } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
@@ -38,6 +41,7 @@ const AdminDashboard = () => {
         { name: 'Đơn hàng', path: '/admin/orders', icon: ShoppingBagIcon },
         { name: 'Người dùng', path: '/admin/users', icon: UsersIcon },
         { name: 'Danh mục', path: '/admin/categories', icon: TagIcon },
+        { name: 'Đánh giá', path: '/admin/reviews', icon: StarIcon },
     ];
 
     return (
@@ -89,6 +93,7 @@ const AdminDashboard = () => {
                     <Route path="orders" element={<AdminOrderList />} />
                     <Route path="users" element={<AdminUserList />} />
                     <Route path="categories" element={<AdminCategoryList />} />
+                    <Route path="reviews" element={<AdminReviewList />} />
                 </Routes>
             </div>
         </div>

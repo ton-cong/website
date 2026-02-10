@@ -55,7 +55,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         boolean isPublicGetEndpoint = method.equals("GET") && 
                                       (path.startsWith("/api/products") || 
                                        path.startsWith("/api/category") || 
-                                       path.startsWith("/api/reviews"));
+                                       path.startsWith("/api/reviews/product"));
         
         if (isPublicAuthEndpoint || isPublicGetEndpoint) {
             filterChain.doFilter(request, response);
@@ -88,9 +88,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             );
 
                     SecurityContextHolder.getContext().setAuthentication(authToken);
-                    log.info("✅ Authentication set successfully for: {} with roles: {}", email, userDetails.getAuthorities());
+                    log.info("Authentication set successfully for: {} with roles: {}", email, userDetails.getAuthorities());
                 } else {
-                    log.warn("❌ Token validation failed for: {}", email);
+                    log.warn("Token validation failed for: {}", email);
                 }
             }
         } else {

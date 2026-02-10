@@ -29,9 +29,6 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
 
-                // ================================
-                // 🔥 ENDPOINTS ĐƯỢC PUBLIC
-                // ================================
                 .authorizeHttpRequests(auth -> auth
                         // 🔥 Permit error and OPTIONS for CORS
                         .requestMatchers("/error", "/error/**").permitAll()
@@ -62,9 +59,6 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
 
-                // ================================
-                // 🔥 LOGOUT
-                // ================================
                 .logout(logout -> logout
                         .logoutUrl("/api/auth/logout")
                         .logoutSuccessHandler((request, response, authentication) -> {
@@ -72,9 +66,6 @@ public class SecurityConfig {
                         })
                 )
 
-                // ================================
-                // 🔥 THÊM JWT FILTER
-                // ================================
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -92,9 +83,6 @@ public class SecurityConfig {
         return source;
     }
 
-    // ================================
-    // 🔥 CORS
-    // ================================
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
@@ -112,9 +100,6 @@ public class SecurityConfig {
         };
     }
 
-    // ================================
-    // 🔥 CLOUDINARY
-    // ================================
     @Bean
     public Cloudinary cloudinary() {
         return new Cloudinary(ObjectUtils.asMap(
@@ -125,9 +110,6 @@ public class SecurityConfig {
         ));
     }
 
-    // ================================
-    // 🔥 PASSWORD ENCODER
-    // ================================
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

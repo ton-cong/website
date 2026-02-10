@@ -43,7 +43,6 @@ public class OrderServiceImpl implements OrderService {
             throw new RuntimeException("Cart is empty");
         }
 
-        // Calculate total
         double total = cart.getItems().stream()
                 .mapToDouble(item -> item.getProduct().getPrice() * item.getQuantity())
                 .sum();
@@ -72,7 +71,6 @@ public class OrderServiceImpl implements OrderService {
         orderItemRepository.saveAll(orderItems);
         savedOrder.setItems(orderItems);
 
-        // Clear cart
         cartItemRepository.deleteByCartId(cart.getId());
 
         return orderMapper.toResponse(savedOrder);

@@ -6,6 +6,7 @@ import com.example.demo.dto.response.ReviewResponse;
 import com.example.demo.service.ReviewService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,6 +30,23 @@ public class ReviewController {
     public ApiResponse<List<ReviewResponse>> getReviewsByProduct(@PathVariable Integer productId) {
         ApiResponse<List<ReviewResponse>> response = new ApiResponse<>();
         response.setResult(reviewService.getReviewsByProduct(productId));
+        return response;
+    }
+
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<List<ReviewResponse>> getAllReviews() {
+        ApiResponse<List<ReviewResponse>> response = new ApiResponse<>();
+        response.setResult(reviewService.getAllReviews());
+        return response;
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<String> deleteReview(@PathVariable Integer id) {
+        reviewService.deleteReview(id);
+        ApiResponse<String> response = new ApiResponse<>();
+        response.setResult("Deleted successfully");
         return response;
     }
 }

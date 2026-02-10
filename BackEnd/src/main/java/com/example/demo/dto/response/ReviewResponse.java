@@ -13,7 +13,9 @@ import java.sql.Timestamp;
 public class ReviewResponse {
     private Integer id;
     private String userName;
+    private String userEmail;
     private Integer productId;
+    private String productName;
     private Integer rating;
     private String comment;
     private Timestamp createdAt;

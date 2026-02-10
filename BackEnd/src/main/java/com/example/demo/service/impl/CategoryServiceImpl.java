@@ -20,33 +20,26 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
 
-    // CREATE
     @Override
     public CategoryResponseDTO createCategory(CategoryRequestDTO request) {
 
-        // Check trùng tên
         if (categoryRepository.existsByName(request.getName())) {
             throw new RuntimeException("Category name already exists");
         }
 
-        // Convert -> Entity
         Category category = categoryMapper.toCategory(request);
 
-        // Save vào DB
         Category saved = categoryRepository.save(category);
 
-        // Convert -> Response DTO
         return categoryMapper.toCategoryResponseDto(saved);
     }
 
-    // UPDATE
     @Override
     public CategoryResponseDTO updateCategory(int id, CategoryRequestDTO request) {
 
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
 
-        // Check trùng tên cho ID khác
         if (categoryRepository.existsByName(request.getName())
                 && !category.getName().equals(request.getName())) {
             throw new RuntimeException("Category name already exists");
@@ -60,7 +53,6 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryMapper.toCategoryResponseDto(updated);
     }
 
-    // DELETE
     @Override
     public boolean deleteCategory(int id) {
         if (!categoryRepository.existsById(id)) {
@@ -71,7 +63,6 @@ public class CategoryServiceImpl implements CategoryService {
         return true;
     }
 
-    // GET ALL
     @Override
     public List<CategoryResponseDTO> getAllCategory() {
         return categoryRepository.findAll()
@@ -80,7 +71,6 @@ public class CategoryServiceImpl implements CategoryService {
                 .collect(Collectors.toList());
     }
 
-    // GET BY ID
     @Override
     public CategoryResponseDTO getById(int id) {
         Category category = categoryRepository.findById(id)

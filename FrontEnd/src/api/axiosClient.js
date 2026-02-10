@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const axiosClient = axios.create({
     baseURL: 'http://localhost:8080/api',
@@ -12,7 +13,7 @@ const axiosClient = axios.create({
 axiosClient.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('token');
-        console.log("Token being sent:", token ? token.substring(0, 30) + "..." : "NO TOKEN"); // Debug
+        // console.log("Token being sent:", token ? token.substring(0, 30) + "..." : "NO TOKEN"); // Debug
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
@@ -31,14 +32,34 @@ axiosClient.interceptors.response.use(
     },
     (error) => {
         // Handle errors globally
-        if (error.response && error.response.status === 401) {
-            // Token expired or invalid
-            localStorage.removeItem('token');
-            // Check if we are not already on the login page to avoid loops
-            if (window.location.pathname !== '/login') {
-                // window.location.href = '/login'; // Optional: Redirect to login
+        const { response } = error;
+
+        if (response) {
+            // Server responded with a status code outside 2xx
+            const errorMessage = response.data?.message || response.data?.error || 'Đã có lỗi xảy ra';
+
+            // Only show toast for errors that are relevant to the user
+            // You might want to filter out implementation details or 401s if handled elsewhere
+            if (response.status !== 401) {
+                toast.error(errorMessage);
             }
+
+            if (response.status === 401) {
+                // Token expired or invalid
+                localStorage.removeItem('token');
+                // Check if we are not already on the login page to avoid loops
+                if (window.location.pathname !== '/login') {
+                    // window.location.href = '/login'; // Optional: Redirect to login
+                }
+            }
+        } else if (error.request) {
+            // Request was made but no response received
+            toast.error("Không thể kết nối đến server. Vui lòng kiểm tra mạng.");
+        } else {
+            // Something happened in setting up the request
+            toast.error("Lỗi: " + error.message);
         }
+
         return Promise.reject(error);
     }
 );

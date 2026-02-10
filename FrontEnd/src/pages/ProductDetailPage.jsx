@@ -22,6 +22,7 @@ const ProductDetailPage = () => {
     // Review form state
     const [showReviewForm, setShowReviewForm] = useState(false);
     const [rating, setRating] = useState(5);
+    const [hoverRating, setHoverRating] = useState(0);
     const [comment, setComment] = useState('');
 
     useEffect(() => {
@@ -173,13 +174,16 @@ const ProductDetailPage = () => {
                                         key={star}
                                         type="button"
                                         onClick={() => setRating(star)}
-                                        className="focus:outline-none"
+                                        onMouseEnter={() => setHoverRating(star)}
+                                        onMouseLeave={() => setHoverRating(0)}
+                                        className="focus:outline-none transform transition-transform hover:scale-110"
                                     >
-                                        {star <= rating ? (
-                                            <StarIcon className="h-8 w-8 text-yellow-400" />
-                                        ) : (
-                                            <StarOutline className="h-8 w-8 text-slate-300" />
-                                        )}
+                                        <StarIcon
+                                            className={`h-8 w-8 transition-colors duration-200 ${star <= (hoverRating || rating)
+                                                ? 'text-yellow-400'
+                                                : 'text-slate-300'
+                                                }`}
+                                        />
                                     </button>
                                 ))}
                             </div>

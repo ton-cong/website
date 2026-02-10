@@ -28,55 +28,53 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Map<String, Object>> handleRuntimeException(RuntimeException e) {
-        log.error("❌ RuntimeException: {}", e.getMessage(), e);
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", "error");
-        response.put("message", e.getMessage());
-        return ResponseEntity.badRequest().body(response);
+    public ResponseEntity<ApiResponse> handleRuntimeException(RuntimeException e) {
+        log.error(" RuntimeException: {}", e.getMessage(), e);
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setCode(1001); // Generic error code or custom
+        apiResponse.setMessage(e.getMessage());
+        return ResponseEntity.badRequest().body(apiResponse);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidationException(MethodArgumentNotValidException e) {
-        log.error("❌ Validation error: {}", e.getMessage());
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", "error");
-        response.put("message", "Validation failed");
+    public ResponseEntity<ApiResponse> handleValidationException(MethodArgumentNotValidException e) {
+        log.error(" Validation error: {}", e.getMessage());
+        ApiResponse apiResponse = new ApiResponse();
         
-        Map<String, String> fieldErrors = new HashMap<>();
+        StringBuilder message = new StringBuilder("Validation failed: ");
         e.getBindingResult().getFieldErrors().forEach(error -> {
-            log.error("  - Field '{}': {}", error.getField(), error.getDefaultMessage());
-            fieldErrors.put(error.getField(), error.getDefaultMessage());
+            message.append(error.getField()).append(" ").append(error.getDefaultMessage()).append("; ");
         });
-        response.put("errors", fieldErrors);
         
-        return ResponseEntity.badRequest().body(response);
+        apiResponse.setCode(1002);
+        apiResponse.setMessage(message.toString());
+        return ResponseEntity.badRequest().body(apiResponse);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<Map<String, Object>> handleHttpMessageNotReadable(HttpMessageNotReadableException e) {
-        log.error("❌ Message not readable: {}", e.getMessage());
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", "error");
-        response.put("message", "Invalid request format: " + e.getMostSpecificCause().getMessage());
-        return ResponseEntity.badRequest().body(response);
+    public ResponseEntity<ApiResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException e) {
+        log.error(" Message not readable: {}", e.getMessage());
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setCode(1003);
+        apiResponse.setMessage("Invalid request format: " + e.getMostSpecificCause().getMessage());
+        return ResponseEntity.badRequest().body(apiResponse);
     }
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
-    public ResponseEntity<Map<String, Object>> handleMaxSizeException(MaxUploadSizeExceededException e) {
-        log.error("❌ File too large: {}", e.getMessage());
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", "error");
-        response.put("message", "File quá lớn. Kích thước tối đa cho phép là 10MB.");
-        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(response);
+    public ResponseEntity<ApiResponse> handleMaxSizeException(MaxUploadSizeExceededException e) {
+        log.error(" File too large: {}", e.getMessage());
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setCode(1004);
+        apiResponse.setMessage("File quá lớn. Kích thước tối đa cho phép là 10MB.");
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(apiResponse);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleGenericException(Exception e) {
-        log.error("❌ Unexpected error: {}", e.getMessage(), e);
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", "error");
-        response.put("message", "Đã xảy ra lỗi: " + e.getMessage());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    public ResponseEntity<ApiResponse> handleGenericException(Exception e) {
+        log.error(" Unexpected error: {}", e.getMessage(), e);
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setCode(9999);
+        apiResponse.setMessage("Đã xảy ra lỗi hệ thống: " + e.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
     }
 }

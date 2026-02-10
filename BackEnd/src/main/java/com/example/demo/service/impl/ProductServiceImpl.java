@@ -44,7 +44,6 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new RuntimeException("Category not found with name: " + request.getCategoryName()));
         product.setCategory(category);
 
-        // Xử lý status từ String sang Enum
         if (request.getStatus() != null && !request.getStatus().isEmpty()) {
             try {
                 product.setStatus(ProductStatus.valueOf(request.getStatus().toUpperCase()));
@@ -56,7 +55,6 @@ public class ProductServiceImpl implements ProductService {
             product.setStatus(ProductStatus.ACTIVE);
         }
 
-        // Xử lý upload ảnh
         if (request.getImageFile() != null && !request.getImageFile().isEmpty()) {
             try {
                 product.setImageUrl(cloudinaryService.uploadImage(request.getImageFile()));
@@ -76,17 +74,14 @@ public class ProductServiceImpl implements ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
-        // Cập nhật các field thường
         productMapper.update(product, request);
 
-        // Cập nhật category nếu đổi
         if (request.getCategoryName() != null && !request.getCategoryName().trim().isEmpty()) {
             Category category = categoryRepository.findByName(request.getCategoryName().trim())
                     .orElseThrow(() -> new RuntimeException("Category not found with name: " + request.getCategoryName()));
             product.setCategory(category);
         }
 
-        // Xử lý status từ String sang Enum
         if (request.getStatus() != null && !request.getStatus().isEmpty()) {
             try {
                 product.setStatus(ProductStatus.valueOf(request.getStatus().toUpperCase()));
@@ -95,7 +90,6 @@ public class ProductServiceImpl implements ProductService {
             }
         }
 
-        // Xử lý upload ảnh mới
         if (request.getImageFile() != null && !request.getImageFile().isEmpty()) {
             try {
                 product.setImageUrl(cloudinaryService.uploadImage(request.getImageFile()));

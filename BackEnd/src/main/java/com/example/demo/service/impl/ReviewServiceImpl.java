@@ -54,4 +54,30 @@ public class ReviewServiceImpl implements ReviewService {
                 .map(reviewMapper::toResponse)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<ReviewResponse> getAllReviews() {
+        return reviewRepository.findAll().stream()
+                .map(review -> {
+                    ReviewResponse response = reviewMapper.toResponse(review);
+                    // Manual mapping to ensure fields are populated (bypass potential Mapper regen issues)
+                    if (review.getProduct() != null) {
+                        response.setProductName(review.getProduct().getName());
+                    }
+                    if (review.getUser() != null) {
+                        response.setUserName(review.getUser().getFullName());
+                        response.setUserEmail(review.getUser().getEmail());
+                    }
+                    return response;
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void deleteReview(Integer id) {
+        if (!reviewRepository.existsById(id)) {
+            throw new RuntimeException("Review not found");
+        }
+        reviewRepository.deleteById(id);
+    }
 }
