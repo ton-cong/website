@@ -71,7 +71,7 @@ public class JwtUtil {
         try {
             SignedJWT signed = SignedJWT.parse(token);
             Date expiration = signed.getJWTClaimsSet().getExpirationTime();
-            return new Date().after(expiration); // true nếu token hết hạn
+            return new Date().after(expiration);
         } catch (Exception e) {
             throw new AppException(ErrorCode.TOKEN_EXPIRED);
         }

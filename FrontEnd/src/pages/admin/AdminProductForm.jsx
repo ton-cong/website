@@ -48,21 +48,21 @@ const AdminProductForm = () => {
             console.log("📋 RAW API Response:", response);
             console.log("📋 Categories extracted:", categoriesData);
 
-            // If categories is wrapped in another object, unwrap it
+
             if (categoriesData && typeof categoriesData === 'object' && !Array.isArray(categoriesData)) {
                 console.log("⚠️ Categories is not an array, attempting to extract...");
                 categoriesData = categoriesData.result || categoriesData.data || [];
             }
 
-            // Ensure it's an array
+
             if (!Array.isArray(categoriesData)) {
                 console.error("❌ Categories is not an array:", categoriesData);
                 categoriesData = [];
             }
 
-            // Normalize categories - ensure each has an id field
+
             const normalizedCategories = categoriesData.map((cat, index) => {
-                // Try different possible field names for ID
+
                 const categoryId = cat.id || cat.categoryId || cat.ID || cat.CategoryId;
 
                 if (!categoryId && index === 0) {
@@ -136,14 +136,14 @@ const AdminProductForm = () => {
         console.log("=== FORM SUBMIT STARTED ===");
         console.log("Form Data:", formData);
 
-        // Validate category is selected
+
         if (!formData.categoryId || formData.categoryId === '') {
             console.error("❌ Category validation failed");
             toast.error("Vui lòng chọn danh mục sản phẩm");
             return;
         }
 
-        // Validate price
+
         const priceNum = parseFloat(formData.price);
         console.log("Price:", formData.price, "Parsed:", priceNum, "IsNaN:", isNaN(priceNum));
 
@@ -157,16 +157,16 @@ const AdminProductForm = () => {
         setLoading(true);
 
         try {
-            // Create FormData for multipart upload
+
             const data = new FormData();
             data.append('name', formData.name);
-            // Send category NAME instead of ID
+
             data.append('categoryName', formData.categoryId); // categoryId field contains the name now
             data.append('description', formData.description || '');
             data.append('specifications', formData.specifications || '');
             data.append('price', priceNum);
 
-            // Handle salePrice
+
             if (formData.salePrice) {
                 const salePriceNum = parseFloat(formData.salePrice);
                 if (!isNaN(salePriceNum) && salePriceNum > 0) {
@@ -174,7 +174,7 @@ const AdminProductForm = () => {
                 }
             }
 
-            // Handle stock
+
             const stockNum = parseInt(formData.stock || 0, 10);
             data.append('stock', isNaN(stockNum) ? 0 : stockNum);
 
@@ -190,7 +190,7 @@ const AdminProductForm = () => {
                 data.append('imageFile', formData.image);
             }
 
-            // Log FormData contents
+
             console.log("📦 FormData contents:");
             for (let [key, value] of data.entries()) {
                 console.log(`  ${key}:`, value);
@@ -229,7 +229,7 @@ const AdminProductForm = () => {
                 <h1 className="text-2xl font-bold text-slate-900">
                     {isEditing ? 'Sửa sản phẩm' : 'Thêm sản phẩm mới'}
                 </h1>
-                {/* Debug button */}
+
                 <button
                     type="button"
                     onClick={() => {
@@ -244,7 +244,7 @@ const AdminProductForm = () => {
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Main Info */}
+
                     <div className="lg:col-span-2 space-y-6">
                         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
                             <h2 className="text-lg font-semibold text-slate-900 mb-4">Thông tin cơ bản</h2>
@@ -274,8 +274,7 @@ const AdminProductForm = () => {
                                         >
                                             <option value="">Chọn danh mục</option>
                                             {categories.map((cat, idx) => {
-                                                // Use name as value since backend now expects categoryName
-                                                // and id might be null
+
                                                 return (
                                                     <option key={cat.id || `cat-${idx}`} value={cat.name}>
                                                         {cat.name}
@@ -328,9 +327,9 @@ const AdminProductForm = () => {
                         </div>
                     </div>
 
-                    {/* Sidebar */}
+
                     <div className="space-y-6">
-                        {/* Image Upload */}
+
                         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
                             <h2 className="text-lg font-semibold text-slate-900 mb-4">Hình ảnh</h2>
                             <div className="border-2 border-dashed border-slate-300 rounded-lg p-4 text-center hover:border-indigo-500 transition-colors">
@@ -360,7 +359,7 @@ const AdminProductForm = () => {
                             </div>
                         </div>
 
-                        {/* Pricing */}
+
                         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
                             <h2 className="text-lg font-semibold text-slate-900 mb-4">Giá & Kho</h2>
                             <div className="space-y-4">
@@ -404,7 +403,7 @@ const AdminProductForm = () => {
                             </div>
                         </div>
 
-                        {/* Actions */}
+
                         <div className="flex space-x-3">
                             <Button
                                 type="button"

@@ -24,8 +24,7 @@ const HomePage = () => {
                 productApi.getAll(),
                 categoryApi.getAll()
             ]);
-            // Handle API response structure
-            const productsData = productsRes?.result || productsRes || [];
+            const productsData = productsRes?.result?.content || productsRes?.content || productsRes?.result || productsRes || [];
             const categoriesData = categoriesRes?.result || categoriesRes || [];
 
             console.log("Products loaded:", productsData);
@@ -40,19 +39,15 @@ const HomePage = () => {
         }
     };
 
-    // Filter products
     const filteredProducts = products.filter(p => {
-        // Search filter
         const matchesSearch = p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             p.description?.toLowerCase().includes(searchTerm.toLowerCase());
 
-        // Category filter
         const matchesCategory = !selectedCategory ||
             p.categoryId === selectedCategory ||
             p.category?.id === selectedCategory ||
             p.categoryName === categories.find(c => c.id === selectedCategory)?.name;
 
-        // Price filter
         const price = p.price || 0;
         const matchesMinPrice = !priceRange.min || price >= Number(priceRange.min);
         const matchesMaxPrice = !priceRange.max || price <= Number(priceRange.max);
@@ -60,7 +55,6 @@ const HomePage = () => {
         return matchesSearch && matchesCategory && matchesMinPrice && matchesMaxPrice;
     });
 
-    // Sort products
     const sortedProducts = [...filteredProducts].sort((a, b) => {
         switch (sortBy) {
             case 'price-asc':
@@ -91,7 +85,8 @@ const HomePage = () => {
 
     return (
         <div className="flex gap-8">
-            {/* Sidebar - Categories & Filters */}
+
+
             <aside className={`w-64 flex-shrink-0 ${showFilters ? 'block' : 'hidden'} lg:block`}>
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sticky top-24">
                     <div className="flex items-center justify-between mb-6">
@@ -101,15 +96,14 @@ const HomePage = () => {
                         </button>
                     </div>
 
-                    {/* Categories */}
                     <div className="mb-6">
                         <h3 className="text-sm font-semibold text-slate-700 mb-3">Danh mục</h3>
                         <div className="space-y-2">
                             <button
                                 onClick={() => setSelectedCategory(null)}
                                 className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${!selectedCategory
-                                        ? 'bg-indigo-600 text-white'
-                                        : 'text-slate-600 hover:bg-slate-50'
+                                    ? 'bg-indigo-600 text-white'
+                                    : 'text-slate-600 hover:bg-slate-50'
                                     }`}
                             >
                                 Tất cả sản phẩm
@@ -119,8 +113,8 @@ const HomePage = () => {
                                     key={cat.id}
                                     onClick={() => setSelectedCategory(cat.id)}
                                     className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${selectedCategory === cat.id
-                                            ? 'bg-indigo-600 text-white'
-                                            : 'text-slate-600 hover:bg-slate-50'
+                                        ? 'bg-indigo-600 text-white'
+                                        : 'text-slate-600 hover:bg-slate-50'
                                         }`}
                                 >
                                     {cat.name}
@@ -129,7 +123,6 @@ const HomePage = () => {
                         </div>
                     </div>
 
-                    {/* Price Filter */}
                     <div className="mb-6">
                         <h3 className="text-sm font-semibold text-slate-700 mb-3">Khoảng giá</h3>
                         <div className="flex gap-2">
@@ -150,7 +143,6 @@ const HomePage = () => {
                         </div>
                     </div>
 
-                    {/* Sort */}
                     <div>
                         <h3 className="text-sm font-semibold text-slate-700 mb-3">Sắp xếp</h3>
                         <select
@@ -167,9 +159,7 @@ const HomePage = () => {
                 </div>
             </aside>
 
-            {/* Main Content */}
             <main className="flex-1">
-                {/* Header with Search */}
                 <div className="mb-8">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                         <div>
@@ -181,7 +171,6 @@ const HomePage = () => {
                             <p className="text-slate-500">{sortedProducts.length} sản phẩm</p>
                         </div>
 
-                        {/* Mobile filter toggle */}
                         <button
                             onClick={() => setShowFilters(!showFilters)}
                             className="lg:hidden flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-lg text-sm"
@@ -191,7 +180,6 @@ const HomePage = () => {
                         </button>
                     </div>
 
-                    {/* Search Bar */}
                     <div className="relative">
                         <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
                         <input
@@ -212,7 +200,6 @@ const HomePage = () => {
                     </div>
                 </div>
 
-                {/* Product Grid */}
                 {sortedProducts.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                         {sortedProducts.map(product => (

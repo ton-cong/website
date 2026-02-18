@@ -1,7 +1,14 @@
 import axiosClient from './axiosClient';
 
 const productApi = {
-    getAll: () => axiosClient.get('/products/getAllProduct'),
+    getAll: (params = {}) => axiosClient.get('/products/getAllProduct', {
+        params: {
+            page: params.page || 0,
+            size: params.size || 100,
+            sortBy: params.sortBy || 'id',
+            sortDir: params.sortDir || 'asc',
+        }
+    }),
     getById: (id) => axiosClient.get(`/products/getProductById/${id}`),
     create: (data) => axiosClient.post('/products/create', data, {
         headers: {
@@ -14,6 +21,7 @@ const productApi = {
         },
     }),
     delete: (id) => axiosClient.delete(`/products/delete/${id}`),
+    search: (params = {}) => axiosClient.get('/products/search', { params }),
 };
 
 export default productApi;

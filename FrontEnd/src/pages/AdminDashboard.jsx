@@ -21,7 +21,7 @@ import AdminCategoryList from './admin/AdminCategoryList';
 import AdminReviewList from './admin/AdminReviewList';
 
 const AdminDashboard = () => {
-    // ... hooks ...
+
     const { user, isAuthenticated, isAdmin, loading } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
@@ -46,7 +46,6 @@ const AdminDashboard = () => {
 
     return (
         <div className="flex min-h-screen bg-slate-100">
-            {/* Sidebar */}
             <div className="w-64 bg-slate-900 text-white hidden md:block fixed h-full">
                 <div className="p-6 border-b border-slate-700">
                     <h2 className="text-xl font-bold">🛠️ Admin Panel</h2>
@@ -72,7 +71,6 @@ const AdminDashboard = () => {
                     })}
                 </nav>
 
-                {/* Back to Store Link */}
                 <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700">
                     <Link
                         to="/"
@@ -83,7 +81,6 @@ const AdminDashboard = () => {
                 </div>
             </div>
 
-            {/* Content Area */}
             <div className="flex-1 p-8 overflow-auto md:ml-64">
                 <Routes>
                     <Route index element={<DashboardHome />} />
@@ -100,7 +97,6 @@ const AdminDashboard = () => {
     );
 };
 
-// Dashboard Home with real stats
 const DashboardHome = () => {
     const [stats, setStats] = useState({
         products: 0,
@@ -123,11 +119,10 @@ const DashboardHome = () => {
                 adminApi.getAllUsers()
             ]);
 
-            const products = productsRes?.result || productsRes || [];
+            const products = productsRes?.result?.content || productsRes?.content || productsRes?.result || productsRes || [];
             const orders = ordersRes?.result || ordersRes || [];
             const users = usersRes?.result || usersRes || [];
 
-            // Calculate revenue - Backend returns 'totalPrice' not 'totalAmount'
             const revenue = orders.reduce((sum, order) => sum + (order.totalPrice || order.totalAmount || 0), 0);
 
             setStats({
@@ -137,7 +132,6 @@ const DashboardHome = () => {
                 revenue
             });
 
-            // Get recent orders (last 5)
             setRecentOrders(orders.slice(0, 5));
         } catch (error) {
             console.error("Failed to load stats", error);
@@ -190,7 +184,7 @@ const DashboardHome = () => {
         <div>
             <h1 className="text-2xl font-bold text-slate-900 mb-8">Tổng quan hệ thống</h1>
 
-            {/* Stats Cards */}
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
                     <div className="flex items-center justify-between">
@@ -250,7 +244,6 @@ const DashboardHome = () => {
                 </div>
             </div>
 
-            {/* Recent Orders */}
             <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
                 <div className="p-6 border-b border-slate-100">
                     <div className="flex items-center justify-between">

@@ -20,7 +20,6 @@ const LoginPage = () => {
 
         if (result.success) {
             toast.success("Chào mừng bạn quay lại!");
-            // Role-based redirect - Backend returns 'roles' field
             const userRole = result.user?.roles || result.user?.role;
             console.log("User role for redirect:", userRole); // Debug
             if (userRole === 'ADMIN') {

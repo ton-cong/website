@@ -19,6 +19,6 @@ public class UpdateUserDTO {
     
     private String address;
     
-    private String role;  // Accept as String, will convert to enum in service
+    private String role;
 
 }

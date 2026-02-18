@@ -21,7 +21,8 @@ const AdminProductList = () => {
     const fetchProducts = async () => {
         try {
             const response = await productApi.getAll();
-            setProducts(response?.result || response || []);
+            const data = response?.result?.content || response?.content || response?.result || response || [];
+            setProducts(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error(error);
             toast.error("Không thể tải danh sách sản phẩm");
@@ -50,7 +51,7 @@ const AdminProductList = () => {
         }
     };
 
-    // Filter products
+
     const filteredProducts = products.filter(product => {
         const matchSearch = product.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             product.brand?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -80,7 +81,7 @@ const AdminProductList = () => {
                 </Link>
             </div>
 
-            {/* Filters */}
+
             <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 mb-6">
                 <div className="flex flex-wrap gap-4">
                     <div className="flex-1 min-w-[200px]">
@@ -108,7 +109,7 @@ const AdminProductList = () => {
                 </div>
             </div>
 
-            {/* Products Table */}
+
             <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-slate-200">

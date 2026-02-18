@@ -60,7 +60,8 @@ public class ReviewServiceImpl implements ReviewService {
         return reviewRepository.findAll().stream()
                 .map(review -> {
                     ReviewResponse response = reviewMapper.toResponse(review);
-                    // Manual mapping to ensure fields are populated (bypass potential Mapper regen issues)
+
+
                     if (review.getProduct() != null) {
                         response.setProductName(review.getProduct().getName());
                     }

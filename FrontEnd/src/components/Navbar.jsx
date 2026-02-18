@@ -16,14 +16,14 @@ const Navbar = () => {
         navigate('/login');
     };
 
-    // Check if we're in admin section
     const isInAdminSection = location.pathname.startsWith('/admin');
 
     return (
         <nav className={`sticky top-0 z-50 border-b ${isInAdminSection ? 'bg-slate-900 border-slate-700' : 'bg-white/80 backdrop-blur-md border-slate-100'}`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
-                    {/* Logo */}
+
+
                     <Link to={isAdmin ? "/admin" : "/"} className="flex items-center space-x-2">
                         <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isInAdminSection ? 'bg-red-600' : 'bg-indigo-600'}`}>
                             {isInAdminSection ? (
@@ -37,7 +37,6 @@ const Navbar = () => {
                         </span>
                     </Link>
 
-                    {/* Desktop Navigation */}
                     <div className="hidden md:flex items-center space-x-6">
                         {!isInAdminSection && (
                             <Link to="/" className="text-slate-600 hover:text-indigo-600 font-medium transition-colors">
@@ -62,9 +61,7 @@ const Navbar = () => {
                         )}
                     </div>
 
-                    {/* Right Side Icons */}
                     <div className="flex items-center space-x-4">
-                        {/* Cart - only show in shopping section */}
                         {!isInAdminSection && (
                             <Link to="/cart" className="relative p-2 text-slate-600 hover:text-indigo-600 hover:bg-slate-50 rounded-full transition-colors">
                                 <ShoppingBagIcon className="h-6 w-6" />
@@ -76,7 +73,6 @@ const Navbar = () => {
                             </Link>
                         )}
 
-                        {/* User Menu */}
                         {isAuthenticated ? (
                             <Menu as="div" className="relative ml-3">
                                 <Menu.Button className="flex items-center space-x-2 p-1 rounded-full hover:bg-slate-50/10 transition-colors">

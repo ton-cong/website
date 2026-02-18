@@ -25,7 +25,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      final JwtUtil jwtUtil;
      final UserDetailsService userDetailsService;
 
-    // Danh sách các endpoint công khai không cần JWT
+
     private final List<String> PUBLIC_ENDPOINTS = Arrays.asList(
             "/api/auth/",
             "/login",
@@ -46,8 +46,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         log.debug("🔍 JWT Filter - Path: {} Method: {}", path, method);
 
-        // Skip ONLY truly public endpoints - login, register, forgetPass
-        // Other /api/auth/* endpoints like changePass and profile/update need JWT processing
+
         boolean isPublicAuthEndpoint = path.equals("/api/auth/login") ||
                                        path.equals("/api/auth/register") ||
                                        path.equals("/api/auth/forgetPass");
@@ -77,7 +76,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(email);
                 log.info("👤 User authorities: {}", userDetails.getAuthorities());
 
-                // Kiểm tra token hợp lệ
+
                 if (jwtUtil.validateToken(token, userDetails.getUsername())) {
 
                     UsernamePasswordAuthenticationToken authToken =

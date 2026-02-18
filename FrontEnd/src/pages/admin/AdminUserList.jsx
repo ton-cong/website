@@ -47,7 +47,7 @@ const AdminUserList = () => {
         }
     };
 
-    // Filter users
+
     const filteredUsers = users.filter(user => {
         const matchSearch = user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             user.fullName?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -87,7 +87,7 @@ const AdminUserList = () => {
                 <h1 className="text-2xl font-bold text-slate-900">Quản lý người dùng</h1>
             </div>
 
-            {/* Stats */}
+
             <div className="grid grid-cols-3 gap-4 mb-6">
                 <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 text-center">
                     <p className="text-3xl font-bold text-slate-900">{users.length}</p>
@@ -107,7 +107,7 @@ const AdminUserList = () => {
                 </div>
             </div>
 
-            {/* Filters */}
+
             <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 mb-6">
                 <div className="flex flex-wrap gap-4">
                     <div className="flex-1 min-w-[200px]">
@@ -134,7 +134,7 @@ const AdminUserList = () => {
                 </div>
             </div>
 
-            {/* Users Table */}
+
             <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-slate-200">

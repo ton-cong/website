@@ -14,11 +14,11 @@ import java.math.BigDecimal;
 public class ProductRequest {
 
     private String name;
-    private String categoryName;  // Changed from categoryId to categoryName
+    private String categoryName;
     private String description;
     private String specifications;
-    private BigDecimal price;          // Changed to BigDecimal to match entity
-    private BigDecimal salePrice;      // Changed to BigDecimal to match entity
+    private BigDecimal price;
+    private BigDecimal salePrice;
     private Integer stock;
     private MultipartFile imageFile;
     private String brand;
@@ -26,6 +26,6 @@ public class ProductRequest {
     private String ram;
     private String storage;
     private String screen;
-    private String status;         // Changed to String to handle any status format
+    private String status;
 
 }

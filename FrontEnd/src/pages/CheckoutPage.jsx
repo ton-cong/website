@@ -37,7 +37,7 @@ const CheckoutPage = () => {
             return;
         }
 
-        // Validate form
+
         if (!formData.fullName || !formData.phone || !formData.address) {
             toast.error("Vui lòng điền đầy đủ thông tin");
             return;
@@ -45,7 +45,7 @@ const CheckoutPage = () => {
 
         setLoading(true);
         try {
-            // Backend OrderRequest expects: { fullName, phone, address, note }
+
             const orderData = {
                 fullName: formData.fullName,
                 phone: formData.phone,
@@ -56,7 +56,7 @@ const CheckoutPage = () => {
             await orderApi.create(orderData);
             toast.success("Đặt hàng thành công!");
 
-            // Refresh cart to clear it (backend already clears cart after order)
+
             if (refreshCart) {
                 await refreshCart();
             }
@@ -86,7 +86,7 @@ const CheckoutPage = () => {
             <h1 className="text-3xl font-bold text-slate-900 mb-8">Thanh toán</h1>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Shipping Form */}
+
                 <div className="bg-white p-6 rounded-2xl shadow-lg border border-slate-100">
                     <h2 className="text-xl font-semibold text-slate-900 mb-6">Thông tin giao hàng</h2>
                     <form onSubmit={handleSubmit} className="space-y-4">
@@ -131,7 +131,7 @@ const CheckoutPage = () => {
                     </form>
                 </div>
 
-                {/* Order Summary */}
+
                 <div className="bg-white p-6 rounded-2xl shadow-lg border border-slate-100 h-fit">
                     <h2 className="text-xl font-semibold text-slate-900 mb-6">Đơn hàng của bạn</h2>
                     <div className="space-y-4">

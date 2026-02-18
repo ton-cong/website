@@ -14,8 +14,8 @@ import com.example.demo.entity.Product;
 public interface ProductMapper {
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "category", ignore = true) // xử lý thủ công
-    @Mapping(target = "status", ignore = true)   // xử lý thủ công trong service
+    @Mapping(target = "category", ignore = true)
+    @Mapping(target = "status", ignore = true)
     @Mapping(target = "imageUrl", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     Product toEntity(ProductRequest request);
@@ -27,7 +27,7 @@ public interface ProductMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "category", ignore = true)
-    @Mapping(target = "status", ignore = true)   // xử lý thủ công trong service
+    @Mapping(target = "status", ignore = true)
     @Mapping(target = "imageUrl", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     void update(@MappingTarget Product product, ProductRequest request);

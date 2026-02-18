@@ -30,7 +30,6 @@ const ProfilePage = () => {
             navigate('/login');
             return;
         }
-        // Fetch user data from API if available, otherwise use context
         if (user) {
             fetchUserProfile();
         }
@@ -38,7 +37,6 @@ const ProfilePage = () => {
 
     const fetchUserProfile = async () => {
         try {
-            // If we have user id, fetch full profile from admin API
             if (user?.id) {
                 const response = await adminApi.getUserById(user.id);
                 const userData = response?.result || response;
@@ -49,7 +47,6 @@ const ProfilePage = () => {
                     address: userData.address || '',
                 });
             } else {
-                // Fallback to context data
                 setProfile({
                     fullName: user.fullName || user.name || '',
                     email: user.email || '',
@@ -58,7 +55,6 @@ const ProfilePage = () => {
                 });
             }
         } catch (error) {
-            // Fallback to context data on error
             setProfile({
                 fullName: user.fullName || user.name || '',
                 email: user.email || '',
@@ -80,7 +76,6 @@ const ProfilePage = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            // Call API to update user profile using auth endpoint (not admin)
             await authApi.updateProfile({
                 fullName: profile.fullName,
                 phone: profile.phone,
@@ -107,7 +102,6 @@ const ProfilePage = () => {
         }
         setLoading(true);
         try {
-            // Backend expects: { pass: "newPassword" }
             await authApi.changePassword(passwords.newPassword);
             toast.success("Đổi mật khẩu thành công!");
             setPasswords({ newPassword: '', confirmPassword: '' });
@@ -128,7 +122,8 @@ const ProfilePage = () => {
         <div className="max-w-2xl mx-auto py-8">
             <h1 className="text-3xl font-bold text-slate-900 mb-8">Tài khoản của tôi</h1>
 
-            {/* Tabs */}
+
+
             <div className="flex gap-4 mb-8 border-b border-slate-200">
                 <button
                     onClick={() => setActiveTab('profile')}

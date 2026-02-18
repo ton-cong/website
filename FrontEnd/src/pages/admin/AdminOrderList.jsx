@@ -70,7 +70,7 @@ const AdminOrderList = () => {
 
     const statusOptions = ['pending', 'processing', 'shipping', 'completed', 'cancelled'];
 
-    // Filter orders
+
     const filteredOrders = orders.filter(order => {
         if (!filterStatus) return true;
         return order.status?.toLowerCase() === filterStatus.toLowerCase();
@@ -102,7 +102,7 @@ const AdminOrderList = () => {
                 </div>
             </div>
 
-            {/* Stats */}
+
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
                 {statusOptions.map(status => {
                     const count = orders.filter(o => o.status?.toLowerCase() === status).length;
@@ -111,8 +111,8 @@ const AdminOrderList = () => {
                             key={status}
                             onClick={() => setFilterStatus(filterStatus === status ? '' : status)}
                             className={`p-3 rounded-lg text-center transition-all ${filterStatus === status
-                                    ? 'ring-2 ring-indigo-500 ' + getStatusColor(status)
-                                    : 'bg-white border border-slate-200 hover:border-indigo-300'
+                                ? 'ring-2 ring-indigo-500 ' + getStatusColor(status)
+                                : 'bg-white border border-slate-200 hover:border-indigo-300'
                                 }`}
                         >
                             <p className="text-2xl font-bold">{count}</p>
@@ -122,7 +122,7 @@ const AdminOrderList = () => {
                 })}
             </div>
 
-            {/* Orders List */}
+
             <div className="space-y-4">
                 {filteredOrders.length > 0 ? filteredOrders.map(order => (
                     <div key={order.id} className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
@@ -168,11 +168,11 @@ const AdminOrderList = () => {
                             </div>
                         </div>
 
-                        {/* Expanded Details */}
+
                         {expandedOrder === order.id && (
                             <div className="border-t border-slate-100 p-4 bg-slate-50">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {/* Customer Info */}
+
                                     <div>
                                         <h3 className="font-semibold text-slate-900 mb-2">Thông tin khách hàng</h3>
                                         <div className="text-sm space-y-1">
@@ -183,7 +183,7 @@ const AdminOrderList = () => {
                                         </div>
                                     </div>
 
-                                    {/* Order Items */}
+
                                     <div>
                                         <h3 className="font-semibold text-slate-900 mb-2">Sản phẩm</h3>
                                         <div className="space-y-2">

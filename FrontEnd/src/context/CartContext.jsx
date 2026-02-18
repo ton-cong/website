@@ -19,18 +19,15 @@ export const CartProvider = ({ children }) => {
         setCartLoading(true);
         try {
             const response = await cartApi.getMyCart();
-            // Response may be wrapped in { result: ... } or direct
             setCart(response?.result || response);
         } catch (error) {
             console.error("Failed to fetch cart", error);
-            // Don't show error toast for 403 - user just not logged in
         } finally {
             setCartLoading(false);
         }
     };
 
     useEffect(() => {
-        // Wait for auth to finish loading before attempting to fetch cart
         if (authLoading) return;
 
         if (isAuthenticated) {

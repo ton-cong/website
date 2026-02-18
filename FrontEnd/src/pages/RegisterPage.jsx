@@ -29,8 +29,6 @@ const RegisterPage = () => {
         }
 
         setLoading(true);
-        // Backend likely expects { email, password, fullName }
-        // Adjust keys based on backend DTO if needed
         const result = await register({
             email: formData.email,
             password: formData.password,

@@ -30,9 +30,12 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
 
                 .authorizeHttpRequests(auth -> auth
-                        // 🔥 Permit error and OPTIONS for CORS
+
                         .requestMatchers("/error", "/error/**").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+
+
+                        .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
                         
                         .requestMatchers(
                                 "/api/auth/login",
@@ -40,14 +43,14 @@ public class SecurityConfig {
                                 "/api/auth/forgetPass"
                         ).permitAll()
 
-                        // 🔥 PUBLIC GET REQUESTS
+
                         .requestMatchers(org.springframework.http.HttpMethod.GET, 
                                 "/api/products/**", 
                                 "/api/category/**", 
                                 "/api/reviews/**"
                         ).permitAll()
 
-                        // 🔥 ADMIN ONLY
+
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/products/**", "/api/category/**").hasRole("ADMIN")
                         .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/products/**", "/api/category/**").hasRole("ADMIN")

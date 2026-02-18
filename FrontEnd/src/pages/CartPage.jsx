@@ -53,7 +53,8 @@ const CartPage = () => {
                 <div className="divide-y divide-slate-100">
                     {cart.items.map((item) => (
                         <div key={item.id} className="p-6 flex items-center md:items-start space-x-6 hover:bg-slate-50 transition-colors">
-                            {/* Product Image */}
+
+
                             <div className="w-24 h-24 bg-slate-100 rounded-lg flex-shrink-0 overflow-hidden">
                                 {item.productImage || item.imageUrl ? (
                                     <img src={item.productImage || item.imageUrl} alt={item.productName} className="w-full h-full object-cover" />

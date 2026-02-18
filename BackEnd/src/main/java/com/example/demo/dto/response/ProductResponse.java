@@ -1,20 +1,24 @@
 package com.example.demo.dto.response;
 
-import com.example.demo.entity.Product;
 import com.example.demo.enums.ProductStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ProductResponse {
+public class ProductResponse implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     private Integer id;
     private String name;
     private String description;
@@ -29,5 +33,6 @@ public class ProductResponse {
     private ProductStatus status;
     private Integer categoryId;
     private String categoryName;
-
+    private Integer stock;
+    private String specifications;
 }

@@ -112,10 +112,10 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // mapper cập nhật field (email, fullName, phone)
+
         userMapper.toUpdateUserDto(request, user);
 
-        // Xử lý role thủ công vì gửi từ frontend là String
+
         if (request.getRole() != null && !request.getRole().isEmpty()) {
             try {
                 user.setRole(Role.valueOf(request.getRole().toUpperCase()));
@@ -124,7 +124,7 @@ public class AuthServiceImpl implements AuthService {
             }
         }
 
-        // LƯU lại DB
+
         userRepository.save(user);
 
         return userMapper.toUserResponse(user);
@@ -184,7 +184,7 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        // Update only allowed fields (not role, not email)
+
         if (request.getFullName() != null && !request.getFullName().isEmpty()) {
             user.setFullName(request.getFullName());
         }

@@ -6,6 +6,7 @@ import com.example.demo.entity.*;
 import com.example.demo.enums.OrderStatus;
 import com.example.demo.mapper.OrderMapper;
 import com.example.demo.repository.*;
+import com.example.demo.service.EmailService;
 import com.example.demo.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,6 +26,7 @@ public class OrderServiceImpl implements OrderService {
     private final CartItemRepository cartItemRepository;
     private final UserRepository userRepository;
     private final OrderMapper orderMapper;
+    private final EmailService emailService;
 
     private User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -72,6 +74,10 @@ public class OrderServiceImpl implements OrderService {
         savedOrder.setItems(orderItems);
 
         cartItemRepository.deleteByCartId(cart.getId());
+
+
+
+        emailService.sendOrderConfirmation(savedOrder);
 
         return orderMapper.toResponse(savedOrder);
     }

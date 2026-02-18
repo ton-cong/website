@@ -9,6 +9,8 @@ import com.example.demo.dto.request.RegisterRequestDTO;
 import com.example.demo.dto.response.AuthResponseDTO;
 import com.example.demo.dto.response.UserResponse;
 import com.example.demo.service.AuthService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -28,10 +30,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:5173")
+@Tag(name = "Authentication", description = "User registration, login, password management, and profile update")
 public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
+    @Operation(summary = "Register a new user")
     private ApiResponse<UserResponse> register(@Valid @RequestBody RegisterRequestDTO request) {
         ApiResponse<UserResponse> apiResponse = new ApiResponse<>();
         apiResponse.setResult(authService.registerUser(request));
@@ -39,6 +43,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
+    @Operation(summary = "Login and get JWT token")
     private ApiResponse<AuthResponseDTO> login(@Valid @RequestBody LoginRequestDTO request) {
         ApiResponse<AuthResponseDTO> apiResponse = new ApiResponse<>();
         apiResponse.setResult(authService.login(request));
@@ -58,6 +63,7 @@ public class AuthController {
     }
 
     @PostMapping("/changePass")
+    @Operation(summary = "Change password (authenticated)")
     public ApiResponse<UserResponse> changePass(@RequestBody ChangePasswordRequest request) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
@@ -67,6 +73,7 @@ public class AuthController {
     }
 
     @PostMapping("/forgetPass")
+    @Operation(summary = "Reset forgotten password via email")
     public ApiResponse<UserResponse> forgetPass(@RequestBody ForgetPasswordRequest request) {
         ApiResponse<UserResponse> apiResponse = new ApiResponse<>();
         apiResponse.setResult(authService.forgetPass(request));
@@ -74,6 +81,7 @@ public class AuthController {
     }
 
     @PostMapping("/profile/update")
+    @Operation(summary = "Update user profile (authenticated)")
     public ApiResponse<UserResponse> updateProfile(@RequestBody UpdateUserDTO request) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         ApiResponse<UserResponse> apiResponse = new ApiResponse<>();

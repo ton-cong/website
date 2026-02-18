@@ -10,7 +10,7 @@ import com.example.demo.entity.CartItem;
 
 @Mapper(componentModel = "spring")
 public interface CartMapper {
-    @Mapping(target = "totalPrice", ignore = true) // Calculated in service
+    @Mapping(target = "totalPrice", ignore = true)
     CartResponse toResponse(Cart cart);
 
     @Mapping(target = "productId", source = "product.id")

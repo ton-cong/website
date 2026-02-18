@@ -19,7 +19,6 @@ const ProductDetailPage = () => {
     const { addToCart } = useCart();
     const { isAuthenticated, user } = useAuth();
 
-    // Review form state
     const [showReviewForm, setShowReviewForm] = useState(false);
     const [rating, setRating] = useState(5);
     const [hoverRating, setHoverRating] = useState(0);
@@ -88,9 +87,7 @@ const ProductDetailPage = () => {
 
     return (
         <div className="space-y-12">
-            {/* Product Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 animate-fade-in-up">
-                {/* Image Section */}
                 <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 flex items-center justify-center min-h-[400px]">
                     {product.imageUrl ? (
                         <img
@@ -103,7 +100,6 @@ const ProductDetailPage = () => {
                     )}
                 </div>
 
-                {/* Info Section */}
                 <div className="space-y-6">
                     <div>
                         <div className="flex items-center space-x-2 mb-4">
@@ -152,7 +148,6 @@ const ProductDetailPage = () => {
                 </div>
             </div>
 
-            {/* Reviews Section */}
             <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-100">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-2xl font-bold text-slate-900">Đánh giá sản phẩm</h2>
@@ -163,7 +158,6 @@ const ProductDetailPage = () => {
                     )}
                 </div>
 
-                {/* Review Form */}
                 {showReviewForm && (
                     <form onSubmit={handleSubmitReview} className="mb-8 p-4 bg-slate-50 rounded-xl">
                         <div className="mb-4">
@@ -204,7 +198,6 @@ const ProductDetailPage = () => {
                     </form>
                 )}
 
-                {/* Review List */}
                 {reviews.length === 0 ? (
                     <p className="text-slate-500 text-center py-8">Chưa có đánh giá nào cho sản phẩm này.</p>
                 ) : (

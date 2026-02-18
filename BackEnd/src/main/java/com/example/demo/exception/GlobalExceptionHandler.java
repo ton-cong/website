@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
-@ControllerAdvice /* annotation xử lý ngoại lệ*/
+@ControllerAdvice
 public class GlobalExceptionHandler {
     
     @ExceptionHandler(AppException.class)
@@ -31,7 +31,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse> handleRuntimeException(RuntimeException e) {
         log.error(" RuntimeException: {}", e.getMessage(), e);
         ApiResponse apiResponse = new ApiResponse();
-        apiResponse.setCode(1001); // Generic error code or custom
+        apiResponse.setCode(1001);
         apiResponse.setMessage(e.getMessage());
         return ResponseEntity.badRequest().body(apiResponse);
     }

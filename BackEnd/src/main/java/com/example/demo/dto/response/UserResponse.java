@@ -16,5 +16,5 @@ public class UserResponse {
     private String fullName;
     private String phone;
     private String address;
-    private Role role;  // Changed from 'roles' to match User entity
+    private Role role;
 }

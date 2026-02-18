@@ -38,7 +38,7 @@ const OrdersPage = () => {
             'shipping': 'bg-purple-100 text-purple-800',
             'completed': 'bg-green-100 text-green-800',
             'cancelled': 'bg-red-100 text-red-800',
-            // Uppercase versions
+
             'PENDING': 'bg-yellow-100 text-yellow-800',
             'PROCESSING': 'bg-blue-100 text-blue-800',
             'SHIPPING': 'bg-purple-100 text-purple-800',
@@ -55,7 +55,7 @@ const OrdersPage = () => {
             'shipping': 'Đang giao',
             'completed': 'Đã giao',
             'cancelled': 'Đã hủy',
-            // Uppercase versions
+
             'PENDING': 'Chờ xác nhận',
             'PROCESSING': 'Đang xử lý',
             'SHIPPING': 'Đang giao',
@@ -102,7 +102,7 @@ const OrdersPage = () => {
                                 </span>
                             </div>
 
-                            {/* Shipping Info */}
+
                             <div className="mb-4 p-3 bg-slate-50 rounded-lg text-sm">
                                 <p className="text-slate-600">
                                     <span className="font-medium">Người nhận:</span> {order.fullName}
@@ -120,7 +120,7 @@ const OrdersPage = () => {
                                 )}
                             </div>
 
-                            {/* Order Items - Backend returns 'items' not 'orderItems' */}
+
                             <div className="border-t border-slate-100 pt-4 space-y-3">
                                 {(order.items || order.orderItems || []).map((item, index) => (
                                     <div key={item.id || index} className="flex justify-between items-center">
@@ -156,7 +156,7 @@ const OrdersPage = () => {
                                 </div>
                                 <div className="text-right">
                                     <p className="text-sm text-slate-500">Tổng cộng</p>
-                                    {/* Backend returns 'totalPrice' not 'totalAmount' */}
+
                                     <p className="text-xl font-bold text-indigo-600">
                                         {(order.totalPrice || order.totalAmount || 0).toLocaleString()}đ
                                     </p>

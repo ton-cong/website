@@ -8,13 +8,11 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // Initial check for token
     useEffect(() => {
         const checkAuth = async () => {
             const token = localStorage.getItem('token');
             if (token) {
                 try {
-                    // Retrieve stored user info
                     const storedUser = localStorage.getItem('user');
                     if (storedUser) {
                         setUser(JSON.parse(storedUser));
@@ -34,8 +32,6 @@ export const AuthProvider = ({ children }) => {
             const response = await axiosClient.post('/auth/login', { email, password });
             console.log("Login response:", response); // Debug
 
-            // Backend returns: { result: { accessToken, tokenType, user: { id, email, role, ... } } }
-            // or directly: { accessToken, tokenType, user: { ... } }
             const data = response.result || response;
             const { accessToken, user: userInfo } = data;
 
