@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.repository.CartRepository">
+
+    <resultMap id="CartResultMap" type="com.example.demo.entity.Cart">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <association property="user" javaType="com.example.demo.entity.User">
+            <id property="id" column="u_id"/>
+            <result property="email" column="u_email"/>
+            <result property="fullName" column="u_full_name"/>
+        </association>
+        <collection property="items" ofType="com.example.demo.entity.CartItem">
+            <id property="id" column="ci_id"/>
+            <result property="cartId" column="ci_cart_id"/>
+            <result property="productId" column="ci_product_id"/>
+            <result property="quantity" column="ci_quantity"/>
+            <association property="product" javaType="com.example.demo.entity.Product">
+                <id property="id" column="p_id"/>
+                <result property="name" column="p_name"/>
+                <result property="price" column="p_price"/>
+                <result property="salePrice" column="p_sale_price"/>
+                <result property="imageUrl" column="p_image_url"/>
+                <result property="stock" column="p_stock"/>
+            </association>
+        </collection>
+    </resultMap>
+
+    <sql id="selectCartWithItems">
+        SELECT
+            c.id, c.user_id, c.created_at, c.updated_at,
+            u.id AS u_id, u.email AS u_email, u.full_name AS u_full_name,
+            ci.id AS ci_id, ci.cart_id AS ci_cart_id, ci.product_id AS ci_product_id, ci.quantity AS ci_quantity,
+            p.id AS p_id, p.name AS p_name, p.price AS p_price, p.sale_price AS p_sale_price, p.image_url AS p_image_url, p.stock AS p_stock
+        FROM carts c
+        LEFT JOIN users u ON c.user_id = u.id
+        LEFT JOIN cart_items ci ON c.id = ci.cart_id
+        LEFT JOIN products p ON ci.product_id = p.id
+    </sql>
+
+    <select id="findByUserId" parameterType="int" resultMap="CartResultMap">
+        <include refid="selectCartWithItems"/>
+        WHERE c.user_id = #{userId}
+    </select>
+
+    <select id="findById" parameterType="int" resultMap="CartResultMap">
+        <include refid="selectCartWithItems"/>
+        WHERE c.id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.example.demo.entity.Cart" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO carts (user_id) VALUES (#{userId})
+    </insert>
+
+    <update id="save" parameterType="com.example.demo.entity.Cart">
+        UPDATE carts SET updated_at = NOW() WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="int">
+        DELETE FROM carts WHERE id = #{id}
+    </delete>
+
+</mapper>

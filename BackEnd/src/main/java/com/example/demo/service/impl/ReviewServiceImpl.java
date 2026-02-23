@@ -2,7 +2,6 @@ package com.example.demo.service.impl;
 
 import com.example.demo.dto.request.ReviewRequest;
 import com.example.demo.dto.response.ReviewResponse;
-import com.example.demo.entity.Product;
 import com.example.demo.entity.Review;
 import com.example.demo.entity.User;
 import com.example.demo.mapper.ReviewMapper;
@@ -11,6 +10,9 @@ import com.example.demo.repository.ReviewRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.ReviewService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -22,8 +24,8 @@ import java.util.stream.Collectors;
 public class ReviewServiceImpl implements ReviewService {
 
     private final ReviewRepository reviewRepository;
-    private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final ProductRepository productRepository;
     private final ReviewMapper reviewMapper;
 
     private User getCurrentUser() {
@@ -35,17 +37,26 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     public ReviewResponse addReview(ReviewRequest request) {
         User user = getCurrentUser();
-        Product product = productRepository.findById(request.getProductId())
+
+        productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
         Review review = Review.builder()
-                .user(user)
-                .product(product)
+                .userId(user.getId())
+                .productId(request.getProductId())
                 .rating(request.getRating())
                 .comment(request.getComment())
                 .build();
 
-        return reviewMapper.toResponse(reviewRepository.save(review));
+        reviewRepository.insert(review);
+
+        List<Review> reviews = reviewRepository.findByProductId(request.getProductId());
+        Review savedReview = reviews.stream()
+                .filter(r -> r.getId().equals(review.getId()))
+                .findFirst()
+                .orElse(review);
+
+        return reviewMapper.toResponse(savedReview);
     }
 
     @Override
@@ -58,26 +69,25 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     public List<ReviewResponse> getAllReviews() {
         return reviewRepository.findAll().stream()
-                .map(review -> {
-                    ReviewResponse response = reviewMapper.toResponse(review);
-
-
-                    if (review.getProduct() != null) {
-                        response.setProductName(review.getProduct().getName());
-                    }
-                    if (review.getUser() != null) {
-                        response.setUserName(review.getUser().getFullName());
-                        response.setUserEmail(review.getUser().getEmail());
-                    }
-                    return response;
-                })
+                .map(reviewMapper::toResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<ReviewResponse> getAllReviews(int page, int size, String sortBy, String sortDir) {
+        long total = reviewRepository.count();
+        int offset = page * size;
+        List<ReviewResponse> list = reviewRepository.findAllPaged(sortBy, sortDir, size, offset)
+                .stream()
+                .map(reviewMapper::toResponse)
+                .collect(Collectors.toList());
+        return new PageImpl<>(list, PageRequest.of(page, size), total);
     }
 
     @Override
     public void deleteReview(Integer id) {
         if (!reviewRepository.existsById(id)) {
-            throw new RuntimeException("Review not found");
+            throw new RuntimeException("Review not found with id: " + id);
         }
         reviewRepository.deleteById(id);
     }

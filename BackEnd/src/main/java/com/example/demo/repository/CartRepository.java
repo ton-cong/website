@@ -1,9 +1,15 @@
 package com.example.demo.repository;
 
 import com.example.demo.entity.Cart;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.apache.ibatis.annotations.Mapper;
+
 import java.util.Optional;
 
-public interface CartRepository extends JpaRepository<Cart, Integer> {
+@Mapper
+public interface CartRepository {
     Optional<Cart> findByUserId(Integer userId);
+    Optional<Cart> findById(Integer id);
+    void insert(Cart cart);
+    void save(Cart cart);
+    void deleteById(Integer id);
 }

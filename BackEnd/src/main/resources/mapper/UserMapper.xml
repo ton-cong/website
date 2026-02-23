@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.repository.UserRepository">
+
+    <resultMap id="UserResultMap" type="com.example.demo.entity.User">
+        <id property="id" column="id"/>
+        <result property="email" column="email"/>
+        <result property="passwordHash" column="password_hash"/>
+        <result property="fullName" column="full_name"/>
+        <result property="phone" column="phone"/>
+        <result property="address" column="address"/>
+        <result property="role" column="role"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <select id="findByEmail" parameterType="String" resultMap="UserResultMap">
+        SELECT * FROM users WHERE email = #{email} LIMIT 1
+    </select>
+
+    <select id="existsByEmail" parameterType="String" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM users WHERE email = #{email}
+    </select>
+
+    <select id="findById" parameterType="int" resultMap="UserResultMap">
+        SELECT * FROM users WHERE id = #{id} LIMIT 1
+    </select>
+
+    <select id="findAll" resultMap="UserResultMap">
+        SELECT * FROM users ORDER BY id ASC
+    </select>
+
+    <select id="findAllPaged" resultMap="UserResultMap">
+        SELECT * FROM users
+        ORDER BY ${sortBy} ${sortDir}
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(*) FROM users
+    </select>
+
+    <select id="existsById" parameterType="int" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM users WHERE id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.example.demo.entity.User" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO users (email, password_hash, full_name, phone, address, role)
+        VALUES (#{email}, #{passwordHash}, #{fullName}, #{phone}, #{address}, #{role})
+    </insert>
+
+    <update id="save" parameterType="com.example.demo.entity.User">
+        UPDATE users SET
+            email = #{email},
+            password_hash = #{passwordHash},
+            full_name = #{fullName},
+            phone = #{phone},
+            address = #{address},
+            role = #{role}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="int">
+        DELETE FROM users WHERE id = #{id}
+    </delete>
+
+</mapper>

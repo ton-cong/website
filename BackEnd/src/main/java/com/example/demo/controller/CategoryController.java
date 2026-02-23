@@ -5,9 +5,11 @@ import com.example.demo.dto.request.CategoryRequestDTO;
 import com.example.demo.dto.response.CategoryResponseDTO;
 import com.example.demo.service.CategoryService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -57,6 +59,17 @@ public class CategoryController {
         ApiResponse<List<CategoryResponseDTO>> apiResponse = new ApiResponse<>();
         apiResponse.setResult(categoryService.getAllCategory());
         return apiResponse;
+    }
+
+    @GetMapping("/all/page")
+    @Operation(summary = "Get all categories (paginated)", description = "Paginated endpoint with sorting support.")
+    public Page<CategoryResponseDTO> getAllCategoriesPaged(
+            @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "10") int size,
+            @Parameter(description = "Sort by field") @RequestParam(defaultValue = "id") String sortBy,
+            @Parameter(description = "Sort direction: asc or desc") @RequestParam(defaultValue = "asc") String sortDir
+    ) {
+        return categoryService.getAllCategory(page, size, sortBy, sortDir);
     }
 
     @GetMapping("/{id}")

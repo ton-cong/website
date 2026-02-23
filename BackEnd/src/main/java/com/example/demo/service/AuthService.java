@@ -7,6 +7,7 @@ import com.example.demo.dto.request.RegisterRequestDTO;
 import com.example.demo.dto.UpdateUserDTO;
 import com.example.demo.dto.response.AuthResponseDTO;
 import com.example.demo.dto.response.UserResponse;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -15,6 +16,7 @@ public interface AuthService {
     AuthResponseDTO login (LoginRequestDTO request);
     UserResponse getUserById(Integer id);
     List<UserResponse> getAllUsers();
+    Page<UserResponse> getAllUsers(int page, int size, String sortBy, String sortDir);
     UserResponse updateUser(Integer id, UpdateUserDTO request);
     boolean deleteUser(Integer id);
     UserResponse getUserByEmail(String email);

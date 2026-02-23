@@ -5,9 +5,11 @@ import com.example.demo.dto.UpdateUserDTO;
 import com.example.demo.dto.response.UserResponse;
 import com.example.demo.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -23,11 +25,14 @@ public class AdminController {
     final AuthService authService;
 
     @GetMapping("/allUser")
-    @Operation(summary = "Get all users")
-    public ApiResponse<List<UserResponse>> getAllUser(){
-        ApiResponse<List<UserResponse>> apiResponse = new ApiResponse<>();
-        apiResponse.setResult(authService.getAllUsers());
-        return apiResponse;
+    @Operation(summary = "Get all users (paginated)", description = "Supports pagination and sorting.")
+    public Page<UserResponse> getAllUser(
+            @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "10") int size,
+            @Parameter(description = "Sort by field") @RequestParam(defaultValue = "id") String sortBy,
+            @Parameter(description = "Sort direction: asc or desc") @RequestParam(defaultValue = "asc") String sortDir
+    ) {
+        return authService.getAllUsers(page, size, sortBy, sortDir);
     }
 
     @DeleteMapping("/delete/{id}")

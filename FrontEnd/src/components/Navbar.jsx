@@ -39,9 +39,11 @@ const Navbar = () => {
 
                     <div className="hidden md:flex items-center space-x-6">
                         {!isInAdminSection && (
-                            <Link to="/" className="text-slate-600 hover:text-indigo-600 font-medium transition-colors">
-                                Sản phẩm
-                            </Link>
+                            <>
+                                <Link to="/" className="text-slate-600 hover:text-indigo-600 font-medium transition-colors">Trang chủ</Link>
+                                <Link to="/about" className="text-slate-600 hover:text-indigo-600 font-medium transition-colors">Giới thiệu</Link>
+                                <Link to="/contact" className="text-slate-600 hover:text-indigo-600 font-medium transition-colors">Liên hệ</Link>
+                            </>
                         )}
                         {isAuthenticated && !isInAdminSection && (
                             <Link to="/orders" className="text-slate-600 hover:text-indigo-600 font-medium transition-colors">

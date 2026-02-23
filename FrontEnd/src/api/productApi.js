@@ -4,7 +4,7 @@ const productApi = {
     getAll: (params = {}) => axiosClient.get('/products/getAllProduct', {
         params: {
             page: params.page || 0,
-            size: params.size || 100,
+            size: params.size || 10,
             sortBy: params.sortBy || 'id',
             sortDir: params.sortDir || 'asc',
         }

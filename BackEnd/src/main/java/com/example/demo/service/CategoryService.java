@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.dto.request.CategoryRequestDTO;
 import com.example.demo.dto.response.CategoryResponseDTO;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,6 +17,8 @@ public interface CategoryService {
     boolean deleteCategory(int id);
 
     List<CategoryResponseDTO> getAllCategory();
+
+    Page<CategoryResponseDTO> getAllCategory(int page, int size, String sortBy, String sortDir);
 
     CategoryResponseDTO getById(int id);
 }

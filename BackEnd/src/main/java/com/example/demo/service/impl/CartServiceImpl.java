@@ -1,13 +1,12 @@
 package com.example.demo.service.impl;
 
 import com.example.demo.dto.request.CartItemRequest;
+import com.example.demo.dto.response.CartItemResponse;
 import com.example.demo.dto.response.CartResponse;
 import com.example.demo.entity.Cart;
 import com.example.demo.entity.CartItem;
 import com.example.demo.entity.Product;
 import com.example.demo.entity.User;
-import com.example.demo.exception.AppException;
-import com.example.demo.enums.ErrorCode;
 import com.example.demo.mapper.CartMapper;
 import com.example.demo.repository.CartItemRepository;
 import com.example.demo.repository.CartRepository;
@@ -20,7 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Optional;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,71 +38,91 @@ public class CartServiceImpl implements CartService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
+    private Cart getOrCreateCart(User user) {
+        return cartRepository.findByUserId(user.getId())
+                .orElseGet(() -> {
+                    Cart newCart = Cart.builder().userId(user.getId()).build();
+                    cartRepository.insert(newCart);
+                    newCart.setItems(new ArrayList<>());
+                    return newCart;
+                });
+    }
+
+    private CartResponse buildCartResponse(Cart cart) {
+        List<CartItem> items = cartItemRepository.findByCartId(cart.getId());
+        List<CartItemResponse> itemResponses = items.stream()
+                .map(item -> {
+                    Product product = item.getProduct();
+                    return CartItemResponse.builder()
+                            .id(item.getId())
+                            .productId(item.getProductId())
+                            .productName(product != null ? product.getName() : null)
+                            .price(product != null && product.getPrice() != null ? product.getPrice().doubleValue() : 0)
+                            .quantity(item.getQuantity())
+                            .imageUrl(product != null ? product.getImageUrl() : null)
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        double totalPrice = itemResponses.stream()
+                .mapToDouble(i -> i.getPrice() * i.getQuantity())
+                .sum();
+
+        return CartResponse.builder()
+                .id(cart.getId())
+                .items(itemResponses)
+                .totalPrice(totalPrice)
+                .build();
+    }
+
     @Override
     public CartResponse getMyCart() {
         User user = getCurrentUser();
-        Cart cart = cartRepository.findByUserId(user.getId())
-                .orElseGet(() -> {
-                    Cart newCart = Cart.builder().user(user).items(new ArrayList<>()).build();
-                    return cartRepository.save(newCart);
-                });
-        return calculateTotal(cart);
+        Cart cart = getOrCreateCart(user);
+        return buildCartResponse(cart);
     }
 
     @Override
     @Transactional
     public CartResponse addToCart(CartItemRequest request) {
         User user = getCurrentUser();
-        Cart cart = cartRepository.findByUserId(user.getId())
-                .orElseGet(() -> {
-                    Cart newCart = Cart.builder().user(user).items(new ArrayList<>()).build();
-                    return cartRepository.save(newCart);
-                });
+        Cart cart = getOrCreateCart(user);
 
-        Product product = productRepository.findById(request.getProductId())
+        productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
-        Optional<CartItem> existingItem = cart.getItems().stream()
-                .filter(item -> item.getProduct().getId().equals(product.getId()))
-                .findFirst();
+        List<CartItem> existingItems = cartItemRepository.findByCartId(cart.getId());
+        CartItem existing = existingItems.stream()
+                .filter(i -> i.getProductId().equals(request.getProductId()))
+                .findFirst()
+                .orElse(null);
 
-        if (existingItem.isPresent()) {
-            CartItem item = existingItem.get();
-            item.setQuantity(item.getQuantity() + request.getQuantity());
-            cartItemRepository.save(item);
+        if (existing != null) {
+            existing.setQuantity(existing.getQuantity() + request.getQuantity());
+            cartItemRepository.save(existing);
         } else {
             CartItem newItem = CartItem.builder()
-                    .cart(cart)
-                    .product(product)
+                    .cartId(cart.getId())
+                    .productId(request.getProductId())
                     .quantity(request.getQuantity())
                     .build();
-            cart.getItems().add(newItem);
-            cartItemRepository.save(newItem);
+            cartItemRepository.insert(newItem);
         }
-        
-        return getMyCart();
+
+        return buildCartResponse(cart);
     }
 
     @Override
+    @Transactional
     public void removeFromCart(Integer cartItemId) {
         cartItemRepository.deleteById(cartItemId);
     }
 
     @Override
+    @Transactional
     public void clearCart() {
         User user = getCurrentUser();
-        Cart cart = cartRepository.findByUserId(user.getId()).orElse(null);
-        if (cart != null) {
-            cartItemRepository.deleteByCartId(cart.getId());
-        }
-    }
-
-    private CartResponse calculateTotal(Cart cart) {
-        CartResponse response = cartMapper.toResponse(cart);
-        double total = cart.getItems().stream()
-                .mapToDouble(item -> item.getProduct().getPrice() * item.getQuantity())
-                .sum();
-        response.setTotalPrice(total);
-        return response;
+        cartRepository.findByUserId(user.getId())
+                .ifPresent(cart -> cartItemRepository.deleteByCartId(cart.getId()));
     }
 }

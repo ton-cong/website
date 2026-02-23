@@ -1,7 +1,14 @@
 package com.example.demo.repository;
 
 import com.example.demo.entity.OrderItem;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.apache.ibatis.annotations.Mapper;
 
-public interface OrderItemRepository extends JpaRepository<OrderItem, Integer> {
+import java.util.List;
+
+@Mapper
+public interface OrderItemRepository {
+    void insert(OrderItem orderItem);
+    void insertAll(List<OrderItem> items);
+    List<OrderItem> findByOrderId(Integer orderId);
+    void deleteByProductId(@org.apache.ibatis.annotations.Param("productId") Integer productId);
 }

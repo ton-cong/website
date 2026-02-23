@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.repository.CartItemRepository">
+
+    <resultMap id="CartItemResultMap" type="com.example.demo.entity.CartItem">
+        <id property="id" column="id"/>
+        <result property="cartId" column="cart_id"/>
+        <result property="productId" column="product_id"/>
+        <result property="quantity" column="quantity"/>
+        <association property="product" javaType="com.example.demo.entity.Product">
+            <id property="id" column="p_id"/>
+            <result property="name" column="p_name"/>
+            <result property="price" column="p_price"/>
+            <result property="salePrice" column="p_sale_price"/>
+            <result property="imageUrl" column="p_image_url"/>
+            <result property="stock" column="p_stock"/>
+        </association>
+    </resultMap>
+
+    <sql id="selectWithProduct">
+        SELECT ci.*, p.id AS p_id, p.name AS p_name, p.price AS p_price,
+               p.sale_price AS p_sale_price, p.image_url AS p_image_url, p.stock AS p_stock
+        FROM cart_items ci
+        LEFT JOIN products p ON ci.product_id = p.id
+    </sql>
+
+    <select id="findById" parameterType="int" resultMap="CartItemResultMap">
+        <include refid="selectWithProduct"/>
+        WHERE ci.id = #{id}
+    </select>
+
+    <select id="findByCartId" parameterType="int" resultMap="CartItemResultMap">
+        <include refid="selectWithProduct"/>
+        WHERE ci.cart_id = #{cartId}
+    </select>
+
+    <insert id="insert" parameterType="com.example.demo.entity.CartItem" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO cart_items (cart_id, product_id, quantity)
+        VALUES (#{cartId}, #{productId}, #{quantity})
+    </insert>
+
+    <update id="save" parameterType="com.example.demo.entity.CartItem">
+        UPDATE cart_items SET quantity = #{quantity} WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="int">
+        DELETE FROM cart_items WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteByCartId" parameterType="int">
+        DELETE FROM cart_items WHERE cart_id = #{cartId}
+    </delete>
+    <delete id="deleteByProductId" parameterType="int">
+        DELETE FROM cart_items WHERE product_id = #{productId}
+    </delete>
+
+</mapper>

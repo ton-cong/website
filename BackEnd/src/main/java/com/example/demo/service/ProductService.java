@@ -21,7 +21,6 @@ public interface ProductService {
     Page<ProductResponse> getAllProduct(int page, int size, String sortBy, String sortDir);
 
     Page<ProductResponse> searchProducts(String keyword, Integer categoryId,
-                                          Double minPrice, Double maxPrice,
                                           int page, int size,
                                           String sortBy, String sortDir);
 }

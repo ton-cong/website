@@ -21,7 +21,6 @@ const LoginPage = () => {
         if (result.success) {
             toast.success("Chào mừng bạn quay lại!");
             const userRole = result.user?.roles || result.user?.role;
-            console.log("User role for redirect:", userRole); // Debug
             if (userRole === 'ADMIN') {
                 navigate('/admin');
             } else {

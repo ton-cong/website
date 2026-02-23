@@ -34,7 +34,6 @@ const ProductDetailPage = () => {
             const data = await productApi.getById(id);
             setProduct(data?.result || data);
         } catch (error) {
-            console.error("Failed to fetch product", error);
         } finally {
             setLoading(false);
         }
@@ -45,7 +44,6 @@ const ProductDetailPage = () => {
             const data = await reviewApi.getByProduct(id);
             setReviews(data?.result || data || []);
         } catch (error) {
-            console.error("Failed to fetch reviews", error);
         }
     };
 
@@ -61,7 +59,7 @@ const ProductDetailPage = () => {
         }
         setReviewLoading(true);
         try {
-            await reviewApi.create({
+            await reviewApi.add({
                 productId: parseInt(id),
                 rating,
                 comment,

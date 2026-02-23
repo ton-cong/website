@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.repository.OrderItemRepository">
+
+    <resultMap id="OrderItemResultMap" type="com.example.demo.entity.OrderItem">
+        <id property="id" column="id"/>
+        <result property="orderId" column="order_id"/>
+        <result property="productId" column="product_id"/>
+        <result property="quantity" column="quantity"/>
+        <result property="price" column="price"/>
+        <association property="product" javaType="com.example.demo.entity.Product">
+            <id property="id" column="p_id"/>
+            <result property="name" column="p_name"/>
+            <result property="imageUrl" column="p_image_url"/>
+        </association>
+    </resultMap>
+
+    <select id="findByOrderId" parameterType="int" resultMap="OrderItemResultMap">
+        SELECT oi.*, p.id AS p_id, p.name AS p_name, p.image_url AS p_image_url
+        FROM order_items oi
+        LEFT JOIN products p ON oi.product_id = p.id
+        WHERE oi.order_id = #{orderId}
+    </select>
+
+    <insert id="insert" parameterType="com.example.demo.entity.OrderItem" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO order_items (order_id, product_id, quantity, price)
+        VALUES (#{orderId}, #{productId}, #{quantity}, #{price})
+    </insert>
+
+    <insert id="insertAll" parameterType="java.util.List">
+        INSERT INTO order_items (order_id, product_id, quantity, price) VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.orderId}, #{item.productId}, #{item.quantity}, #{item.price})
+        </foreach>
+    </insert>
+
+    <delete id="deleteByProductId" parameterType="int">
+        DELETE FROM order_items WHERE product_id = #{productId}
+    </delete>
+
+</mapper>

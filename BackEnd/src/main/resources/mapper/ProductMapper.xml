@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.repository.ProductRepository">
+
+    <resultMap id="ProductResultMap" type="com.example.demo.entity.Product">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="categoryId" column="category_id"/>
+        <result property="description" column="description"/>
+        <result property="specifications" column="specifications"/>
+        <result property="price" column="price"/>
+        <result property="salePrice" column="sale_price"/>
+        <result property="stock" column="stock"/>
+        <result property="imageUrl" column="image_url"/>
+        <result property="brand" column="brand"/>
+        <result property="cpu" column="cpu"/>
+        <result property="ram" column="ram"/>
+        <result property="storage" column="storage"/>
+        <result property="screen" column="screen"/>
+        <result property="status" column="status"/>
+        <result property="createdAt" column="created_at"/>
+        <association property="category" javaType="com.example.demo.entity.Category">
+            <id property="id" column="cat_id"/>
+            <result property="name" column="cat_name"/>
+            <result property="description" column="cat_desc"/>
+        </association>
+    </resultMap>
+
+    <sql id="selectWithCategory">
+        SELECT p.*, c.id AS cat_id, c.name AS cat_name, c.description AS cat_desc
+        FROM products p
+        LEFT JOIN categories c ON p.category_id = c.id
+    </sql>
+
+    <select id="findById" parameterType="int" resultMap="ProductResultMap">
+        <include refid="selectWithCategory"/>
+        WHERE p.id = #{id}
+    </select>
+
+    <select id="findAll" resultMap="ProductResultMap">
+        <include refid="selectWithCategory"/>
+        ORDER BY p.id ASC
+    </select>
+
+    <select id="findAllPaged" resultMap="ProductResultMap">
+        <include refid="selectWithCategory"/>
+        ORDER BY p.${sortBy} ${sortDir}
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="searchProducts" resultMap="ProductResultMap">
+        <include refid="selectWithCategory"/>
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (p.name LIKE CONCAT('%', #{keyword}, '%')
+                     OR p.description LIKE CONCAT('%', #{keyword}, '%')
+                     OR p.brand LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="categoryId != null">
+                AND p.category_id = #{categoryId}
+            </if>
+
+        </where>
+        ORDER BY p.${sortBy} ${sortDir}
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(*) FROM products
+    </select>
+
+    <select id="countSearch" resultType="long">
+        SELECT COUNT(*) FROM products p
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (p.name LIKE CONCAT('%', #{keyword}, '%')
+                     OR p.description LIKE CONCAT('%', #{keyword}, '%')
+                     OR p.brand LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="categoryId != null">
+                AND p.category_id = #{categoryId}
+            </if>
+
+        </where>
+    </select>
+
+    <select id="existsById" parameterType="int" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM products WHERE id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.example.demo.entity.Product" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO products (name, category_id, description, specifications, price, sale_price,
+                              stock, image_url, brand, cpu, ram, storage, screen, status)
+        VALUES (#{name}, #{categoryId}, #{description}, #{specifications}, #{price}, #{salePrice},
+                #{stock}, #{imageUrl}, #{brand}, #{cpu}, #{ram}, #{storage}, #{screen}, #{status})
+    </insert>
+
+    <update id="save" parameterType="com.example.demo.entity.Product">
+        UPDATE products SET
+            name = #{name},
+            category_id = #{categoryId},
+            description = #{description},
+            specifications = #{specifications},
+            price = #{price},
+            sale_price = #{salePrice},
+            stock = #{stock},
+            image_url = #{imageUrl},
+            brand = #{brand},
+            cpu = #{cpu},
+            ram = #{ram},
+            storage = #{storage},
+            screen = #{screen},
+            status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="int">
+        DELETE FROM products WHERE id = #{id}
+    </delete>
+
+</mapper>

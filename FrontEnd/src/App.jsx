@@ -10,6 +10,8 @@ import OrdersPage from './pages/OrdersPage';
 import ProfilePage from './pages/ProfilePage';
 import AdminDashboard from './pages/AdminDashboard';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import AboutPage from './pages/AboutPage';
+import ContactPage from './pages/ContactPage';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { AdminRoute, AuthRoute } from './components/ProtectedRoute';
@@ -23,6 +25,8 @@ function App() {
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route index element={<HomePage />} />
+            <Route path="about" element={<AboutPage />} />
+            <Route path="contact" element={<ContactPage />} />
             <Route path="products/:id" element={<ProductDetailPage />} />
 
             <Route path="login" element={<LoginPage />} />

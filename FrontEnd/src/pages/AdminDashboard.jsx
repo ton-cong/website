@@ -114,25 +114,26 @@ const DashboardHome = () => {
     const fetchStats = async () => {
         try {
             const [productsRes, ordersRes, usersRes] = await Promise.all([
-                productApi.getAll(),
-                orderApi.getAll(),
-                adminApi.getAllUsers()
+                productApi.getAll({ size: 1 }),
+                orderApi.getAll({ size: 100 }),
+                adminApi.getAllUsers({ size: 1 })
             ]);
 
-            const products = productsRes?.result?.content || productsRes?.content || productsRes?.result || productsRes || [];
-            const orders = ordersRes?.result || ordersRes || [];
-            const users = usersRes?.result || usersRes || [];
+            const productCount = productsRes?.totalElements || 0;
+            const orderData = ordersRes?.content || [];
+            const orderCount = ordersRes?.totalElements || 0;
+            const userCount = usersRes?.totalElements || 0;
 
-            const revenue = orders.reduce((sum, order) => sum + (order.totalPrice || order.totalAmount || 0), 0);
+            const revenue = orderData.reduce((sum, order) => sum + (order.totalPrice || 0), 0);
 
             setStats({
-                products: products.length,
-                orders: orders.length,
-                users: users.length,
+                products: productCount,
+                orders: orderCount,
+                users: userCount,
                 revenue
             });
 
-            setRecentOrders(orders.slice(0, 5));
+            setRecentOrders(orderData.slice(0, 5));
         } catch (error) {
             console.error("Failed to load stats", error);
         } finally {

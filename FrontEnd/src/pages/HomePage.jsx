@@ -1,225 +1,205 @@
 import { useEffect, useState } from 'react';
 import productApi from '../api/productApi';
 import categoryApi from '../api/categoryApi';
-import ProductCard from '../components/ProductCard';
-import { MagnifyingGlassIcon, FunnelIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { ShoppingCartIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import Pagination from '../components/Pagination';
 
 const HomePage = () => {
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState(null);
-    const [priceRange, setPriceRange] = useState({ min: '', max: '' });
-    const [sortBy, setSortBy] = useState('newest');
-    const [showFilters, setShowFilters] = useState(false);
+    const [currentPage, setCurrentPage] = useState(0);
+    const [pageSize, setPageSize] = useState(12);
+    const [totalPages, setTotalPages] = useState(0);
+    const [totalElements, setTotalElements] = useState(0);
+
+    const [keyword, setKeyword] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('');
 
     useEffect(() => {
-        fetchData();
+        fetchCategories();
     }, []);
 
-    const fetchData = async () => {
+    useEffect(() => {
+        fetchProducts();
+    }, [currentPage, pageSize]);
+
+    const fetchCategories = async () => {
         try {
-            const [productsRes, categoriesRes] = await Promise.all([
-                productApi.getAll(),
-                categoryApi.getAll()
-            ]);
-            const productsData = productsRes?.result?.content || productsRes?.content || productsRes?.result || productsRes || [];
-            const categoriesData = categoriesRes?.result || categoriesRes || [];
-
-            console.log("Products loaded:", productsData);
-            console.log("Categories loaded:", categoriesData);
-
-            setProducts(Array.isArray(productsData) ? productsData : []);
-            setCategories(Array.isArray(categoriesData) ? categoriesData : []);
+            const res = await categoryApi.getAll();
+            setCategories(res?.result || res || []);
         } catch (error) {
-            console.error("Failed to load data", error);
+        }
+    };
+
+    const fetchProducts = async () => {
+        try {
+            setLoading(true);
+            const hasFilter = keyword.trim() || selectedCategory;
+            let response;
+
+            if (hasFilter) {
+                response = await productApi.search({
+                    keyword: keyword.trim() || undefined,
+                    categoryId: selectedCategory || undefined,
+                    page: currentPage,
+                    size: pageSize,
+                });
+            } else {
+                response = await productApi.getAll({
+                    page: currentPage,
+                    size: pageSize,
+                });
+            }
+
+            const data = response?.result || response;
+            setProducts(data?.content || []);
+            setTotalPages(data?.totalPages || 0);
+            setTotalElements(data?.totalElements || 0);
+        } catch (error) {
+            toast.error("Không thể tải sản phẩm");
         } finally {
             setLoading(false);
         }
     };
 
-    const filteredProducts = products.filter(p => {
-        const matchesSearch = p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            p.description?.toLowerCase().includes(searchTerm.toLowerCase());
-
-        const matchesCategory = !selectedCategory ||
-            p.categoryId === selectedCategory ||
-            p.category?.id === selectedCategory ||
-            p.categoryName === categories.find(c => c.id === selectedCategory)?.name;
-
-        const price = p.price || 0;
-        const matchesMinPrice = !priceRange.min || price >= Number(priceRange.min);
-        const matchesMaxPrice = !priceRange.max || price <= Number(priceRange.max);
-
-        return matchesSearch && matchesCategory && matchesMinPrice && matchesMaxPrice;
-    });
-
-    const sortedProducts = [...filteredProducts].sort((a, b) => {
-        switch (sortBy) {
-            case 'price-asc':
-                return (a.price || 0) - (b.price || 0);
-            case 'price-desc':
-                return (b.price || 0) - (a.price || 0);
-            case 'name':
-                return (a.name || '').localeCompare(b.name || '');
-            default:
-                return (b.id || 0) - (a.id || 0); // newest first
-        }
-    });
-
-    const clearFilters = () => {
-        setSearchTerm('');
-        setSelectedCategory(null);
-        setPriceRange({ min: '', max: '' });
-        setSortBy('newest');
+    const handleSearch = (e) => {
+        e.preventDefault();
+        setCurrentPage(0);
+        fetchProducts();
     };
 
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center min-h-[400px]">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
-            </div>
-        );
-    }
+    const handleReset = () => {
+        setKeyword('');
+        setSelectedCategory('');
+        setCurrentPage(0);
+    };
+
+    useEffect(() => {
+        if (!keyword && !selectedCategory) {
+            fetchProducts();
+        }
+    }, [keyword, selectedCategory]);
 
     return (
-        <div className="flex gap-8">
-
-
-            <aside className={`w-64 flex-shrink-0 ${showFilters ? 'block' : 'hidden'} lg:block`}>
-                <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sticky top-24">
-                    <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-lg font-bold text-slate-900">Bộ lọc</h2>
-                        <button onClick={clearFilters} className="text-sm text-indigo-600 hover:underline">
-                            Xóa lọc
-                        </button>
-                    </div>
-
-                    <div className="mb-6">
-                        <h3 className="text-sm font-semibold text-slate-700 mb-3">Danh mục</h3>
-                        <div className="space-y-2">
-                            <button
-                                onClick={() => setSelectedCategory(null)}
-                                className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${!selectedCategory
-                                    ? 'bg-indigo-600 text-white'
-                                    : 'text-slate-600 hover:bg-slate-50'
-                                    }`}
-                            >
-                                Tất cả sản phẩm
-                            </button>
-                            {categories.map(cat => (
-                                <button
-                                    key={cat.id}
-                                    onClick={() => setSelectedCategory(cat.id)}
-                                    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${selectedCategory === cat.id
-                                        ? 'bg-indigo-600 text-white'
-                                        : 'text-slate-600 hover:bg-slate-50'
-                                        }`}
-                                >
-                                    {cat.name}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="mb-6">
-                        <h3 className="text-sm font-semibold text-slate-700 mb-3">Khoảng giá</h3>
-                        <div className="flex gap-2">
-                            <input
-                                type="number"
-                                placeholder="Từ"
-                                value={priceRange.min}
-                                onChange={(e) => setPriceRange({ ...priceRange, min: e.target.value })}
-                                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:border-indigo-500 outline-none"
-                            />
-                            <input
-                                type="number"
-                                placeholder="Đến"
-                                value={priceRange.max}
-                                onChange={(e) => setPriceRange({ ...priceRange, max: e.target.value })}
-                                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:border-indigo-500 outline-none"
-                            />
-                        </div>
-                    </div>
-
-                    <div>
-                        <h3 className="text-sm font-semibold text-slate-700 mb-3">Sắp xếp</h3>
-                        <select
-                            value={sortBy}
-                            onChange={(e) => setSortBy(e.target.value)}
-                            className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:border-indigo-500 outline-none"
+        <div className="max-w-7xl mx-auto py-8 px-4">
+            <div className="relative isolate overflow-hidden bg-slate-900 rounded-3xl mb-12 shadow-2xl">
+                <div className="absolute inset-0 -z-10 bg-[radial-gradient(45rem_50rem_at_top,theme(colors.indigo.400),theme(colors.slate.900))] opacity-80" />
+                <div className="absolute inset-y-0 right-1/2 -z-10 mr-16 w-[200%] origin-bottom-left skew-x-[-30deg] bg-white ring-1 ring-white/10 shadow-xl shadow-indigo-600/10 ring-white/10 sm:mr-28 lg:mr-0 xl:mr-16 xl:origin-center" />
+                <div className="px-6 py-20 sm:py-32 lg:px-8 text-center relative z-10">
+                    <h1 className="text-4xl font-bold tracking-tight text-white sm:text-6xl animate-fade-in-up drop-shadow-lg">
+                        Khám Phá Công Nghệ Đỉnh Cao
+                    </h1>
+                    <p className="mt-6 text-lg leading-8 text-indigo-100 max-w-2xl mx-auto animate-fade-in-up drop-shadow" style={{ animationDelay: '100ms' }}>
+                        Nâng tầm trải nghiệm của bạn với những chiếc laptop hàng đầu. Mua sắm thông minh, làm việc hiệu quả và giải trí không giới hạn cùng LapTon.
+                    </p>
+                    <div className="mt-10 flex items-center justify-center gap-x-6 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+                        <button
+                            onClick={() => window.scrollTo({ top: 600, behavior: 'smooth' })}
+                            className="rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-indigo-600 shadow-xl hover:bg-indigo-50 hover:scale-105 transition-all duration-300 ring-1 ring-inset ring-indigo-200"
                         >
-                            <option value="newest">Mới nhất</option>
-                            <option value="price-asc">Giá: Thấp → Cao</option>
-                            <option value="price-desc">Giá: Cao → Thấp</option>
-                            <option value="name">Tên A-Z</option>
-                        </select>
+                            Mua sắm ngay
+                        </button>
                     </div>
                 </div>
-            </aside>
+            </div>
 
-            <main className="flex-1">
-                <div className="mb-8">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                        <div>
-                            <h1 className="text-3xl font-bold text-slate-900">
-                                {selectedCategory
-                                    ? categories.find(c => c.id === selectedCategory)?.name
-                                    : 'Tất cả sản phẩm'}
-                            </h1>
-                            <p className="text-slate-500">{sortedProducts.length} sản phẩm</p>
-                        </div>
+            <div className="mb-8">
+                <h2 className="text-3xl font-bold text-slate-900 mb-2">Sản phẩm nổi bật</h2>
+                <p className="text-slate-500">Khám phá bộ sưu tập sản phẩm mới nhất của chúng tôi</p>
+            </div>
 
-                        <button
-                            onClick={() => setShowFilters(!showFilters)}
-                            className="lg:hidden flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-lg text-sm"
-                        >
-                            <FunnelIcon className="h-4 w-4" />
-                            Bộ lọc
-                        </button>
-                    </div>
-
-                    <div className="relative">
-                        <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+            <div className="bg-white rounded-2xl shadow-lg border border-slate-100 p-6 mb-8">
+                <form onSubmit={handleSearch} className="flex flex-col lg:flex-row gap-4">
+                    <div className="relative flex-1">
+                        <MagnifyingGlassIcon className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
                         <input
                             type="text"
                             placeholder="Tìm kiếm sản phẩm..."
-                            className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
+                            value={keyword}
+                            onChange={(e) => setKeyword(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         />
-                        {searchTerm && (
-                            <button
-                                onClick={() => setSearchTerm('')}
-                                className="absolute right-4 top-1/2 -translate-y-1/2"
-                            >
-                                <XMarkIcon className="h-5 w-5 text-slate-400 hover:text-slate-600" />
-                            </button>
-                        )}
                     </div>
-                </div>
 
-                {sortedProducts.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                        {sortedProducts.map(product => (
-                            <ProductCard key={product.id} product={product} />
+                    <select
+                        value={selectedCategory}
+                        onChange={(e) => { setSelectedCategory(e.target.value); }}
+                        className="px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+                    >
+                        <option value="">Tất cả danh mục</option>
+                        {categories.map(cat => (
+                            <option key={cat.id} value={cat.id}>{cat.name}</option>
                         ))}
-                    </div>
-                ) : (
-                    <div className="text-center py-16 bg-white rounded-2xl border border-slate-100">
-                        <div className="text-slate-400 text-6xl mb-4">🔍</div>
-                        <h3 className="text-xl font-semibold text-slate-900 mb-2">Không tìm thấy sản phẩm</h3>
-                        <p className="text-slate-500 mb-4">Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</p>
+                    </select>
+
+                    <div className="flex gap-2">
                         <button
-                            onClick={clearFilters}
-                            className="text-indigo-600 font-medium hover:underline"
+                            type="submit"
+                            className="px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
                         >
-                            Xóa tất cả bộ lọc
+                            Tìm kiếm
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleReset}
+                            className="px-4 py-2.5 border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 transition-colors"
+                        >
+                            Đặt lại
                         </button>
                     </div>
-                )}
-            </main>
+                </form>
+            </div>
+
+            {loading ? (
+                <div className="flex items-center justify-center min-h-[300px]">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
+                </div>
+            ) : products.length === 0 ? (
+                <div className="text-center py-16">
+                    <p className="text-slate-500 text-lg">Không tìm thấy sản phẩm nào</p>
+                </div>
+            ) : (
+                <>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {products.map((product) => (
+                            <Link
+                                key={product.id}
+                                to={`/products/${product.id}`}
+                                className="group bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                            >
+                                <div className="aspect-square overflow-hidden bg-slate-100">
+                                    <img
+                                        src={product.imageUrl || 'https://via.placeholder.com/300'}
+                                        alt={product.name}
+                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                    />
+                                </div>
+                                <div className="p-4">
+                                    <p className="text-xs text-indigo-600 font-medium mb-1">{product.categoryName}</p>
+                                    <h3 className="font-semibold text-slate-900 mb-2 line-clamp-2 group-hover:text-indigo-600 transition-colors">{product.name}</h3>
+                                    <div className="flex items-center justify-between">
+                                        <p className="text-lg font-bold text-indigo-600">{product.price?.toLocaleString()}đ</p>
+                                        <ShoppingCartIcon className="h-5 w-5 text-slate-400 group-hover:text-indigo-600 transition-colors" />
+                                    </div>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        totalElements={totalElements}
+                        pageSize={pageSize}
+                        onPageChange={setCurrentPage}
+                        onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(0); }}
+                        pageSizeOptions={[8, 12, 24, 48]}
+                    />
+                </>
+            )}
         </div>
     );
 };

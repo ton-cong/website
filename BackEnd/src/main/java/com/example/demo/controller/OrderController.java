@@ -6,9 +6,11 @@ import com.example.demo.dto.response.OrderResponse;
 import com.example.demo.enums.OrderStatus;
 import com.example.demo.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,11 +43,14 @@ public class OrderController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Get all orders", description = "Admin only")
-    public ApiResponse<List<OrderResponse>> getAllOrders() {
-        ApiResponse<List<OrderResponse>> response = new ApiResponse<>();
-        response.setResult(orderService.getAllOrders());
-        return response;
+    @Operation(summary = "Get all orders (paginated)", description = "Admin only. Supports pagination and sorting.")
+    public Page<OrderResponse> getAllOrders(
+            @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "10") int size,
+            @Parameter(description = "Sort by field") @RequestParam(defaultValue = "id") String sortBy,
+            @Parameter(description = "Sort direction: asc or desc") @RequestParam(defaultValue = "desc") String sortDir
+    ) {
+        return orderService.getAllOrders(page, size, sortBy, sortDir);
     }
 
     @PutMapping("/{orderId}/status")

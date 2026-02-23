@@ -1,34 +1,24 @@
 package com.example.demo.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.sql.Timestamp;
 
-@Entity
-@Table(name = "reviews")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Review {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
-
-    @ManyToOne
-    @JoinColumn(name = "product_id")
-    private Product product;
-
+    private Integer userId;
+    private Integer productId;
     private Integer rating;
-
     private String comment;
-
-    @CreationTimestamp
-    @Column(name = "created_at")
     private Timestamp createdAt;
+
+    private User user;
+    private Product product;
 }

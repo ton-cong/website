@@ -1,26 +1,40 @@
 import { useEffect, useState } from 'react';
 import reviewApi from '../../api/reviewApi';
 import { toast } from 'react-toastify';
-import { TrashIcon, StarIcon } from '@heroicons/react/24/solid';
-import { StarIcon as StarIconOutline } from '@heroicons/react/24/outline'; // Rename to avoid conflict
-import Button from '../../components/Button';
+import { TrashIcon, StarIcon } from '@heroicons/react/24/outline';
+import { StarIcon as StarSolid } from '@heroicons/react/24/solid';
+import Pagination from '../../components/Pagination';
 
 const AdminReviewList = () => {
     const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [currentPage, setCurrentPage] = useState(0);
+    const [pageSize, setPageSize] = useState(10);
+    const [totalPages, setTotalPages] = useState(0);
+    const [totalElements, setTotalElements] = useState(0);
+    const [sortBy, setSortBy] = useState('id');
+    const [sortDir, setSortDir] = useState('desc');
 
     useEffect(() => {
         fetchReviews();
-    }, []);
+    }, [currentPage, pageSize, sortBy, sortDir]);
 
     const fetchReviews = async () => {
         try {
-            const response = await reviewApi.getAll();
-            setReviews(response?.result || response || []);
+            setLoading(true);
+            const response = await reviewApi.getAll({
+                page: currentPage,
+                size: pageSize,
+                sortBy,
+                sortDir,
+            });
+            const data = response?.result || response;
+            setReviews(data?.content || []);
+            setTotalPages(data?.totalPages || 0);
+            setTotalElements(data?.totalElements || 0);
         } catch (error) {
             console.error(error);
-            toast.error("Không thể tải danh sách đánh giá");
+            toast.error("Không thể tải đánh giá");
         } finally {
             setLoading(false);
         }
@@ -38,24 +52,31 @@ const AdminReviewList = () => {
     };
 
     const renderStars = (rating) => {
-        return (
-            <div className="flex text-yellow-500">
-                {[...Array(5)].map((_, index) => (
-                    <StarIcon key={index} className={`h-4 w-4 ${index < rating ? 'fill-current' : 'text-gray-300'}`} />
-                ))}
-            </div>
-        );
+        return [...Array(5)].map((_, i) => (
+            i < rating
+                ? <StarSolid key={i} className="h-4 w-4 text-yellow-400" />
+                : <StarIcon key={i} className="h-4 w-4 text-slate-300" />
+        ));
     };
 
-    const filteredReviews = reviews.filter(review =>
-        review.productName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        review.userEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        review.comment?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const handleSort = (field) => {
+        if (sortBy === field) {
+            setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
+        } else {
+            setSortBy(field);
+            setSortDir('asc');
+        }
+        setCurrentPage(0);
+    };
 
-    if (loading) {
+    const getSortIcon = (field) => {
+        if (sortBy !== field) return '↕';
+        return sortDir === 'asc' ? '↑' : '↓';
+    };
+
+    if (loading && reviews.length === 0) {
         return (
-            <div className="flex items-center justify-center h-64">
+            <div className="flex items-center justify-center min-h-[400px]">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
             </div>
         );
@@ -63,54 +84,48 @@ const AdminReviewList = () => {
 
     return (
         <div>
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold text-slate-900">Quản lý đánh giá</h1>
-            </div>
+            <h1 className="text-2xl font-bold text-slate-900 mb-6">Quản lý đánh giá</h1>
 
-            <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 mb-6">
-                <input
-                    type="text"
-                    placeholder="Tìm kiếm theo sản phẩm, email hoặc nội dung..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none"
-                />
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden">
                 <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-slate-200">
-                        <thead className="bg-slate-50">
+                    <table className="w-full">
+                        <thead className="bg-slate-50 border-b border-slate-200">
                             <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Sản phẩm</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Người dùng</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Đánh giá</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Nội dung</th>
-                                <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase">Thao tác</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider cursor-pointer hover:text-indigo-600" onClick={() => handleSort('id')}>
+                                    ID {getSortIcon('id')}
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Sản phẩm</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Người đánh giá</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider cursor-pointer hover:text-indigo-600" onClick={() => handleSort('rating')}>
+                                    Đánh giá {getSortIcon('rating')}
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Nội dung</th>
+                                <th className="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Hành động</th>
                             </tr>
                         </thead>
-                        <tbody className="bg-white divide-y divide-slate-200">
-                            {filteredReviews.map((review) => (
-                                <tr key={review.id} className="hover:bg-slate-50">
-                                    <td className="px-6 py-4 text-sm font-medium text-slate-900">
-                                        {review.productName || 'Unknown Product'}
+                        <tbody className="divide-y divide-slate-100">
+                            {reviews.map((review) => (
+                                <tr key={review.id} className="hover:bg-slate-50 transition-colors">
+                                    <td className="px-6 py-4 text-sm text-slate-900">{review.id}</td>
+                                    <td className="px-6 py-4 text-sm font-medium text-slate-900">{review.productName || `SP #${review.productId}`}</td>
+                                    <td className="px-6 py-4">
+                                        <div>
+                                            <p className="text-sm font-medium text-slate-900">{review.userName || 'N/A'}</p>
+                                            <p className="text-xs text-slate-500">{review.userEmail || ''}</p>
+                                        </div>
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-slate-500">
-                                        {review.userEmail || review.userName || 'Unknown User'}
+                                    <td className="px-6 py-4">
+                                        <div className="flex items-center gap-0.5">
+                                            {renderStars(review.rating)}
+                                        </div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        {renderStars(review.rating)}
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-slate-600">
-                                        <div className="max-w-xs truncate" title={review.comment}>{review.comment}</div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <td className="px-6 py-4 text-sm text-slate-500 max-w-[250px] truncate">{review.comment}</td>
+                                    <td className="px-6 py-4 text-right">
                                         <button
                                             onClick={() => handleDelete(review.id)}
-                                            className="text-red-600 hover:text-red-900 p-2 hover:bg-red-50 rounded-lg transition-colors"
-                                            title="Xóa đánh giá"
+                                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                         >
-                                            <TrashIcon className="h-5 w-5" />
+                                            <TrashIcon className="h-4 w-4" />
                                         </button>
                                     </td>
                                 </tr>
@@ -118,14 +133,19 @@ const AdminReviewList = () => {
                         </tbody>
                     </table>
                 </div>
-                {filteredReviews.length === 0 && (
-                    <div className="text-center py-12 text-slate-500">
-                        {searchTerm ? 'Không tìm thấy đánh giá phù hợp' : 'Chưa có đánh giá nào'}
-                    </div>
+
+                {reviews.length === 0 && !loading && (
+                    <div className="text-center py-12 text-slate-500">Không có đánh giá nào</div>
                 )}
-            </div>
-            <div className="mt-4 text-sm text-slate-500">
-                Hiển thị {filteredReviews.length} / {reviews.length} đánh giá
+
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    totalElements={totalElements}
+                    pageSize={pageSize}
+                    onPageChange={setCurrentPage}
+                    onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(0); }}
+                />
             </div>
         </div>
     );

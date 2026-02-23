@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.repository.CategoryRepository">
+
+    <resultMap id="CategoryResultMap" type="com.example.demo.entity.Category">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="description" column="description"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <select id="findById" parameterType="int" resultMap="CategoryResultMap">
+        SELECT * FROM categories WHERE id = #{id} LIMIT 1
+    </select>
+
+    <select id="findByName" parameterType="String" resultMap="CategoryResultMap">
+        SELECT * FROM categories WHERE name = #{name} LIMIT 1
+    </select>
+
+    <select id="findAll" resultMap="CategoryResultMap">
+        SELECT * FROM categories ORDER BY id ASC
+    </select>
+
+    <select id="findAllPaged" resultMap="CategoryResultMap">
+        SELECT * FROM categories
+        ORDER BY ${sortBy} ${sortDir}
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(*) FROM categories
+    </select>
+
+    <select id="existsById" parameterType="int" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM categories WHERE id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.example.demo.entity.Category" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO categories (name, description)
+        VALUES (#{name}, #{description})
+    </insert>
+
+    <update id="save" parameterType="com.example.demo.entity.Category">
+        UPDATE categories SET
+            name = #{name},
+            description = #{description}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="int">
+        DELETE FROM categories WHERE id = #{id}
+    </delete>
+
+</mapper>

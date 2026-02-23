@@ -5,9 +5,11 @@ import com.example.demo.dto.request.ReviewRequest;
 import com.example.demo.dto.response.ReviewResponse;
 import com.example.demo.service.ReviewService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,11 +42,14 @@ public class ReviewController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Get all reviews", description = "Admin only")
-    public ApiResponse<List<ReviewResponse>> getAllReviews() {
-        ApiResponse<List<ReviewResponse>> response = new ApiResponse<>();
-        response.setResult(reviewService.getAllReviews());
-        return response;
+    @Operation(summary = "Get all reviews (paginated)", description = "Admin only. Supports pagination and sorting.")
+    public Page<ReviewResponse> getAllReviews(
+            @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "10") int size,
+            @Parameter(description = "Sort by field") @RequestParam(defaultValue = "id") String sortBy,
+            @Parameter(description = "Sort direction: asc or desc") @RequestParam(defaultValue = "desc") String sortDir
+    ) {
+        return reviewService.getAllReviews(page, size, sortBy, sortDir);
     }
 
     @DeleteMapping("/{id}")

@@ -61,17 +61,15 @@ public class ProductController {
     }
 
     @GetMapping("/search")
-    @Operation(summary = "Search & filter products", description = "Public endpoint. Supports keyword search, category filter, and price range filter with pagination.")
+    @Operation(summary = "Search & filter products", description = "Public endpoint. Supports keyword search, category filter with pagination.")
     public Page<ProductResponse> searchProducts(
             @Parameter(description = "Search keyword (matches name, description, brand)") @RequestParam(required = false) String keyword,
             @Parameter(description = "Filter by category ID") @RequestParam(required = false) Integer categoryId,
-            @Parameter(description = "Minimum price") @RequestParam(required = false) Double minPrice,
-            @Parameter(description = "Maximum price") @RequestParam(required = false) Double maxPrice,
             @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Page size") @RequestParam(defaultValue = "10") int size,
             @Parameter(description = "Sort by field") @RequestParam(defaultValue = "id") String sortBy,
             @Parameter(description = "Sort direction: asc or desc") @RequestParam(defaultValue = "asc") String sortDir
     ) {
-        return productService.searchProducts(keyword, categoryId, minPrice, maxPrice, page, size, sortBy, sortDir);
+        return productService.searchProducts(keyword, categoryId, page, size, sortBy, sortDir);
     }
 }

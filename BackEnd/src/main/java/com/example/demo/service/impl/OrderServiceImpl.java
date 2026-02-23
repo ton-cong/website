@@ -6,13 +6,16 @@ import com.example.demo.entity.*;
 import com.example.demo.enums.OrderStatus;
 import com.example.demo.mapper.OrderMapper;
 import com.example.demo.repository.*;
-import com.example.demo.service.EmailService;
 import com.example.demo.service.OrderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,7 +29,6 @@ public class OrderServiceImpl implements OrderService {
     private final CartItemRepository cartItemRepository;
     private final UserRepository userRepository;
     private final OrderMapper orderMapper;
-    private final EmailService emailService;
 
     private User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -38,47 +40,53 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public OrderResponse createOrder(OrderRequest request) {
         User user = getCurrentUser();
+
         Cart cart = cartRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new RuntimeException("Cart is empty"));
 
-        if (cart.getItems().isEmpty()) {
+        List<CartItem> cartItems = cartItemRepository.findByCartId(cart.getId());
+        if (cartItems.isEmpty()) {
             throw new RuntimeException("Cart is empty");
         }
 
-        double total = cart.getItems().stream()
-                .mapToDouble(item -> item.getProduct().getPrice() * item.getQuantity())
+        double totalPrice = cartItems.stream()
+                .mapToDouble(item -> {
+                    Product product = item.getProduct();
+                    double price = product != null && product.getPrice() != null ? product.getPrice().doubleValue() : 0;
+                    return price * item.getQuantity();
+                })
                 .sum();
 
         Order order = Order.builder()
-                .user(user)
+                .userId(user.getId())
                 .fullName(request.getFullName())
                 .phone(request.getPhone())
                 .address(request.getAddress())
                 .note(request.getNote())
-                .totalPrice(total)
+                .totalPrice(totalPrice)
                 .status(OrderStatus.pending)
                 .build();
-        
-        Order savedOrder = orderRepository.save(order);
 
-        List<OrderItem> orderItems = cart.getItems().stream().map(cartItem -> 
-            OrderItem.builder()
-                    .order(savedOrder)
-                    .product(cartItem.getProduct())
+        orderRepository.insert(order);
+
+        List<OrderItem> orderItems = new ArrayList<>();
+        for (CartItem cartItem : cartItems) {
+            Product product = cartItem.getProduct();
+            double price = product != null && product.getPrice() != null ? product.getPrice().doubleValue() : 0;
+            OrderItem orderItem = OrderItem.builder()
+                    .orderId(order.getId())
+                    .productId(cartItem.getProductId())
                     .quantity(cartItem.getQuantity())
-                    .price(cartItem.getProduct().getPrice())
-                    .build()
-        ).collect(Collectors.toList());
-
-        orderItemRepository.saveAll(orderItems);
-        savedOrder.setItems(orderItems);
+                    .price(price)
+                    .build();
+            orderItems.add(orderItem);
+        }
+        orderItemRepository.insertAll(orderItems);
 
         cartItemRepository.deleteByCartId(cart.getId());
 
-
-
-        emailService.sendOrderConfirmation(savedOrder);
-
+        Order savedOrder = orderRepository.findById(order.getId())
+                .orElseThrow(() -> new RuntimeException("Order not found"));
         return orderMapper.toResponse(savedOrder);
     }
 
@@ -98,10 +106,25 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public Page<OrderResponse> getAllOrders(int page, int size, String sortBy, String sortDir) {
+        long total = orderRepository.count();
+        int offset = page * size;
+        List<OrderResponse> list = orderRepository.findAllPaged(sortBy, sortDir, size, offset)
+                .stream()
+                .map(orderMapper::toResponse)
+                .collect(Collectors.toList());
+        return new PageImpl<>(list, PageRequest.of(page, size), total);
+    }
+
+    @Override
+    @Transactional
     public OrderResponse updateStatus(Integer orderId, OrderStatus status) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+                .orElseThrow(() -> new RuntimeException("Order not found with id: " + orderId));
         order.setStatus(status);
-        return orderMapper.toResponse(orderRepository.save(order));
+        orderRepository.save(order);
+        Order updated = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+        return orderMapper.toResponse(updated);
     }
 }
