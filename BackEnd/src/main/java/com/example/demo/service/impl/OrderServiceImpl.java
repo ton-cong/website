@@ -7,6 +7,7 @@ import com.example.demo.enums.OrderStatus;
 import com.example.demo.mapper.OrderMapper;
 import com.example.demo.repository.*;
 import com.example.demo.service.OrderService;
+import com.example.demo.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -29,6 +30,7 @@ public class OrderServiceImpl implements OrderService {
     private final CartItemRepository cartItemRepository;
     private final UserRepository userRepository;
     private final OrderMapper orderMapper;
+    private final NotificationService notificationService;
 
     private User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -65,6 +67,7 @@ public class OrderServiceImpl implements OrderService {
                 .note(request.getNote())
                 .totalPrice(totalPrice)
                 .status(OrderStatus.pending)
+                .paymentMethod(request.getPaymentMethod() != null ? request.getPaymentMethod() : "COD")
                 .build();
 
         orderRepository.insert(order);
@@ -125,6 +128,19 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.save(order);
         Order updated = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
+                
+        String statusText;
+        switch(status) {
+            case pending: statusText = "Chờ xử lý"; break;
+            case processing: statusText = "Đang xử lý"; break;
+            case shipping: statusText = "Đang giao hàng"; break;
+            case completed: statusText = "Đã hoàn thành"; break;
+            case cancelled: statusText = "Đã hủy"; break;
+            default: statusText = status.name();
+        }
+        String content = "Đơn hàng #" + orderId + " của bạn đã được chuyển sang trạng thái: " + statusText;
+        notificationService.createAndSendNotification(order.getUserId(), "order", content);
+        
         return orderMapper.toResponse(updated);
     }
 }

@@ -12,9 +12,11 @@ public interface ReviewRepository {
     List<Review> findAll();
     List<Review> findAllPaged(@Param("sortBy") String sortBy, @Param("sortDir") String sortDir,
                               @Param("limit") int limit, @Param("offset") int offset);
+    List<Review> findRepliesByParentIds(@Param("parentIds") List<Integer> parentIds);
     long count();
     boolean existsById(@Param("id") Integer id);
     void insert(Review review);
+    void deleteRepliesByParentId(@Param("parentId") Integer parentId);
     void deleteById(@Param("id") Integer id);
     void deleteByProductId(@Param("productId") Integer productId);
 }

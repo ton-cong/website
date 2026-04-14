@@ -22,8 +22,10 @@ public class Order {
     private String note;
     private Double totalPrice;
     private OrderStatus status;
+    private String paymentMethod;
     private Timestamp createdAt;
     private Timestamp updatedAt;
+    private Boolean deleted;
 
     private List<OrderItem> items;
 }

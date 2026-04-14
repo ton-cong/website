@@ -15,4 +15,6 @@ public class ReviewRequest {
     private Integer rating;
 
     private String comment;
+
+    private Integer parentId;
 }

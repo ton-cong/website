@@ -2,6 +2,7 @@ import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import ChatWidget from './ChatWidget';
 
 const Layout = () => {
     return (
@@ -18,6 +19,7 @@ const Layout = () => {
                 </div>
             </footer>
             <ToastContainer position="bottom-right" theme="light" />
+            <ChatWidget />
         </div>
     );
 };

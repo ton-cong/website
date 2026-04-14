@@ -11,7 +11,8 @@ import {
     UsersIcon,
     TagIcon,
     CurrencyDollarIcon,
-    StarIcon
+    StarIcon,
+    ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline';
 import AdminProductList from './admin/AdminProductList';
 import AdminProductForm from './admin/AdminProductForm';
@@ -19,6 +20,7 @@ import AdminOrderList from './admin/AdminOrderList';
 import AdminUserList from './admin/AdminUserList';
 import AdminCategoryList from './admin/AdminCategoryList';
 import AdminReviewList from './admin/AdminReviewList';
+import AdminChat from './admin/AdminChat';
 
 const AdminDashboard = () => {
 
@@ -42,6 +44,7 @@ const AdminDashboard = () => {
         { name: 'Người dùng', path: '/admin/users', icon: UsersIcon },
         { name: 'Danh mục', path: '/admin/categories', icon: TagIcon },
         { name: 'Đánh giá', path: '/admin/reviews', icon: StarIcon },
+        { name: 'Hỗ trợ Chat', path: '/admin/chat', icon: ChatBubbleLeftRightIcon },
     ];
 
     return (
@@ -91,6 +94,7 @@ const AdminDashboard = () => {
                     <Route path="users" element={<AdminUserList />} />
                     <Route path="categories" element={<AdminCategoryList />} />
                     <Route path="reviews" element={<AdminReviewList />} />
+                    <Route path="chat" element={<AdminChat />} />
                 </Routes>
             </div>
         </div>

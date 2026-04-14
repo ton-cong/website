@@ -225,9 +225,3 @@ npm run dev
 | `PUT` | `/api/admin/orders/{id}/status` | Cập nhật trạng thái | 🔑 ADMIN |
 | `GET` | `/api/admin/users` | Danh sách users | 🔑 ADMIN |
 | `GET` | `/api/admin/stats` | Thống kê dashboard | 🔑 ADMIN |
-
----
-
-## 📝 License
-
-MIT License

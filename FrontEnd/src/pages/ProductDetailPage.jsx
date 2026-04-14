@@ -23,6 +23,8 @@ const ProductDetailPage = () => {
     const [rating, setRating] = useState(5);
     const [hoverRating, setHoverRating] = useState(0);
     const [comment, setComment] = useState('');
+    const [replyingTo, setReplyingTo] = useState(null);
+    const [replyComment, setReplyComment] = useState('');
 
     useEffect(() => {
         fetchProduct();
@@ -75,6 +77,32 @@ const ProductDetailPage = () => {
             setReviewLoading(false);
         }
     };
+
+    const handleSubmitReply = async (e, parentId) => {
+        e.preventDefault();
+        if (!isAuthenticated) {
+            toast.warning("Vui lòng đăng nhập để trả lời");
+            return;
+        }
+        setReviewLoading(true);
+        try {
+            await reviewApi.add({
+                productId: parseInt(id),
+                rating: 5,
+                comment: replyComment,
+                parentId: parentId
+            });
+            toast.success("Trả lời thành công!");
+            setReplyComment('');
+            setReplyingTo(null);
+            fetchReviews();
+        } catch (error) {
+            toast.error("Không thể gửi nhận xét");
+        } finally {
+            setReviewLoading(false);
+        }
+    };
+
 
     const averageRating = reviews.length > 0
         ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
@@ -219,6 +247,55 @@ const ProductDetailPage = () => {
                                 <p className="text-xs text-slate-400 mt-1">
                                     {review.createdAt ? new Date(review.createdAt).toLocaleDateString('vi-VN') : ''}
                                 </p>
+
+                                {/* Reply Button */}
+                                <div className="mt-2">
+                                    <button
+                                        onClick={() => setReplyingTo(replyingTo === review.id ? null : review.id)}
+                                        className="text-indigo-600 text-sm font-medium hover:underline"
+                                    >
+                                        {replyingTo === review.id ? 'Hủy' : 'Trả lời'}
+                                    </button>
+                                </div>
+
+                                {/* Reply Form */}
+                                {replyingTo === review.id && (
+                                    <form onSubmit={(e) => handleSubmitReply(e, review.id)} className="mt-3 p-3 bg-slate-50 border border-indigo-100 rounded-xl ml-8">
+                                        <textarea
+                                            value={replyComment}
+                                            onChange={(e) => setReplyComment(e.target.value)}
+                                            className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none mb-2"
+                                            placeholder={`Trả lời ${review.userName || review.userEmail}...`}
+                                            rows="2"
+                                            required
+                                        />
+                                        <div className="flex justify-end">
+                                            <Button type="submit" disabled={reviewLoading} size="sm">
+                                                {reviewLoading ? 'Đang gửi...' : 'Gửi'}
+                                            </Button>
+                                        </div>
+                                    </form>
+                                )}
+
+                                {/* Nested Replies */}
+                                {review.replies && review.replies.length > 0 && (
+                                    <div className="mt-4 ml-8 space-y-4 border-l-2 border-indigo-100 pl-4">
+                                        {review.replies.map(reply => (
+                                            <div key={reply.id} className="bg-slate-50 p-3 rounded-xl">
+                                                <div className="flex items-center space-x-2 mb-1">
+                                                    <div className="w-6 h-6 rounded-full bg-indigo-200 flex items-center justify-center text-indigo-700 font-bold text-xs">
+                                                        {reply.userName?.charAt(0) || reply.userEmail?.charAt(0) || 'U'}
+                                                    </div>
+                                                    <span className="font-medium text-slate-800 text-sm">{reply.userName || reply.userEmail || 'Người dùng'}</span>
+                                                </div>
+                                                <p className="text-slate-600 text-sm">{reply.comment}</p>
+                                                <p className="text-xs text-slate-400 mt-1">
+                                                    {reply.createdAt ? new Date(reply.createdAt).toLocaleDateString('vi-VN') : ''}
+                                                </p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>

@@ -13,8 +13,10 @@
         <result property="note" column="note"/>
         <result property="totalPrice" column="total_price"/>
         <result property="status" column="status"/>
+        <result property="paymentMethod" column="payment_method"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
+        <result property="deleted" column="deleted"/>
         <collection property="items" ofType="com.example.demo.entity.OrderItem">
             <id property="id" column="oi_id"/>
             <result property="orderId" column="oi_order_id"/>
@@ -41,17 +43,18 @@
 
     <select id="findById" parameterType="int" resultMap="OrderResultMap">
         <include refid="selectOrderWithItems"/>
-        WHERE o.id = #{id}
+        WHERE o.id = #{id} AND o.deleted = 0
     </select>
 
     <select id="findByUserId" parameterType="int" resultMap="OrderResultMap">
         <include refid="selectOrderWithItems"/>
-        WHERE o.user_id = #{userId}
+        WHERE o.user_id = #{userId} AND o.deleted = 0
         ORDER BY o.created_at DESC
     </select>
 
     <select id="findAll" resultMap="OrderResultMap">
         <include refid="selectOrderWithItems"/>
+        WHERE o.deleted = 0
         ORDER BY o.id DESC
     </select>
 
@@ -61,7 +64,7 @@
                oi.quantity AS oi_quantity, oi.price AS oi_price,
                p.id AS p_id, p.name AS p_name, p.image_url AS p_image_url
         FROM (
-            SELECT * FROM orders
+            SELECT * FROM orders WHERE deleted = 0
             ORDER BY ${sortBy} ${sortDir}
             LIMIT #{limit} OFFSET #{offset}
         ) o_page
@@ -70,12 +73,12 @@
     </select>
 
     <select id="count" resultType="long">
-        SELECT COUNT(*) FROM orders
+        SELECT COUNT(*) FROM orders WHERE deleted = 0
     </select>
 
     <insert id="insert" parameterType="com.example.demo.entity.Order" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO orders (user_id, full_name, phone, address, note, total_price, status)
-        VALUES (#{userId}, #{fullName}, #{phone}, #{address}, #{note}, #{totalPrice}, #{status})
+        INSERT INTO orders (user_id, full_name, phone, address, note, total_price, status, payment_method, deleted)
+        VALUES (#{userId}, #{fullName}, #{phone}, #{address}, #{note}, #{totalPrice}, #{status}, #{paymentMethod}, 0)
     </insert>
 
     <update id="save" parameterType="com.example.demo.entity.Order">
@@ -85,12 +88,13 @@
             address = #{address},
             note = #{note},
             total_price = #{totalPrice},
-            status = #{status}
+            status = #{status},
+            payment_method = #{paymentMethod}
         WHERE id = #{id}
     </update>
 
-    <delete id="deleteById" parameterType="int">
-        DELETE FROM orders WHERE id = #{id}
-    </delete>
+    <update id="deleteById" parameterType="int">
+        UPDATE orders SET deleted = 1 WHERE id = #{id}
+    </update>
 
 </mapper>

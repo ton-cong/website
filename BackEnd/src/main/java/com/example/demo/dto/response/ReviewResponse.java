@@ -19,4 +19,7 @@ public class ReviewResponse {
     private Integer rating;
     private String comment;
     private Timestamp createdAt;
+    private Integer parentId;
+    private Boolean deleted;
+    private java.util.List<ReviewResponse> replies;
 }

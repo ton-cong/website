@@ -18,7 +18,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/reviews")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173")
+
 @Tag(name = "Review", description = "Product review APIs")
 public class ReviewController {
 

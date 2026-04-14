@@ -1,5 +1,8 @@
 use lapton;
 
+DROP TABLE IF EXISTS Notification;
+DROP TABLE IF EXISTS messages;
+DROP TABLE IF EXISTS conversations;
 DROP TABLE IF EXISTS reviews;
 DROP TABLE IF EXISTS cart_items;
 DROP TABLE IF EXISTS carts;
@@ -17,7 +20,8 @@ CREATE TABLE IF NOT EXISTS users (
                                      phone VARCHAR(20),
                                      address TEXT,
                                      role ENUM('ADMIN','USER') NOT NULL DEFAULT 'USER',
-                                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                     deleted TINYINT DEFAULT 0
 );
 
 INSERT INTO users (email, password_hash, full_name, phone, address, role) VALUES
@@ -46,7 +50,8 @@ CREATE TABLE IF NOT EXISTS categories (
                                           id INT AUTO_INCREMENT PRIMARY KEY,
                                           name VARCHAR(255) NOT NULL UNIQUE,
                                           description TEXT,
-                                          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                                          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                          deleted TINYINT DEFAULT 0
 );
 
 INSERT INTO categories (name, description) VALUES
@@ -75,6 +80,7 @@ CREATE TABLE IF NOT EXISTS products (
                                         screen VARCHAR(100),
                                         status ENUM('ACTIVE','INACTIVE','OUT_OF_STOCK') DEFAULT 'ACTIVE',
                                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                        deleted TINYINT DEFAULT 0,
                                         FOREIGN KEY (category_id) REFERENCES categories(id)
 );
 
@@ -128,32 +134,34 @@ CREATE TABLE IF NOT EXISTS orders (
                                       note TEXT,
                                       total_price DOUBLE,
                                       status ENUM('pending','processing','shipping','completed','cancelled') DEFAULT 'pending',
+                                      payment_method VARCHAR(20) DEFAULT 'COD',
                                       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                                       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                                      deleted TINYINT DEFAULT 0,
                                       FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
-INSERT INTO orders (user_id, full_name, phone, address, note, total_price, status) VALUES
-                                                                                       (2, 'Nguyen Van An',  '0901000002', '12 Le Loi, Da Nang',       'Giao trong gio hanh chinh', 28990000,  'completed'),
-                                                                                       (3, 'Tran Thi Binh',  '0901000003', '34 Tran Phu, Hue',          NULL,                         21990000,  'completed'),
-                                                                                       (4, 'Le Van Cuong',   '0901000004', '56 Hai Ba Trung, Hanoi',    'De truoc cua',               24990000,  'completed'),
-                                                                                       (5, 'Pham Thi Dung',  '0901000005', '78 Dien Bien Phu, HCM',     NULL,                         18990000,  'completed'),
-                                                                                       (6, 'Hoang Van Em',   '0901000006', '90 CMT8, Can Tho',           'Goi dien truoc khi giao',   52990000,  'completed'),
-                                                                                       (7, 'Vu Thi Phuong',  '0901000007', '22 Pham Van Dong, HCM',     NULL,                         28990000,  'completed'),
-                                                                                       (8, 'Do Quoc Giang',  '0901000008', '44 Truong Chinh, Hanoi',    'Shipping bình thường',       21990000,  'completed'),
-                                                                                       (9, 'Bui Thi Huong',  '0901000009', '66 Nguyen Trai, HCM',       NULL,                         22490000,  'completed'),
-                                                                                       (10,'Dao Minh Hung',  '0901000010', '88 Vo Van Tan, HCM',         NULL,                         65990000,  'completed'),
-                                                                                       (11,'Ly Thi Khanh',   '0901000011', '10 Ly Thuong Kiet, Hanoi',  'Giao cuoi tuan',             28990000,  'processing'),
-                                                                                       (12,'Mai Van Lan',    '0901000012', '32 Nguyen Dinh Chieu, HCM', NULL,                         34990000,  'processing'),
-                                                                                       (13,'Ngo Thi Mai',    '0901000013', '54 Ba Trieu, Hanoi',         NULL,                         10990000,  'shipping'),
-                                                                                       (14,'Trieu Van Nam',  '0901000014', '76 Tran Hung Dao, HCM',     'Giao gio hanh chinh',        8990000,   'shipping'),
-                                                                                       (15,'Lam Thi Oanh',   '0901000015', '98 Xo Viet Nghe Tinh, HCM', NULL,                         35990000,  'pending'),
-                                                                                       (16,'Duong Van Phat', '0901000016', '11 Ha Huy Tap, Hanoi',       NULL,                         24490000,  'pending'),
-                                                                                       (2, 'Nguyen Van An',  '0901000002', '12 Le Loi, Da Nang',        'Hang mong manh',             9990000,   'cancelled'),
-                                                                                       (3, 'Tran Thi Binh',  '0901000003', '34 Tran Phu, Hue',           NULL,                         19990000,  'completed'),
-                                                                                       (4, 'Le Van Cuong',   '0901000004', '56 Hai Ba Trung, Hanoi',     NULL,                         38990000,  'completed'),
-                                                                                       (5, 'Pham Thi Dung',  '0901000005', '78 Dien Bien Phu, HCM',      NULL,                         54990000,  'completed'),
-                                                                                       (6, 'Hoang Van Em',   '0901000006', '90 CMT8, Can Tho',           'Bao bi ky',                  37990000,  'pending');
+INSERT INTO orders (user_id, full_name, phone, address, note, total_price, status, payment_method) VALUES
+                                                                                        (2, 'Nguyen Van An',  '0901000002', '12 Le Loi, Da Nang',       'Giao trong gio hanh chinh', 28990000,  'completed', 'COD'),
+                                                                                        (3, 'Tran Thi Binh',  '0901000003', '34 Tran Phu, Hue',          NULL,                         21990000,  'completed', 'VNPAY'),
+                                                                                        (4, 'Le Van Cuong',   '0901000004', '56 Hai Ba Trung, Hanoi',    'De truoc cua',               24990000,  'completed', 'COD'),
+                                                                                        (5, 'Pham Thi Dung',  '0901000005', '78 Dien Bien Phu, HCM',     NULL,                         18990000,  'completed', 'VNPAY'),
+                                                                                        (6, 'Hoang Van Em',   '0901000006', '90 CMT8, Can Tho',           'Goi dien truoc khi giao',   52990000,  'completed', 'COD'),
+                                                                                        (7, 'Vu Thi Phuong',  '0901000007', '22 Pham Van Dong, HCM',     NULL,                         28990000,  'completed', 'VNPAY'),
+                                                                                        (8, 'Do Quoc Giang',  '0901000008', '44 Truong Chinh, Hanoi',    'Shipping bình thường',       21990000,  'completed', 'COD'),
+                                                                                        (9, 'Bui Thi Huong',  '0901000009', '66 Nguyen Trai, HCM',       NULL,                         22490000,  'completed', 'VNPAY'),
+                                                                                        (10,'Dao Minh Hung',  '0901000010', '88 Vo Van Tan, HCM',         NULL,                         65990000,  'completed', 'VNPAY'),
+                                                                                        (11,'Ly Thi Khanh',   '0901000011', '10 Ly Thuong Kiet, Hanoi',  'Giao cuoi tuan',             28990000,  'processing', 'COD'),
+                                                                                        (12,'Mai Van Lan',    '0901000012', '32 Nguyen Dinh Chieu, HCM', NULL,                         34990000,  'processing', 'VNPAY'),
+                                                                                        (13,'Ngo Thi Mai',    '0901000013', '54 Ba Trieu, Hanoi',         NULL,                         10990000,  'shipping', 'COD'),
+                                                                                        (14,'Trieu Van Nam',  '0901000014', '76 Tran Hung Dao, HCM',     'Giao gio hanh chinh',        8990000,   'shipping', 'COD'),
+                                                                                        (15,'Lam Thi Oanh',   '0901000015', '98 Xo Viet Nghe Tinh, HCM', NULL,                         35990000,  'pending', 'VNPAY'),
+                                                                                        (16,'Duong Van Phat', '0901000016', '11 Ha Huy Tap, Hanoi',       NULL,                         24490000,  'pending', 'COD'),
+                                                                                        (2, 'Nguyen Van An',  '0901000002', '12 Le Loi, Da Nang',        'Hang mong manh',             9990000,   'cancelled', 'COD'),
+                                                                                        (3, 'Tran Thi Binh',  '0901000003', '34 Tran Phu, Hue',           NULL,                         19990000,  'completed', 'VNPAY'),
+                                                                                        (4, 'Le Van Cuong',   '0901000004', '56 Hai Ba Trung, Hanoi',     NULL,                         38990000,  'completed', 'COD'),
+                                                                                        (5, 'Pham Thi Dung',  '0901000005', '78 Dien Bien Phu, HCM',      NULL,                         54990000,  'completed', 'VNPAY'),
+                                                                                        (6, 'Hoang Van Em',   '0901000006', '90 CMT8, Can Tho',           'Bao bi ky',                  37990000,  'pending', 'COD');
 
 CREATE TABLE IF NOT EXISTS order_items (
                                            id INT AUTO_INCREMENT PRIMARY KEY,
@@ -222,11 +230,14 @@ CREATE TABLE IF NOT EXISTS reviews (
                                        id INT AUTO_INCREMENT PRIMARY KEY,
                                        user_id INT NOT NULL,
                                        product_id INT NOT NULL,
-                                       rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
+                                       rating INT CHECK (rating >= 1 AND rating <= 5),
                                        comment TEXT,
                                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                       parent_id INT,
+                                       deleted TINYINT DEFAULT 0,
                                        FOREIGN KEY (user_id) REFERENCES users(id),
-                                       FOREIGN KEY (product_id) REFERENCES products(id)
+                                       FOREIGN KEY (product_id) REFERENCES products(id),
+                                       FOREIGN KEY (parent_id) REFERENCES reviews(id)
 );
 
 INSERT INTO reviews (user_id, product_id, rating, comment) VALUES
@@ -250,3 +261,42 @@ INSERT INTO reviews (user_id, product_id, rating, comment) VALUES
                                                                (4,  37, 5, 'Dell Precision 5480 render 3D siêu nhanh!'),
                                                                (5,  35, 4, 'Surface Pro 9 dùng như tablet rất tiện.'),
                                                                (6,  13, 4, 'Acer Predator Helios 300 gaming mượt, nhiệt ổn.');
+
+-- Mock Replies
+INSERT INTO reviews (user_id, product_id, rating, comment, parent_id) VALUES
+                                                               (1,  1,  NULL, 'Cảm ơn bạn đã ủng hộ shop nha!', 1),
+                                                               (3,  1,  NULL, 'Cho mình hỏi máy này có ồn khi quạt quay tối đa không ạ?', 1),
+                                                               (2,  1,  NULL, 'Cũng hơi ồn nhưng mát bạn nhé.', 22);
+
+
+CREATE TABLE IF NOT EXISTS conversations (
+                               id INT AUTO_INCREMENT PRIMARY KEY,
+                               user_id INT NOT NULL,
+                               admin_id INT,
+                               last_message TEXT,
+                               last_message_at TIMESTAMP,
+                               created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                               FOREIGN KEY (user_id) REFERENCES users(id),
+                               FOREIGN KEY (admin_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS messages (
+                         id INT AUTO_INCREMENT PRIMARY KEY,
+                         sender_id INT NOT NULL,
+                         conversation_id INT NOT NULL,
+                         content TEXT,
+                         message_type ENUM('text', 'image', 'file', 'video') DEFAULT 'text',
+                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                         CONSTRAINT fk_message_sender_v2 FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
+                         CONSTRAINT fk_message_conversation_v2 FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Notification (
+                               id INT AUTO_INCREMENT PRIMARY KEY,
+                               user_id INT NOT NULL,
+                               type VARCHAR(50) NOT NULL CHECK (type IN ('like', 'comment', 'share', 'message', 'follow', 'friend_request', 'group_invite', 'order')),
+                               content TEXT NOT NULL,
+                               is_read BOOLEAN DEFAULT FALSE,
+                               created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                               CONSTRAINT fk_notification_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);

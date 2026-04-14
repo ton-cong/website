@@ -46,6 +46,7 @@ public class ReviewServiceImpl implements ReviewService {
                 .productId(request.getProductId())
                 .rating(request.getRating())
                 .comment(request.getComment())
+                .parentId(request.getParentId())
                 .build();
 
         reviewRepository.insert(review);
@@ -61,8 +62,20 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public List<ReviewResponse> getReviewsByProduct(Integer productId) {
-        return reviewRepository.findByProductId(productId).stream()
+        List<ReviewResponse> allReviews = reviewRepository.findByProductId(productId).stream()
                 .map(reviewMapper::toResponse)
+                .collect(Collectors.toList());
+                
+        java.util.Map<Integer, List<ReviewResponse>> groupedByParent = allReviews.stream()
+                .filter(r -> r.getParentId() != null)
+                .collect(Collectors.groupingBy(ReviewResponse::getParentId));
+                
+        allReviews.forEach(r -> {
+            r.setReplies(groupedByParent.getOrDefault(r.getId(), new java.util.ArrayList<>()));
+        });
+        
+        return allReviews.stream()
+                .filter(r -> r.getParentId() == null)
                 .collect(Collectors.toList());
     }
 
@@ -77,10 +90,25 @@ public class ReviewServiceImpl implements ReviewService {
     public Page<ReviewResponse> getAllReviews(int page, int size, String sortBy, String sortDir) {
         long total = reviewRepository.count();
         int offset = page * size;
-        List<ReviewResponse> list = reviewRepository.findAllPaged(sortBy, sortDir, size, offset)
-                .stream()
+        List<Review> parentReviews = reviewRepository.findAllPaged(sortBy, sortDir, size, offset);
+        
+        List<ReviewResponse> list = parentReviews.stream()
                 .map(reviewMapper::toResponse)
                 .collect(Collectors.toList());
+                
+        List<Integer> parentIds = list.stream().map(ReviewResponse::getId).collect(Collectors.toList());
+        
+        if (!parentIds.isEmpty()) {
+            List<ReviewResponse> replies = reviewRepository.findRepliesByParentIds(parentIds).stream()
+                    .map(reviewMapper::toResponse)
+                    .collect(Collectors.toList());
+            java.util.Map<Integer, List<ReviewResponse>> groupedByParent = replies.stream()
+                    .collect(Collectors.groupingBy(ReviewResponse::getParentId));
+            list.forEach(r -> {
+                r.setReplies(groupedByParent.getOrDefault(r.getId(), new java.util.ArrayList<>()));
+            });
+        }
+        
         return new PageImpl<>(list, PageRequest.of(page, size), total);
     }
 
@@ -89,6 +117,7 @@ public class ReviewServiceImpl implements ReviewService {
         if (!reviewRepository.existsById(id)) {
             throw new RuntimeException("Review not found with id: " + id);
         }
+        reviewRepository.deleteRepliesByParentId(id);
         reviewRepository.deleteById(id);
     }
 }

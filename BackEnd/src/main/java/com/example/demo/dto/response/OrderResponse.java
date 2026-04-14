@@ -20,6 +20,7 @@ public class OrderResponse {
     private String note;
     private Double totalPrice;
     private OrderStatus status;
+    private String paymentMethod;
     private Timestamp createdAt;
     private List<OrderItemResponse> items;
 }

@@ -1,15 +1,21 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
-import { ShoppingBagIcon, UserIcon, ArrowRightOnRectangleIcon, ClipboardDocumentListIcon, Cog6ToothIcon } from '@heroicons/react/24/outline';
-import { Menu, Transition } from '@headlessui/react';
-import { Fragment } from 'react';
+import { ShoppingBagIcon, UserIcon, ArrowRightOnRectangleIcon, ClipboardDocumentListIcon, Cog6ToothIcon, BellIcon, CheckIcon } from '@heroicons/react/24/outline';
+import { Menu, Transition, Popover } from '@headlessui/react';
+import { Fragment, useState, useEffect } from 'react';
+import { Client } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
+import notificationApi from '../api/notificationApi';
 
 const Navbar = () => {
     const { user, logout, isAuthenticated, isAdmin } = useAuth();
     const { cartCount } = useCart();
     const navigate = useNavigate();
     const location = useLocation();
+
+    const [notifications, setNotifications] = useState([]);
+    const [unreadCount, setUnreadCount] = useState(0);
 
     const handleLogout = () => {
         logout();
@@ -18,11 +24,78 @@ const Navbar = () => {
 
     const isInAdminSection = location.pathname.startsWith('/admin');
 
+    useEffect(() => {
+        if (isAuthenticated && user) {
+            fetchNotifications();
+
+            const client = new Client({
+                webSocketFactory: () => new SockJS('http://localhost:8080/ws'),
+                reconnectDelay: 5000,
+            });
+
+            client.onConnect = function () {
+                client.subscribe('/topic/notifications/' + user.id, (message) => {
+                    const newNotify = JSON.parse(message.body);
+                    setNotifications(prev => [newNotify, ...prev].slice(0, 50));
+                    setUnreadCount(prev => prev + 1);
+                });
+            };
+
+            client.activate();
+
+            return () => {
+                if (client.active) {
+                    client.deactivate();
+                }
+            };
+        }
+    }, [isAuthenticated, user]);
+
+    const fetchNotifications = async () => {
+        try {
+            const notList = await notificationApi.getMyNotifications();
+            setNotifications(notList || []);
+            const unreadRes = await notificationApi.getUnreadCount();
+            setUnreadCount(unreadRes || 0);
+        } catch (error) {
+            console.error('Error fetching notifications', error);
+        }
+    };
+
+    const handleNotificationClick = async (notif) => {
+        if (!notif.isRead) {
+            try {
+                await notificationApi.markAsRead(notif.id);
+                setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, isRead: true } : n));
+                setUnreadCount(prev => Math.max(0, prev - 1));
+            } catch (error) {
+                console.error('Error marking as read', error);
+            }
+        }
+        
+        if (notif.type === 'order') {
+            navigate('/orders');
+        } else if (notif.type === 'message') {
+            if (isAdmin && isInAdminSection) {
+                 navigate('/admin/chat');
+            }
+        }
+    };
+
+    const handleMarkAllRead = async () => {
+        try {
+            await notificationApi.markAllAsRead();
+            setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+            setUnreadCount(0);
+        } catch (error) {
+            console.error("error marking all read", error);
+        }
+    };
+
     return (
         <nav className={`sticky top-0 z-50 border-b ${isInAdminSection ? 'bg-slate-900 border-slate-700' : 'bg-white/80 backdrop-blur-md border-slate-100'}`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
-
 
                     <Link to={isAdmin ? "/admin" : "/"} className="flex items-center space-x-2">
                         <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isInAdminSection ? 'bg-red-600' : 'bg-indigo-600'}`}>
@@ -63,13 +136,81 @@ const Navbar = () => {
                         )}
                     </div>
 
-                    <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-4">                     
+                        {isAuthenticated && (
+                            <Popover className="relative">
+                                <Popover.Button className={`relative p-2 rounded-full transition-colors ${isInAdminSection ? 'text-slate-300 hover:text-white hover:bg-slate-800' : 'text-slate-600 hover:text-indigo-600 hover:bg-slate-50'}`}>
+                                    <BellIcon className="h-6 w-6" />
+                                    {unreadCount > 0 && (
+                                        <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold leading-none text-white transform translate-x-0 -translate-y-0 bg-red-500 rounded-full">
+                                            {unreadCount > 99 ? '99+' : unreadCount}
+                                        </span>
+                                    )}
+                                </Popover.Button>
+
+                                <Transition
+                                    as={Fragment}
+                                    enter="transition ease-out duration-200"
+                                    enterFrom="opacity-0 translate-y-1"
+                                    enterTo="opacity-100 translate-y-0"
+                                    leave="transition ease-in duration-150"
+                                    leaveFrom="opacity-100 translate-y-0"
+                                    leaveTo="opacity-0 translate-y-1"
+                                >
+                                    <Popover.Panel className="absolute right-0 z-10 mt-3 w-80 lg:w-96 transform px-4 sm:px-0">
+                                        <div className="overflow-hidden rounded-2xl shadow-xl ring-1 ring-black ring-opacity-5">
+                                            <div className="bg-white p-4 border-b border-slate-100 flex justify-between items-center">
+                                                <h3 className="text-sm font-semibold text-slate-800">Thông báo</h3>
+                                                {unreadCount > 0 && (
+                                                    <button onClick={handleMarkAllRead} className="text-xs text-indigo-600 hover:text-indigo-800 font-medium">
+                                                        Đánh dấu đã đọc tất cả
+                                                    </button>
+                                                )}
+                                            </div>
+                                            <div className="bg-white max-h-96 overflow-y-auto w-full">
+                                                {notifications.length === 0 ? (
+                                                    <div className="p-6 text-center text-sm text-slate-500">
+                                                        Không có thông báo nào.
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex flex-col">
+                                                        {notifications.map((notif) => (
+                                                            <div 
+                                                                key={notif.id} 
+                                                                onClick={() => handleNotificationClick(notif)}
+                                                                className={`p-4 cursor-pointer border-b border-slate-50 hover:bg-slate-50 transition-colors flex gap-3 items-start ${!notif.isRead ? 'bg-indigo-50/50' : ''}`}
+                                                            >
+                                                                <div className={`p-2 rounded-full mt-1 ${notif.type === 'order' ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600'}`}>
+                                                                    {notif.type === 'order' ? <ClipboardDocumentListIcon className="w-5 h-5"/> : <BellIcon className="w-5 h-5"/>}
+                                                                </div>
+                                                                <div className="flex-1">
+                                                                    <p className={`text-sm ${!notif.isRead ? 'font-semibold text-slate-900' : 'text-slate-600'}`}>
+                                                                        {notif.content}
+                                                                    </p>
+                                                                    <p className="text-xs text-slate-400 mt-1">
+                                                                        {new Date(notif.createdAt).toLocaleString('vi-VN')}
+                                                                    </p>
+                                                                </div>
+                                                                {!notif.isRead && (
+                                                                    <div className="w-2 h-2 rounded-full bg-indigo-500 mt-2"></div>
+                                                                )}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </Popover.Panel>
+                                </Transition>
+                            </Popover>
+                        )}
+
                         {!isInAdminSection && (
                             <Link to="/cart" className="relative p-2 text-slate-600 hover:text-indigo-600 hover:bg-slate-50 rounded-full transition-colors">
                                 <ShoppingBagIcon className="h-6 w-6" />
                                 {cartCount > 0 && (
-                                    <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/4 -translate-y-1/4 bg-red-500 rounded-full">
-                                        {cartCount}
+                                    <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold leading-none text-white transform translate-x-0 -translate-y-0 bg-red-500 rounded-full">
+                                        {cartCount > 99 ? '99+' : cartCount}
                                     </span>
                                 )}
                             </Link>

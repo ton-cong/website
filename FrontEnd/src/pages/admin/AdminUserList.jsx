@@ -63,6 +63,27 @@ const AdminUserList = () => {
         }
     };
 
+    const handleRoleChange = async (user, newRole) => {
+        if (user.role === newRole) return;
+        
+        if (!window.confirm(`Bạn có chắc muốn đổi quyền thành ${newRole} cho người dùng ${user.fullName || user.email}?`)) return;
+
+        try {
+            await adminApi.updateUser(user.id, {
+                email: user.email,
+                fullName: user.fullName,
+                phone: user.phone,
+                address: user.address,
+                role: newRole
+            });
+            toast.success("Đã cập nhật phân quyền");
+            fetchUsers();
+        } catch (error) {
+            console.error(error);
+            toast.error("Không thể cập nhật phân quyền");
+        }
+    };
+
     const handleSort = (field) => {
         if (sortBy === field) {
             setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
@@ -134,9 +155,15 @@ const AdminUserList = () => {
                                     <td className="px-6 py-4 text-sm text-slate-500">{user.email}</td>
                                     <td className="px-6 py-4 text-sm text-slate-500">{user.phone || '—'}</td>
                                     <td className="px-6 py-4">
-                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getRoleColor(user.role)}`}>
-                                            {user.role}
-                                        </span>
+                                        <select
+                                            value={user.role}
+                                            onChange={(e) => handleRoleChange(user, e.target.value)}
+                                            className={`px-2 py-1 rounded-full text-xs font-medium border border-transparent hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer ${getRoleColor(user.role)}`}
+                                            disabled={user.email === 'admin@gmail.com'}
+                                        >
+                                            <option value="USER" className="text-slate-900 bg-white">USER</option>
+                                            <option value="ADMIN" className="text-slate-900 bg-white">ADMIN</option>
+                                        </select>
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <button

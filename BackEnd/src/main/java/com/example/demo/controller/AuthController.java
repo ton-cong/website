@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173")
+
 @Tag(name = "Authentication", description = "User registration, login, password management, and profile update")
 public class AuthController {
     private final AuthService authService;

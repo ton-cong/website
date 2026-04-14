@@ -21,6 +21,7 @@
         <result property="screen" column="screen"/>
         <result property="status" column="status"/>
         <result property="createdAt" column="created_at"/>
+        <result property="deleted" column="deleted"/>
         <association property="category" javaType="com.example.demo.entity.Category">
             <id property="id" column="cat_id"/>
             <result property="name" column="cat_name"/>
@@ -34,18 +35,24 @@
         LEFT JOIN categories c ON p.category_id = c.id
     </sql>
 
+    <sql id="notDeleted">
+        p.deleted = 0
+    </sql>
+
     <select id="findById" parameterType="int" resultMap="ProductResultMap">
         <include refid="selectWithCategory"/>
-        WHERE p.id = #{id}
+        WHERE p.id = #{id} AND p.deleted = 0
     </select>
 
     <select id="findAll" resultMap="ProductResultMap">
         <include refid="selectWithCategory"/>
+        WHERE <include refid="notDeleted"/>
         ORDER BY p.id ASC
     </select>
 
     <select id="findAllPaged" resultMap="ProductResultMap">
         <include refid="selectWithCategory"/>
+        WHERE <include refid="notDeleted"/>
         ORDER BY p.${sortBy} ${sortDir}
         LIMIT #{limit} OFFSET #{offset}
     </select>
@@ -53,48 +60,46 @@
     <select id="searchProducts" resultMap="ProductResultMap">
         <include refid="selectWithCategory"/>
         <where>
-            <if test="keyword != null and keyword != ''">
-                AND (p.name LIKE CONCAT('%', #{keyword}, '%')
+            <if test="keyword != null and keyword != ''">AND (p.name LIKE CONCAT('%', #{keyword}, '%')
                      OR p.description LIKE CONCAT('%', #{keyword}, '%')
                      OR p.brand LIKE CONCAT('%', #{keyword}, '%'))
             </if>
             <if test="categoryId != null">
                 AND p.category_id = #{categoryId}
             </if>
-
+            AND p.deleted = 0
         </where>
         ORDER BY p.${sortBy} ${sortDir}
         LIMIT #{limit} OFFSET #{offset}
     </select>
 
-    <select id="count" resultType="long">
-        SELECT COUNT(*) FROM products
-    </select>
-
     <select id="countSearch" resultType="long">
         SELECT COUNT(*) FROM products p
         <where>
-            <if test="keyword != null and keyword != ''">
-                AND (p.name LIKE CONCAT('%', #{keyword}, '%')
+            <if test="keyword != null and keyword != ''">AND (p.name LIKE CONCAT('%', #{keyword}, '%')
                      OR p.description LIKE CONCAT('%', #{keyword}, '%')
                      OR p.brand LIKE CONCAT('%', #{keyword}, '%'))
             </if>
             <if test="categoryId != null">
                 AND p.category_id = #{categoryId}
             </if>
-
+            AND p.deleted = 0
         </where>
     </select>
 
+    <select id="count" resultType="long">
+        SELECT COUNT(*) FROM products WHERE deleted = 0
+    </select>
+
     <select id="existsById" parameterType="int" resultType="boolean">
-        SELECT COUNT(*) > 0 FROM products WHERE id = #{id}
+        SELECT COUNT(*) > 0 FROM products WHERE id = #{id} AND deleted = 0
     </select>
 
     <insert id="insert" parameterType="com.example.demo.entity.Product" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO products (name, category_id, description, specifications, price, sale_price,
-                              stock, image_url, brand, cpu, ram, storage, screen, status)
+                              stock, image_url, brand, cpu, ram, storage, screen, status, deleted)
         VALUES (#{name}, #{categoryId}, #{description}, #{specifications}, #{price}, #{salePrice},
-                #{stock}, #{imageUrl}, #{brand}, #{cpu}, #{ram}, #{storage}, #{screen}, #{status})
+                #{stock}, #{imageUrl}, #{brand}, #{cpu}, #{ram}, #{storage}, #{screen}, #{status}, 0)
     </insert>
 
     <update id="save" parameterType="com.example.demo.entity.Product">
@@ -116,8 +121,8 @@
         WHERE id = #{id}
     </update>
 
-    <delete id="deleteById" parameterType="int">
-        DELETE FROM products WHERE id = #{id}
-    </delete>
+    <update id="deleteById" parameterType="int">
+        UPDATE products SET deleted = 1 WHERE id = #{id}
+    </update>
 
 </mapper>

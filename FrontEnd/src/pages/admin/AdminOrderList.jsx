@@ -115,6 +115,7 @@ const AdminOrderList = () => {
                                     Tổng tiền {getSortIcon('totalPrice')}
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Trạng thái</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Thanh toán</th>
                                 <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider cursor-pointer hover:text-indigo-600" onClick={() => handleSort('createdAt')}>
                                     Ngày tạo {getSortIcon('createdAt')}
                                 </th>
@@ -133,6 +134,11 @@ const AdminOrderList = () => {
                                     <td className="px-6 py-4">
                                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
                                             {getStatusText(order.status)}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${order.paymentMethod === 'VNPAY' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}`}>
+                                            {order.paymentMethod === 'VNPAY' ? 'VNPay' : 'COD'}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-sm text-slate-500">

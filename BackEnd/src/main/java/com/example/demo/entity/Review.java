@@ -18,6 +18,9 @@ public class Review {
     private Integer rating;
     private String comment;
     private Timestamp createdAt;
+    private Integer parentId;
+    private Boolean deleted;
+    private java.util.List<Review> replies;
 
     private User user;
     private Product product;

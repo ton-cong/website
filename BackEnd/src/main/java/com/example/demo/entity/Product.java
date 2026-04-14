@@ -30,6 +30,7 @@ public class Product {
     private String screen;
     private ProductStatus status;
     private Timestamp createdAt;
+    private Boolean deleted;
 
     private Category category;
 }

@@ -11,6 +11,8 @@
         <result property="rating" column="rating"/>
         <result property="comment" column="comment"/>
         <result property="createdAt" column="created_at"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="deleted" column="deleted"/>
         <association property="user" javaType="com.example.demo.entity.User">
             <id property="id" column="u_id"/>
             <result property="email" column="u_email"/>
@@ -30,41 +32,60 @@
         LEFT JOIN products p ON r.product_id = p.id
     </sql>
 
+    <sql id="notDeleted">
+        r.deleted = 0
+    </sql>
+
     <select id="findByProductId" parameterType="int" resultMap="ReviewResultMap">
         <include refid="selectWithDetails"/>
-        WHERE r.product_id = #{productId}
+        WHERE r.product_id = #{productId} AND <include refid="notDeleted"/>
         ORDER BY r.created_at DESC
     </select>
 
     <select id="findAll" resultMap="ReviewResultMap">
         <include refid="selectWithDetails"/>
+        WHERE <include refid="notDeleted"/>
         ORDER BY r.id DESC
     </select>
 
     <select id="findAllPaged" resultMap="ReviewResultMap">
         <include refid="selectWithDetails"/>
+        WHERE r.parent_id IS NULL AND <include refid="notDeleted"/>
         ORDER BY r.${sortBy} ${sortDir}
         LIMIT #{limit} OFFSET #{offset}
     </select>
 
+    <select id="findRepliesByParentIds" resultMap="ReviewResultMap">
+        <include refid="selectWithDetails"/>
+        WHERE r.parent_id IN
+        <foreach item="id" collection="parentIds" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        AND <include refid="notDeleted"/>
+        ORDER BY r.created_at ASC
+    </select>
+
     <select id="count" resultType="long">
-        SELECT COUNT(*) FROM reviews
+        SELECT COUNT(*) FROM reviews WHERE parent_id IS NULL AND deleted = 0
     </select>
 
     <select id="existsById" parameterType="int" resultType="boolean">
-        SELECT COUNT(*) > 0 FROM reviews WHERE id = #{id}
+        SELECT COUNT(*) > 0 FROM reviews WHERE id = #{id} AND deleted = 0
     </select>
 
     <insert id="insert" parameterType="com.example.demo.entity.Review" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO reviews (user_id, product_id, rating, comment)
-        VALUES (#{userId}, #{productId}, #{rating}, #{comment})
+        INSERT INTO reviews (user_id, product_id, rating, comment, parent_id, deleted)
+        VALUES (#{userId}, #{productId}, #{rating}, #{comment}, #{parentId}, 0)
     </insert>
 
-    <delete id="deleteById" parameterType="int">
-        DELETE FROM reviews WHERE id = #{id}
-    </delete>
-    <delete id="deleteByProductId" parameterType="int">
-        DELETE FROM reviews WHERE product_id = #{productId}
-    </delete>
+    <update id="deleteRepliesByParentId" parameterType="int">
+        UPDATE reviews SET deleted = 1 WHERE parent_id = #{parentId}
+    </update>
+    <update id="deleteById" parameterType="int">
+        UPDATE reviews SET deleted = 1 WHERE id = #{id}
+    </update>
+    <update id="deleteByProductId" parameterType="int">
+        UPDATE reviews SET deleted = 1 WHERE product_id = #{productId}
+    </update>
 
 </mapper>

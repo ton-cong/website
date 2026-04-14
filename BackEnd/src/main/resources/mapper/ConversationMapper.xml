@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.repository.ConversationRepository">
+    <resultMap id="ConversationResultMap" type="com.example.demo.entity.Conversation">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="adminId" column="admin_id"/>
+        <result property="lastMessage" column="last_message"/>
+        <result property="lastMessageAt" column="last_message_at"/>
+        <result property="createdAt" column="created_at"/>
+        <association property="user" javaType="com.example.demo.entity.User">
+            <id property="id" column="u_id"/>
+            <result property="fullName" column="u_full_name"/>
+            <result property="email" column="u_email"/>
+        </association>
+    </resultMap>
+
+    <sql id="selectWithUser">
+        SELECT c.*, u.id AS u_id, u.full_name AS u_full_name, u.email AS u_email 
+        FROM conversations c
+        LEFT JOIN users u ON c.user_id = u.id
+    </sql>
+
+    <select id="findById" parameterType="int" resultMap="ConversationResultMap">
+        <include refid="selectWithUser"/>
+        WHERE c.id = #{id}
+    </select>
+
+    <select id="findByUserId" parameterType="int" resultMap="ConversationResultMap">
+        <include refid="selectWithUser"/>
+        WHERE c.user_id = #{userId}
+    </select>
+
+    <select id="findAll" resultMap="ConversationResultMap">
+        <include refid="selectWithUser"/>
+        ORDER BY c.last_message_at DESC
+    </select>
+
+    <insert id="insert" parameterType="com.example.demo.entity.Conversation" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO conversations (user_id, admin_id)
+        VALUES (#{userId}, #{adminId})
+    </insert>
+
+    <update id="updateLastMessage" parameterType="com.example.demo.entity.Conversation">
+        UPDATE conversations 
+        SET last_message = #{lastMessage}, 
+            last_message_at = #{lastMessageAt},
+            admin_id = #{adminId}
+        WHERE id = #{id}
+    </update>
+</mapper>

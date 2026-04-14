@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.repository.MessageRepository">
+    <resultMap id="MessageResultMap" type="com.example.demo.entity.ChatMessage">
+        <id property="id" column="id"/>
+        <result property="senderId" column="sender_id"/>
+        <result property="conversationId" column="conversation_id"/>
+        <result property="content" column="content"/>
+        <result property="messageType" column="message_type"/>
+        <result property="createdAt" column="created_at"/>
+        <association property="sender" javaType="com.example.demo.entity.User">
+            <id property="id" column="s_id"/>
+            <result property="fullName" column="s_full_name"/>
+            <result property="email" column="s_email"/>
+        </association>
+    </resultMap>
+
+    <select id="findByConversationId" parameterType="int" resultMap="MessageResultMap">
+        SELECT m.*, u.id AS s_id, u.full_name AS s_full_name, u.email AS s_email
+        FROM messages m
+        LEFT JOIN users u ON m.sender_id = u.id
+        WHERE m.conversation_id = #{conversationId}
+        ORDER BY m.created_at ASC
+    </select>
+
+    <insert id="insert" parameterType="com.example.demo.entity.ChatMessage" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO messages (sender_id, conversation_id, content, message_type)
+        VALUES (#{senderId}, #{conversationId}, #{content}, #{messageType})
+    </insert>
+</mapper>

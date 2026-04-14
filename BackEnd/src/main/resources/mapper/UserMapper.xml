@@ -13,41 +13,43 @@
         <result property="address" column="address"/>
         <result property="role" column="role"/>
         <result property="createdAt" column="created_at"/>
+        <result property="deleted" column="deleted"/>
     </resultMap>
 
     <select id="findByEmail" parameterType="String" resultMap="UserResultMap">
-        SELECT * FROM users WHERE email = #{email} LIMIT 1
+        SELECT * FROM users WHERE email = #{email} AND deleted = 0 LIMIT 1
     </select>
 
     <select id="existsByEmail" parameterType="String" resultType="boolean">
-        SELECT COUNT(*) > 0 FROM users WHERE email = #{email}
+        SELECT COUNT(*) > 0 FROM users WHERE email = #{email} AND deleted = 0
     </select>
 
     <select id="findById" parameterType="int" resultMap="UserResultMap">
-        SELECT * FROM users WHERE id = #{id} LIMIT 1
+        SELECT * FROM users WHERE id = #{id} AND deleted = 0 LIMIT 1
     </select>
 
     <select id="findAll" resultMap="UserResultMap">
-        SELECT * FROM users ORDER BY id ASC
+        SELECT * FROM users WHERE deleted = 0 ORDER BY id ASC
     </select>
 
     <select id="findAllPaged" resultMap="UserResultMap">
         SELECT * FROM users
+        WHERE deleted = 0
         ORDER BY ${sortBy} ${sortDir}
         LIMIT #{limit} OFFSET #{offset}
     </select>
 
     <select id="count" resultType="long">
-        SELECT COUNT(*) FROM users
+        SELECT COUNT(*) FROM users WHERE deleted = 0
     </select>
 
     <select id="existsById" parameterType="int" resultType="boolean">
-        SELECT COUNT(*) > 0 FROM users WHERE id = #{id}
+        SELECT COUNT(*) > 0 FROM users WHERE id = #{id} AND deleted = 0
     </select>
 
     <insert id="insert" parameterType="com.example.demo.entity.User" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO users (email, password_hash, full_name, phone, address, role)
-        VALUES (#{email}, #{passwordHash}, #{fullName}, #{phone}, #{address}, #{role})
+        INSERT INTO users (email, password_hash, full_name, phone, address, role, deleted)
+        VALUES (#{email}, #{passwordHash}, #{fullName}, #{phone}, #{address}, #{role}, 0)
     </insert>
 
     <update id="save" parameterType="com.example.demo.entity.User">
@@ -61,8 +63,8 @@
         WHERE id = #{id}
     </update>
 
-    <delete id="deleteById" parameterType="int">
-        DELETE FROM users WHERE id = #{id}
-    </delete>
+    <update id="deleteById" parameterType="int">
+        UPDATE users SET deleted = 1 WHERE id = #{id}
+    </update>
 
 </mapper>

@@ -118,6 +118,12 @@ const OrdersPage = () => {
                                         <span className="font-medium">Ghi chú:</span> {order.note}
                                     </p>
                                 )}
+                                <p className="text-slate-600">
+                                    <span className="font-medium">Thanh toán:</span>{' '}
+                                    <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${order.paymentMethod === 'VNPAY' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}`}>
+                                        {order.paymentMethod === 'VNPAY' ? 'VNPay Online' : 'Ship COD'}
+                                    </span>
+                                </p>
                             </div>
 
 
