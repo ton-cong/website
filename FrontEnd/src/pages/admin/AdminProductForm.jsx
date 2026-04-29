@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import productApi from '../../api/productApi';
 import categoryApi from '../../api/categoryApi';
@@ -6,6 +6,8 @@ import Button from '../../components/Button';
 import Input from '../../components/Input';
 import { toast } from 'react-toastify';
 import { ArrowLeftIcon, PhotoIcon } from '@heroicons/react/24/outline';
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
 
 const AdminProductForm = () => {
     const { id } = useParams();
@@ -15,6 +17,90 @@ const AdminProductForm = () => {
     const [loading, setLoading] = useState(false);
     const [categories, setCategories] = useState([]);
     const [imagePreview, setImagePreview] = useState(null);
+    const quillRef = useRef(null);
+
+    // Upload ảnh: click nút image trong toolbar
+    const imageHandler = useCallback(() => {
+        const input = document.createElement('input');
+        input.setAttribute('type', 'file');
+        input.setAttribute('accept', 'image/*');
+        input.click();
+        input.onchange = async () => {
+            const file = input.files[0];
+            if (!file) return;
+            try {
+                const res = await productApi.uploadEditorImage(file);
+                const url = res?.url || res?.data?.url || res;
+                // react-quill-new: quillRef.current là Quill instance trực tiếp
+                const quill = quillRef.current;
+                if (quill) {
+                    const range = quill.getSelection(true);
+                    quill.insertEmbed(range ? range.index : 0, 'image', url);
+                    quill.setSelection((range ? range.index : 0) + 1);
+                }
+            } catch (e) {
+                toast.error('Không thể upload ảnh');
+            }
+        };
+    }, []);
+
+    // Paste ảnh Ctrl+V vào editor
+    useEffect(() => {
+        // Đợi editor mount xong
+        const timer = setTimeout(() => {
+            const quill = quillRef.current;
+            if (!quill || !quill.root) return;
+
+            const handlePaste = async (e) => {
+                const clipboard = e.clipboardData || window.clipboardData;
+                if (!clipboard) return;
+                const items = Array.from(clipboard.items);
+                const imageItem = items.find(item => item.type.startsWith('image/'));
+                if (!imageItem) return;
+                e.preventDefault();
+                const file = imageItem.getAsFile();
+                if (!file) return;
+                try {
+                    toast.info('Đang upload ảnh...');
+                    const res = await productApi.uploadEditorImage(file);
+                    const url = res?.url || res?.data?.url || res;
+                    const range = quill.getSelection(true);
+                    quill.insertEmbed(range ? range.index : 0, 'image', url);
+                    quill.setSelection((range ? range.index : 0) + 1);
+                    toast.success('Upload ảnh thành công!');
+                } catch (err) {
+                    toast.error('Không thể upload ảnh');
+                }
+            };
+
+            quill.root.addEventListener('paste', handlePaste);
+            // lưu cleanup
+            quillRef._pasteCleanup = () => quill.root.removeEventListener('paste', handlePaste);
+        }, 300);
+
+        return () => {
+            clearTimeout(timer);
+            if (quillRef._pasteCleanup) {
+                quillRef._pasteCleanup();
+                quillRef._pasteCleanup = null;
+            }
+        };
+    }, []);
+
+    // Memo modules: tránh re-render vô tận khi imageHandler thay đổi
+    const quillModules = useMemo(() => ({
+        toolbar: {
+            container: [
+                [{ header: [1, 2, 3, false] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ color: [] }, { background: [] }],
+                [{ list: 'ordered' }, { list: 'bullet' }],
+                ['link', 'image'],
+                ['clean'],
+            ],
+            handlers: { image: imageHandler },
+        },
+    }), [imageHandler]);
 
     const [formData, setFormData] = useState({
         name: '',
@@ -31,6 +117,7 @@ const AdminProductForm = () => {
         screen: '',
         status: 'ACTIVE',
         image: null,
+        content: '',
     });
 
     useEffect(() => {
@@ -87,6 +174,7 @@ const AdminProductForm = () => {
                 screen: product.screen || '',
                 status: product.status || 'ACTIVE',
                 image: null,
+                content: product.content || '',
             });
             if (product.imageUrl) {
                 setImagePreview(product.imageUrl);
@@ -129,7 +217,7 @@ const AdminProductForm = () => {
         try {
             const data = new FormData();
             data.append('name', formData.name);
-            data.append('categoryName', formData.categoryId);
+            data.append('categoryId', formData.categoryId);
             data.append('description', formData.description || '');
             data.append('specifications', formData.specifications || '');
             data.append('price', priceNum);
@@ -150,6 +238,7 @@ const AdminProductForm = () => {
             data.append('storage', formData.storage || '');
             data.append('screen', formData.screen || '');
             data.append('status', formData.status);
+            data.append('content', formData.content || '');
 
             if (formData.image) {
                 data.append('imageFile', formData.image);
@@ -216,7 +305,7 @@ const AdminProductForm = () => {
                                         >
                                             <option value="">Chọn danh mục</option>
                                             {categories.map((cat, idx) => (
-                                                <option key={cat.id || `cat-${idx}`} value={cat.name}>
+                                                <option key={cat.id || `cat-${idx}`} value={cat.id}>
                                                     {cat.name}
                                                 </option>
                                             ))}
@@ -255,6 +344,21 @@ const AdminProductForm = () => {
                             </div>
                         </div>
 
+                        {/* Rich Text Content */}
+                        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                            <h2 className="text-lg font-semibold text-slate-900 mb-2">Nội dung chi tiết</h2>
+                            <p className="text-xs text-slate-400 mb-3">Soạn mô tả chi tiết, thêm ảnh minh hoạ, định dạng văn bản...</p>
+                            <div style={{ minHeight: '300px' }}>
+                                <ReactQuill
+                                    theme="snow"
+                                    value={formData.content}
+                                    onChange={(val) => setFormData(prev => ({ ...prev, content: val }))}
+                                    style={{ height: '260px', marginBottom: '42px' }}
+                                    modules={quillModules}
+                                />
+                            </div>
+                        </div>
+
                         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
                             <h2 className="text-lg font-semibold text-slate-900 mb-4">Thông số chi tiết</h2>
                             <div className="grid grid-cols-2 gap-4">
@@ -277,7 +381,7 @@ const AdminProductForm = () => {
                                         <button
                                             type="button"
                                             onClick={() => { setImagePreview(null); setFormData({ ...formData, image: null }); }}
-                                            className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 text-xs"
+                                            className="absolute top-0 right-0 bg-blue-500 text-white rounded-full p-1 text-xs"
                                         >
                                             ✕
                                         </button>

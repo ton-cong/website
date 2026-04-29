@@ -64,6 +64,15 @@ export const CartProvider = ({ children }) => {
         }
     };
 
+    const updateCartItemQuantity = async (cartItemId, quantity) => {
+        try {
+            await cartApi.updateQuantity(cartItemId, quantity);
+            fetchCart();
+        } catch (error) {
+            toast.error("Không thể cập nhật số lượng");
+        }
+    };
+
     const clearCart = async () => {
         try {
             await cartApi.clearCart();
@@ -76,7 +85,7 @@ export const CartProvider = ({ children }) => {
     const cartCount = cart?.items?.length || 0;
 
     return (
-        <CartContext.Provider value={{ cart, cartLoading, addToCart, removeFromCart, clearCart, cartCount, refreshCart: fetchCart }}>
+        <CartContext.Provider value={{ cart, cartLoading, addToCart, removeFromCart, updateCartItemQuantity, clearCart, cartCount, refreshCart: fetchCart }}>
             {children}
         </CartContext.Provider>
     );

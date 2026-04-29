@@ -35,6 +35,14 @@ public class CartController {
         return response;
     }
 
+    @PutMapping("/update/{cartItemId}")
+    @Operation(summary = "Update item quantity in cart")
+    public ApiResponse<CartResponse> updateQuantity(@PathVariable Integer cartItemId, @RequestParam Integer quantity) {
+        ApiResponse<CartResponse> response = new ApiResponse<>();
+        response.setResult(cartService.updateQuantity(cartItemId, quantity));
+        return response;
+    }
+
     @DeleteMapping("/remove/{cartItemId}")
     @Operation(summary = "Remove item from cart")
     public ApiResponse<String> removeFromCart(@PathVariable Integer cartItemId) {

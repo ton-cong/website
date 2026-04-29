@@ -5,6 +5,8 @@ import { TrashIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import Pagination from '../../components/Pagination';
 
 const AdminUserList = () => {
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    const isSuperAdmin = currentUser.role === 'SUPER_ADMIN';
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(0);
@@ -100,6 +102,7 @@ const AdminUserList = () => {
     };
 
     const getRoleColor = (role) => {
+        if (role === 'SUPER_ADMIN') return 'bg-red-100 text-red-800';
         if (role === 'ADMIN') return 'bg-purple-100 text-purple-800';
         return 'bg-blue-100 text-blue-800';
     };
@@ -159,18 +162,19 @@ const AdminUserList = () => {
                                             value={user.role}
                                             onChange={(e) => handleRoleChange(user, e.target.value)}
                                             className={`px-2 py-1 rounded-full text-xs font-medium border border-transparent hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer ${getRoleColor(user.role)}`}
-                                            disabled={user.email === 'admin@gmail.com'}
+                                            disabled={user.email === 'admin@gmail.com' || (user.role === 'SUPER_ADMIN' && !isSuperAdmin)}
                                         >
                                             <option value="USER" className="text-slate-900 bg-white">USER</option>
                                             <option value="ADMIN" className="text-slate-900 bg-white">ADMIN</option>
+                                            {(isSuperAdmin || user.role === 'SUPER_ADMIN') && <option value="SUPER_ADMIN" className="text-slate-900 bg-white">SUPER_ADMIN</option>}
                                         </select>
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <button
                                             onClick={() => handleDelete(user.id)}
-                                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                            disabled={user.role === 'ADMIN'}
-                                            title={user.role === 'ADMIN' ? 'Không thể xóa admin' : 'Xóa người dùng'}
+                                            className={`p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors ${(user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                            disabled={user.role === 'ADMIN' || user.role === 'SUPER_ADMIN'}
+                                            title={(user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') ? 'Không thể xóa admin' : 'Xóa người dùng'}
                                         >
                                             <TrashIcon className="h-4 w-4" />
                                         </button>

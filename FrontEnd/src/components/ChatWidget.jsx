@@ -17,6 +17,10 @@ const ChatWidget = () => {
     useEffect(() => {
         if (isAuthenticated && user?.role === 'USER') {
             fetchConversation();
+        } else {
+            setConversation(null);
+            setMessages([]);
+            setIsOpen(false);
         }
     }, [isAuthenticated, user]);
 
@@ -72,6 +76,9 @@ const ChatWidget = () => {
             const res = await chatApi.getConversations();
             if (res && res.length > 0) {
                 setConversation(res[0]);
+            } else {
+                setConversation(null);
+                setMessages([]);
             }
         } catch (error) {
             console.error('Error fetching conversation', error);
@@ -141,7 +148,7 @@ const ChatWidget = () => {
                                 <ChatBubbleLeftRightIcon className="w-5 h-5 text-white" />
                             </div>
                             <div>
-                                <span className="font-semibold text-white tracking-wide text-sm block">Shop Support</span>
+                                <span className="font-semibold text-white tracking-wide text-sm block">TQuad Support</span>
                                 <span className="text-violet-200 text-xs flex items-center gap-1.5 mt-0.5">
                                     <span className="w-2 h-2 rounded-full bg-emerald-400 border border-emerald-200 animate-pulse"></span>
                                     Online Default
@@ -163,7 +170,7 @@ const ChatWidget = () => {
                                 <div className="w-16 h-16 bg-gradient-to-br from-violet-100 to-indigo-50 rounded-full flex items-center justify-center mb-4 shadow-sm border border-violet-100/50">
                                     <ChatBubbleLeftRightIcon className="w-8 h-8 text-violet-500" />
                                 </div>
-                                <p className="text-slate-600 font-semibold text-sm">Welcome to TechShop!</p>
+                                <p className="text-slate-600 font-semibold text-sm">Chào mừng đến TQuad!</p>
                                 <p className="text-slate-400 text-xs mt-1.5 max-w-[200px]">We generally reply in a few minutes. How can we help you?</p>
                             </div>
                         ) : (

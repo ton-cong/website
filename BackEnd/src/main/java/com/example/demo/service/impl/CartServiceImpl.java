@@ -114,6 +114,29 @@ public class CartServiceImpl implements CartService {
 
     @Override
     @Transactional
+    public CartResponse updateQuantity(Integer cartItemId, Integer quantity) {
+        User user = getCurrentUser();
+        Cart cart = getOrCreateCart(user);
+
+        CartItem item = cartItemRepository.findById(cartItemId)
+                .orElseThrow(() -> new RuntimeException("Cart item not found"));
+
+        if (!item.getCartId().equals(cart.getId())) {
+            throw new RuntimeException("Access denied to this cart item");
+        }
+
+        if (quantity <= 0) {
+            cartItemRepository.deleteById(cartItemId);
+        } else {
+            item.setQuantity(quantity);
+            cartItemRepository.save(item);
+        }
+
+        return buildCartResponse(cart);
+    }
+
+    @Override
+    @Transactional
     public void removeFromCart(Integer cartItemId) {
         cartItemRepository.deleteById(cartItemId);
     }

@@ -48,10 +48,16 @@ public class ProductServiceImpl implements ProductService {
                 .ram(request.getRam())
                 .storage(request.getStorage())
                 .screen(request.getScreen())
+                .content(request.getContent())
                 .status(request.getStatus() != null ? ProductStatus.valueOf(request.getStatus()) : ProductStatus.ACTIVE)
                 .build();
 
-        if (request.getCategoryName() != null) {
+        if (request.getCategoryId() != null) {
+            Category category = categoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new RuntimeException("Category not found with id: " + request.getCategoryId()));
+            product.setCategoryId(category.getId());
+            product.setCategory(category);
+        } else if (request.getCategoryName() != null) {
             Category category = categoryRepository.findByName(request.getCategoryName())
                     .orElseThrow(() -> new RuntimeException("Category not found: " + request.getCategoryName()));
             product.setCategoryId(category.getId());
@@ -87,9 +93,15 @@ public class ProductServiceImpl implements ProductService {
         if (request.getRam() != null) product.setRam(request.getRam());
         if (request.getStorage() != null) product.setStorage(request.getStorage());
         if (request.getScreen() != null) product.setScreen(request.getScreen());
+        if (request.getContent() != null) product.setContent(request.getContent());
         if (request.getStatus() != null) product.setStatus(ProductStatus.valueOf(request.getStatus()));
 
-        if (request.getCategoryName() != null) {
+        if (request.getCategoryId() != null) {
+            Category category = categoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new RuntimeException("Category not found with id: " + request.getCategoryId()));
+            product.setCategoryId(category.getId());
+            product.setCategory(category);
+        } else if (request.getCategoryName() != null) {
             Category category = categoryRepository.findByName(request.getCategoryName())
                     .orElseThrow(() -> new RuntimeException("Category not found: " + request.getCategoryName()));
             product.setCategoryId(category.getId());
@@ -148,15 +160,23 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Page<ProductResponse> searchProducts(String keyword, Integer categoryId,
-                                                 int page, int size,
-                                                 String sortBy, String sortDir) {
-        long total = productRepository.countSearch(keyword, categoryId);
+                                                String brand, String cpu, String ram, String storage,
+                                                Long minPrice, Long maxPrice,
+                                                int page, int size,
+                                                String sortBy, String sortDir) {
+        long total = productRepository.countSearch(keyword, categoryId, brand, cpu, ram, storage, minPrice, maxPrice);
         int offset = page * size;
-        List<ProductResponse> list = productRepository.searchProducts(keyword, categoryId,
-                        sortBy, sortDir, size, offset)
+        List<ProductResponse> list = productRepository.searchProducts(
+                        keyword, categoryId, brand, cpu, ram, storage,
+                        minPrice, maxPrice, sortBy, sortDir, size, offset)
                 .stream()
                 .map(productMapper::toResponse)
                 .collect(Collectors.toList());
         return new PageImpl<>(list, PageRequest.of(page, size), total);
+    }
+
+    @Override
+    public List<String> getDistinctBrands() {
+        return productRepository.getDistinctBrands();
     }
 }

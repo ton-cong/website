@@ -8,6 +8,7 @@ import com.example.demo.mapper.OrderMapper;
 import com.example.demo.repository.*;
 import com.example.demo.service.OrderService;
 import com.example.demo.service.NotificationService;
+import com.example.demo.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -29,8 +30,10 @@ public class OrderServiceImpl implements OrderService {
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final UserRepository userRepository;
+    private final ProductRepository productRepository;
     private final OrderMapper orderMapper;
     private final NotificationService notificationService;
+    private final EmailService emailService;
 
     private User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -74,11 +77,21 @@ public class OrderServiceImpl implements OrderService {
 
         List<OrderItem> orderItems = new ArrayList<>();
         for (CartItem cartItem : cartItems) {
-            Product product = cartItem.getProduct();
-            double price = product != null && product.getPrice() != null ? product.getPrice().doubleValue() : 0;
+            Product product = productRepository.findById(cartItem.getProductId())
+                    .orElseThrow(() -> new RuntimeException("Product not found"));
+                    
+            if (product.getStock() < cartItem.getQuantity()) {
+                throw new RuntimeException("Not enough stock for product: " + product.getName());
+            }
+            
+            // Deduct stock
+            product.setStock(product.getStock() - cartItem.getQuantity());
+            productRepository.save(product);
+
+            double price = product.getPrice() != null ? product.getPrice().doubleValue() : 0;
             OrderItem orderItem = OrderItem.builder()
                     .orderId(order.getId())
-                    .productId(cartItem.getProductId())
+                    .productId(product.getId())
                     .quantity(cartItem.getQuantity())
                     .price(price)
                     .build();
@@ -90,6 +103,10 @@ public class OrderServiceImpl implements OrderService {
 
         Order savedOrder = orderRepository.findById(order.getId())
                 .orElseThrow(() -> new RuntimeException("Order not found"));
+                
+        // Send email notification
+        emailService.sendOrderConfirmation(savedOrder);
+        
         return orderMapper.toResponse(savedOrder);
     }
 
@@ -120,10 +137,41 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public OrderResponse getOrderById(Integer id) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Order not found with id: " + id));
+        
+        // Security check: if not admin, ensure the order belongs to the current user
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByEmail(email).orElse(null);
+        
+        if (currentUser != null && !currentUser.getRole().name().equals("ADMIN")) {
+            if (!order.getUserId().equals(currentUser.getId())) {
+                throw new RuntimeException("Access denied");
+            }
+        }
+        
+        return orderMapper.toResponse(order);
+    }
+
+    @Override
     @Transactional
     public OrderResponse updateStatus(Integer orderId, OrderStatus status) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found with id: " + orderId));
+                
+        // Restore stock if cancelled
+        if (status == OrderStatus.cancelled && order.getStatus() != OrderStatus.cancelled) {
+            List<OrderItem> items = orderItemRepository.findByOrderId(orderId);
+            for (OrderItem item : items) {
+                Product product = productRepository.findById(item.getProductId()).orElse(null);
+                if (product != null) {
+                    product.setStock(product.getStock() + item.getQuantity());
+                    productRepository.save(product);
+                }
+            }
+        }
+        
         order.setStatus(status);
         orderRepository.save(order);
         Order updated = orderRepository.findById(orderId)

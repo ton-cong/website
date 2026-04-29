@@ -35,4 +35,5 @@ public class ProductResponse implements Serializable {
     private String categoryName;
     private Integer stock;
     private String specifications;
+    private String content;
 }

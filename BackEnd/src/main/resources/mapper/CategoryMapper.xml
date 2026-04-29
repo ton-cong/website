@@ -8,6 +8,7 @@
         <id property="id" column="id"/>
         <result property="name" column="name"/>
         <result property="description" column="description"/>
+        <result property="imageUrl" column="image_url"/>
         <result property="createdAt" column="created_at"/>
         <result property="deleted" column="deleted"/>
     </resultMap>
@@ -40,14 +41,15 @@
     </select>
 
     <insert id="insert" parameterType="com.example.demo.entity.Category" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO categories (name, description, deleted)
-        VALUES (#{name}, #{description}, 0)
+        INSERT INTO categories (name, description, image_url, deleted)
+        VALUES (#{name}, #{description}, #{imageUrl}, 0)
     </insert>
 
     <update id="save" parameterType="com.example.demo.entity.Category">
         UPDATE categories SET
             name = #{name},
-            description = #{description}
+            description = #{description},
+            image_url = #{imageUrl}
         WHERE id = #{id}
     </update>
 

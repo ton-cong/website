@@ -1,6 +1,6 @@
 use lapton;
 
-DROP TABLE IF EXISTS Notification;
+DROP TABLE IF EXISTS notifications;
 DROP TABLE IF EXISTS messages;
 DROP TABLE IF EXISTS conversations;
 DROP TABLE IF EXISTS reviews;
@@ -19,14 +19,14 @@ CREATE TABLE IF NOT EXISTS users (
                                      full_name VARCHAR(255) NOT NULL,
                                      phone VARCHAR(20),
                                      address TEXT,
-                                     role ENUM('ADMIN','USER') NOT NULL DEFAULT 'USER',
+                                     role ENUM('ADMIN','USER','SUPER_ADMIN') NOT NULL DEFAULT 'USER',
                                      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                                      deleted TINYINT DEFAULT 0
 );
 
 INSERT INTO users (email, password_hash, full_name, phone, address, role) VALUES
-                                                                              ('admin@gmail.com','$2a$10$pnbqt6JBbsrxIT6s7sgCR.XYAf9UNTafOtIAeayyKp0yXkJ0Pyuwm', 'Admin System',     '0901000001', '1 Nguyen Hue, HCM',        'ADMIN'),
-                                                                              ('user@gmail.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9ljo0a36HsO2.We', 'Nguyen Van An',    '0901000002', '12 Le Loi, Da Nang',       'USER'),
+                                                                              ('admin@gmail.com','$2a$10$pnbqt6JBbsrxIT6s7sgCR.XYAf9UNTafOtIAeayyKp0yXkJ0Pyuwm', 'Admin System',     '0901000001', '1 Nguyen Hue, HCM',        'SUPER_ADMIN'),
+                                                                              ('user@gmail.com', '$2a$10$pnbqt6JBbsrxIT6s7sgCR.XYAf9UNTafOtIAeayyKp0yXkJ0Pyuwm', 'Nguyen Van An',    '0901000002', '12 Le Loi, Da Nang',       'USER'),
                                                                               ('tran.binh@example.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9ljo0a36HsO2.We', 'Tran Thi Binh',   '0901000003', '34 Tran Phu, Hue',         'USER'),
                                                                               ('le.cuong@example.com',  '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9ljo0a36HsO2.We', 'Le Van Cuong',     '0901000004', '56 Hai Ba Trung, Hanoi',   'USER'),
                                                                               ('pham.dung@example.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9ljo0a36HsO2.We', 'Pham Thi Dung',   '0901000005', '78 Dien Bien Phu, HCM',    'USER'),
@@ -55,13 +55,13 @@ CREATE TABLE IF NOT EXISTS categories (
 );
 
 INSERT INTO categories (name, description) VALUES
-                                               ('Gaming Laptops',     'High-performance laptops designed for gaming with dedicated GPUs and high-refresh displays'),
-                                               ('Ultrabooks',         'Thin, light and portable laptops with long battery life for professionals and students'),
-                                               ('MacBooks',           'Apple MacBook lineup powered by macOS and M-series chips'),
-                                               ('Business Laptops',   'Durable, reliable laptops built for enterprise and business use'),
-                                               ('Budget Laptops',     'Affordable laptops suitable for everyday computing tasks'),
-                                               ('2-in-1 Convertibles','Versatile laptops that convert into tablets with touchscreen support'),
-                                               ('Workstation Laptops','High-end laptops for creators, engineers and data scientists');
+                                               ('Laptop Gaming',       'Laptop hiệu năng cao dành cho game thủ, trang bị GPU rời và màn hình tần số cao'),
+                                               ('Laptop Mỏng Nhẹ',    'Laptop mỏng nhẹ, pin trâu, thiết kế cao cấp dành cho dân văn phòng và sinh viên năng động'),
+                                               ('MacBook (Apple)',     'Dòng laptop Apple MacBook chạy macOS với chip M-series hiệu năng vượt trội, tối ưu hóa phần cứng-phần mềm'),
+                                               ('Laptop Văn Phòng',   'Laptop bền bỉ, bảo mật cao, tối ưu cho công việc văn phòng và doanh nghiệp'),
+                                               ('Laptop Sinh Viên',   'Laptop phổ thông giá tốt, cấu hình đủ dùng, phù hợp cho học sinh sinh viên'),
+                                               ('Laptop 2 Trong 1',   'Laptop có thể gập 360° hoặc tháo bàn phím, sử dụng linh hoạt như máy tính bảng cảm ứng'),
+                                               ('Laptop Đồ Họa',      'Laptop workstation cao cấp dành cho thiết kế đồ họa, dựng phim, kỹ thuật và khoa học dữ liệu');
 
 CREATE TABLE IF NOT EXISTS products (
                                         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -134,7 +134,7 @@ CREATE TABLE IF NOT EXISTS orders (
                                       note TEXT,
                                       total_price DOUBLE,
                                       status ENUM('pending','processing','shipping','completed','cancelled') DEFAULT 'pending',
-                                      payment_method VARCHAR(20) DEFAULT 'COD',
+                                      payment_method ENUM('COD','BANK_TRANSFER') DEFAULT 'COD',
                                       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                                       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                                       deleted TINYINT DEFAULT 0,
@@ -143,24 +143,24 @@ CREATE TABLE IF NOT EXISTS orders (
 
 INSERT INTO orders (user_id, full_name, phone, address, note, total_price, status, payment_method) VALUES
                                                                                         (2, 'Nguyen Van An',  '0901000002', '12 Le Loi, Da Nang',       'Giao trong gio hanh chinh', 28990000,  'completed', 'COD'),
-                                                                                        (3, 'Tran Thi Binh',  '0901000003', '34 Tran Phu, Hue',          NULL,                         21990000,  'completed', 'VNPAY'),
+                                                                                        (3, 'Tran Thi Binh',  '0901000003', '34 Tran Phu, Hue',          NULL,                         21990000,  'completed', 'BANK_TRANSFER'),
                                                                                         (4, 'Le Van Cuong',   '0901000004', '56 Hai Ba Trung, Hanoi',    'De truoc cua',               24990000,  'completed', 'COD'),
-                                                                                        (5, 'Pham Thi Dung',  '0901000005', '78 Dien Bien Phu, HCM',     NULL,                         18990000,  'completed', 'VNPAY'),
+                                                                                        (5, 'Pham Thi Dung',  '0901000005', '78 Dien Bien Phu, HCM',     NULL,                         18990000,  'completed', 'BANK_TRANSFER'),
                                                                                         (6, 'Hoang Van Em',   '0901000006', '90 CMT8, Can Tho',           'Goi dien truoc khi giao',   52990000,  'completed', 'COD'),
-                                                                                        (7, 'Vu Thi Phuong',  '0901000007', '22 Pham Van Dong, HCM',     NULL,                         28990000,  'completed', 'VNPAY'),
+                                                                                        (7, 'Vu Thi Phuong',  '0901000007', '22 Pham Van Dong, HCM',     NULL,                         28990000,  'completed', 'BANK_TRANSFER'),
                                                                                         (8, 'Do Quoc Giang',  '0901000008', '44 Truong Chinh, Hanoi',    'Shipping bình thường',       21990000,  'completed', 'COD'),
-                                                                                        (9, 'Bui Thi Huong',  '0901000009', '66 Nguyen Trai, HCM',       NULL,                         22490000,  'completed', 'VNPAY'),
-                                                                                        (10,'Dao Minh Hung',  '0901000010', '88 Vo Van Tan, HCM',         NULL,                         65990000,  'completed', 'VNPAY'),
+                                                                                        (9, 'Bui Thi Huong',  '0901000009', '66 Nguyen Trai, HCM',       NULL,                         22490000,  'completed', 'BANK_TRANSFER'),
+                                                                                        (10,'Dao Minh Hung',  '0901000010', '88 Vo Van Tan, HCM',         NULL,                         65990000,  'completed', 'BANK_TRANSFER'),
                                                                                         (11,'Ly Thi Khanh',   '0901000011', '10 Ly Thuong Kiet, Hanoi',  'Giao cuoi tuan',             28990000,  'processing', 'COD'),
-                                                                                        (12,'Mai Van Lan',    '0901000012', '32 Nguyen Dinh Chieu, HCM', NULL,                         34990000,  'processing', 'VNPAY'),
+                                                                                        (12,'Mai Van Lan',    '0901000012', '32 Nguyen Dinh Chieu, HCM', NULL,                         34990000,  'processing', 'BANK_TRANSFER'),
                                                                                         (13,'Ngo Thi Mai',    '0901000013', '54 Ba Trieu, Hanoi',         NULL,                         10990000,  'shipping', 'COD'),
                                                                                         (14,'Trieu Van Nam',  '0901000014', '76 Tran Hung Dao, HCM',     'Giao gio hanh chinh',        8990000,   'shipping', 'COD'),
-                                                                                        (15,'Lam Thi Oanh',   '0901000015', '98 Xo Viet Nghe Tinh, HCM', NULL,                         35990000,  'pending', 'VNPAY'),
+                                                                                        (15,'Lam Thi Oanh',   '0901000015', '98 Xo Viet Nghe Tinh, HCM', NULL,                         35990000,  'pending', 'BANK_TRANSFER'),
                                                                                         (16,'Duong Van Phat', '0901000016', '11 Ha Huy Tap, Hanoi',       NULL,                         24490000,  'pending', 'COD'),
                                                                                         (2, 'Nguyen Van An',  '0901000002', '12 Le Loi, Da Nang',        'Hang mong manh',             9990000,   'cancelled', 'COD'),
-                                                                                        (3, 'Tran Thi Binh',  '0901000003', '34 Tran Phu, Hue',           NULL,                         19990000,  'completed', 'VNPAY'),
+                                                                                        (3, 'Tran Thi Binh',  '0901000003', '34 Tran Phu, Hue',           NULL,                         19990000,  'completed', 'BANK_TRANSFER'),
                                                                                         (4, 'Le Van Cuong',   '0901000004', '56 Hai Ba Trung, Hanoi',     NULL,                         38990000,  'completed', 'COD'),
-                                                                                        (5, 'Pham Thi Dung',  '0901000005', '78 Dien Bien Phu, HCM',      NULL,                         54990000,  'completed', 'VNPAY'),
+                                                                                        (5, 'Pham Thi Dung',  '0901000005', '78 Dien Bien Phu, HCM',      NULL,                         54990000,  'completed', 'BANK_TRANSFER'),
                                                                                         (6, 'Hoang Van Em',   '0901000006', '90 CMT8, Can Tho',           'Bao bi ky',                  37990000,  'pending', 'COD');
 
 CREATE TABLE IF NOT EXISTS order_items (
@@ -291,7 +291,7 @@ CREATE TABLE IF NOT EXISTS messages (
                          CONSTRAINT fk_message_conversation_v2 FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS Notification (
+CREATE TABLE IF NOT EXISTS notifications (
                                id INT AUTO_INCREMENT PRIMARY KEY,
                                user_id INT NOT NULL,
                                type VARCHAR(50) NOT NULL CHECK (type IN ('like', 'comment', 'share', 'message', 'follow', 'friend_request', 'group_invite', 'order')),
@@ -300,3 +300,5 @@ CREATE TABLE IF NOT EXISTS Notification (
                                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                                CONSTRAINT fk_notification_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+ALTER TABLE products ADD COLUMN content LONGTEXT NULL COMMENT 'Nội dung rich text HTML';
+ALTER TABLE categories ADD COLUMN image_url VARCHAR(512) NULL;

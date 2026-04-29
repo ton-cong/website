@@ -41,10 +41,20 @@ const ProductCard = ({ product }) => {
                     </div>
                 </div>
 
-                <p className="text-slate-500 text-sm mb-4 line-clamp-2">{product.description}</p>
+                <div className="mb-4 space-y-1 h-10">
+                    {(product.cpu || product.ram || product.storage) ? (
+                        <div className="flex flex-wrap gap-1.5 text-[11px] font-medium text-slate-500">
+                            {product.cpu && <span className="bg-slate-100 px-2 py-0.5 rounded-md truncate max-w-[120px]" title={product.cpu}>{product.cpu}</span>}
+                            {product.ram && <span className="bg-slate-100 px-2 py-0.5 rounded-md">{product.ram}</span>}
+                            {product.storage && <span className="bg-slate-100 px-2 py-0.5 rounded-md">{product.storage}</span>}
+                        </div>
+                    ) : (
+                        <p className="text-slate-500 text-sm line-clamp-2">{product.description}</p>
+                    )}
+                </div>
 
                 <div className="flex items-center justify-between mt-auto">
-                    <span className="text-xl font-bold text-slate-900">${product.price.toLocaleString()}</span>
+                    <span className="text-xl font-bold text-slate-900">{product.price.toLocaleString()}đ</span>
                     <Button
                         variant="primary"
                         size="sm"

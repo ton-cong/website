@@ -31,6 +31,7 @@ public class Product {
     private ProductStatus status;
     private Timestamp createdAt;
     private Boolean deleted;
+    private String content;
 
     private Category category;
 }

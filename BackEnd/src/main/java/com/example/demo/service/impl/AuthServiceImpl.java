@@ -95,19 +95,43 @@ public class AuthServiceImpl implements AuthService {
     public UserResponse updateUser(Integer id, UpdateUserDTO request) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        userMapper.toUpdateUserDto(request, user);
+
         if (request.getRole() != null) {
-            user.setRole(Role.valueOf(request.getRole()));
+            Role newRole = Role.valueOf(request.getRole());
+            if (user.getRole() != newRole || user.getRole() == Role.SUPER_ADMIN) {
+                String currentEmail = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+                User currentUser = userRepository.findByEmail(currentEmail)
+                        .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+                
+                if (user.getRole() == Role.SUPER_ADMIN && currentUser.getRole() != Role.SUPER_ADMIN) {
+                    throw new AppException(ErrorCode.FORBIDDEN);
+                }
+                if (newRole == Role.SUPER_ADMIN && currentUser.getRole() != Role.SUPER_ADMIN) {
+                    throw new AppException(ErrorCode.FORBIDDEN);
+                }
+            }
+            user.setRole(newRole);
         }
+
+        userMapper.toUpdateUserDto(request, user);
         userRepository.save(user);
         return userMapper.toUserResponse(user);
     }
 
     @Override
     public boolean deleteUser(Integer id) {
-        if (!userRepository.existsById(id)) {
-            throw new AppException(ErrorCode.USER_NOT_EXISTED);
+        User targetUser = userRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        if (targetUser.getRole() == Role.SUPER_ADMIN) {
+            String currentEmail = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+            User currentUser = userRepository.findByEmail(currentEmail)
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+            if (currentUser.getRole() != Role.SUPER_ADMIN) {
+                throw new AppException(ErrorCode.FORBIDDEN);
+            }
         }
+
         userRepository.deleteById(id);
         return true;
     }

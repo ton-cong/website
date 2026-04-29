@@ -41,8 +41,16 @@ public class OrderController {
         return response;
     }
 
+    @GetMapping("/{orderId}")
+    @Operation(summary = "Get order details by ID")
+    public ApiResponse<OrderResponse> getOrderById(@PathVariable Integer orderId) {
+        ApiResponse<OrderResponse> response = new ApiResponse<>();
+        response.setResult(orderService.getOrderById(orderId));
+        return response;
+    }
+
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @Operation(summary = "Get all orders (paginated)", description = "Admin only. Supports pagination and sorting.")
     public Page<OrderResponse> getAllOrders(
             @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
@@ -54,7 +62,7 @@ public class OrderController {
     }
 
     @PutMapping("/{orderId}/status")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @Operation(summary = "Update order status", description = "Admin only")
     public ApiResponse<OrderResponse> updateStatus(@PathVariable Integer orderId, @RequestParam OrderStatus status) {
         ApiResponse<OrderResponse> response = new ApiResponse<>();

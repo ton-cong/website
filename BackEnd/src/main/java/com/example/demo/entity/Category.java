@@ -15,6 +15,7 @@ public class Category {
     private Integer id;
     private String name;
     private String description;
-    private Timestamp createdAt;
+    private String imageUrl;
+    private java.sql.Timestamp createdAt;
     private Boolean deleted;
 }

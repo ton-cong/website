@@ -24,7 +24,7 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @PostMapping("/create")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @Operation(summary = "Create a new category", description = "Admin only")
     public ApiResponse<CategoryResponseDTO> createCategory(@Valid @RequestBody CategoryRequestDTO request) {
         ApiResponse<CategoryResponseDTO> apiResponse = new ApiResponse<>();
@@ -33,7 +33,7 @@ public class CategoryController {
     }
 
     @PutMapping("/update/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @Operation(summary = "Update a category", description = "Admin only")
     public ApiResponse<CategoryResponseDTO> updateCategory(
             @PathVariable int id,
@@ -45,7 +45,7 @@ public class CategoryController {
     }
 
     @DeleteMapping("/delete/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @Operation(summary = "Delete a category", description = "Admin only")
     public ApiResponse<Boolean> deleteCategory(@PathVariable int id) {
         ApiResponse<Boolean> apiResponse = new ApiResponse<>();

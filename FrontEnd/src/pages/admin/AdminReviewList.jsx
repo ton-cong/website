@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import reviewApi from '../../api/reviewApi';
 import { toast } from 'react-toastify';
 import { TrashIcon, StarIcon } from '@heroicons/react/24/outline';
@@ -155,7 +155,7 @@ const AdminReviewList = () => {
                                                         <p className="text-sm text-indigo-900 break-words pr-2">{reply.comment}</p>
                                                         <button
                                                             onClick={() => handleDelete(reply.id)}
-                                                            className="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity p-0.5 bg-white rounded-md shadow-sm"
+                                                            className="text-blue-400 hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity p-0.5 bg-white rounded-md shadow-sm"
                                                             title="Xóa phản hồi"
                                                         >
                                                             <TrashIcon className="h-3.5 w-3.5" />
@@ -211,7 +211,7 @@ const AdminReviewList = () => {
                                             )}
                                             <button
                                                 onClick={() => handleDelete(review.id)}
-                                                className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                                                 title="Xóa đánh giá"
                                             >
                                                 <TrashIcon className="h-4 w-4" />

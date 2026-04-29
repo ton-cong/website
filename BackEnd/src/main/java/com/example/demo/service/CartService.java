@@ -6,6 +6,7 @@ import com.example.demo.dto.response.CartResponse;
 public interface CartService {
     CartResponse getMyCart();
     CartResponse addToCart(CartItemRequest request);
+    CartResponse updateQuantity(Integer cartItemId, Integer quantity);
     void removeFromCart(Integer cartItemId);
     void clearCart();
 }

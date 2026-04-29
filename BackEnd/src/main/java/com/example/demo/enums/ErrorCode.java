@@ -9,7 +9,8 @@ public enum ErrorCode {
     NOT_EMAIL_FROM_TOKEN(1008,"not get email from token"),
     TOKEN_NOT_CREATED(1005,"token not created"),
     TOKEN_EXPIRED(1008,"token is expired"),
-    PASS_FAIL(1006,"Pass fail");
+    PASS_FAIL(1006,"Pass fail"),
+    FORBIDDEN(1009,"You do not have permission");
 
     private final int code;
     private final String message;

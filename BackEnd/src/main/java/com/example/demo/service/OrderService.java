@@ -11,5 +11,6 @@ public interface OrderService {
     List<OrderResponse> getMyOrders();
     List<OrderResponse> getAllOrders();
     Page<OrderResponse> getAllOrders(int page, int size, String sortBy, String sortDir);
+    OrderResponse getOrderById(Integer id);
     OrderResponse updateStatus(Integer orderId, OrderStatus status);
 }

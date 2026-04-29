@@ -15,13 +15,26 @@ public interface ProductRepository {
                                @Param("limit") int limit, @Param("offset") int offset);
     List<Product> searchProducts(@Param("keyword") String keyword,
                                  @Param("categoryId") Integer categoryId,
+                                 @Param("brand") String brand,
+                                 @Param("cpu") String cpu,
+                                 @Param("ram") String ram,
+                                 @Param("storage") String storage,
+                                 @Param("minPrice") Long minPrice,
+                                 @Param("maxPrice") Long maxPrice,
                                  @Param("sortBy") String sortBy,
                                  @Param("sortDir") String sortDir,
                                  @Param("limit") int limit,
                                  @Param("offset") int offset);
     long count();
     long countSearch(@Param("keyword") String keyword,
-                     @Param("categoryId") Integer categoryId);
+                     @Param("categoryId") Integer categoryId,
+                     @Param("brand") String brand,
+                     @Param("cpu") String cpu,
+                     @Param("ram") String ram,
+                     @Param("storage") String storage,
+                     @Param("minPrice") Long minPrice,
+                     @Param("maxPrice") Long maxPrice);
+    List<String> getDistinctBrands();
     boolean existsById(@Param("id") Integer id);
     void insert(Product product);
     void save(Product product);

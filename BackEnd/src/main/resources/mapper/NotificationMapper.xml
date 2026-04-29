@@ -13,31 +13,31 @@
     </resultMap>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id" parameterType="com.example.demo.entity.Notification">
-        INSERT INTO Notification (user_id, type, content, is_read, created_at)
+        INSERT INTO notifications (user_id, type, content, is_read, created_at)
         VALUES (#{userId}, #{type}, #{content}, #{isRead}, #{createdAt})
     </insert>
 
     <select id="findByUserId" resultMap="NotificationResultMap">
-        SELECT * FROM Notification
+        SELECT * FROM notifications
         WHERE user_id = #{userId}
         ORDER BY created_at DESC
         LIMIT 50
     </select>
 
     <update id="markAsRead">
-        UPDATE Notification
+        UPDATE notifications
         SET is_read = 1
         WHERE id = #{id}
     </update>
 
     <update id="markAllAsRead">
-        UPDATE Notification
+        UPDATE notifications
         SET is_read = 1
         WHERE user_id = #{userId}
     </update>
 
     <select id="countUnreadByUserId" resultType="int">
-        SELECT COUNT(*) FROM Notification
+        SELECT COUNT(*) FROM notifications
         WHERE user_id = #{userId} AND is_read = 0
     </select>
 

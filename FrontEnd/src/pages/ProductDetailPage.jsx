@@ -137,7 +137,7 @@ const ProductDetailPage = () => {
                                     <CheckCircleIcon className="w-4 h-4 mr-1" /> Còn hàng
                                 </span>
                             ) : (
-                                <span className="text-red-500 text-sm font-medium">Hết hàng</span>
+                                <span className="text-blue-500 text-sm font-medium">Hết hàng</span>
                             )}
                         </div>
                         <h1 className="text-3xl font-extrabold text-slate-900">{product.name}</h1>
@@ -156,9 +156,36 @@ const ProductDetailPage = () => {
                         {product.price?.toLocaleString()}đ
                     </div>
 
-                    <p className="text-slate-600 leading-relaxed border-t border-b border-slate-100 py-6">
-                        {product.description}
-                    </p>
+                    {/* Laptop Specifications */}
+                    <div className="border-t border-b border-slate-100 py-6 space-y-4">
+                        <h3 className="text-lg font-semibold text-slate-800">Thông số kỹ thuật</h3>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-slate-600">
+                            {product.brand && (
+                                <div className="flex bg-slate-50 p-3 rounded-lg"><span className="font-medium w-24 text-slate-700 min-w-[6rem]">Thương hiệu:</span> <span>{product.brand}</span></div>
+                            )}
+                            {product.cpu && (
+                                <div className="flex bg-slate-50 p-3 rounded-lg"><span className="font-medium w-24 text-slate-700 min-w-[6rem]">CPU:</span> <span>{product.cpu}</span></div>
+                            )}
+                            {product.ram && (
+                                <div className="flex bg-slate-50 p-3 rounded-lg"><span className="font-medium w-24 text-slate-700 min-w-[6rem]">RAM:</span> <span>{product.ram}</span></div>
+                            )}
+                            {product.storage && (
+                                <div className="flex bg-slate-50 p-3 rounded-lg"><span className="font-medium w-24 text-slate-700 min-w-[6rem]">Ổ cứng:</span> <span>{product.storage}</span></div>
+                            )}
+                            {product.screen && (
+                                <div className="flex bg-slate-50 p-3 rounded-lg"><span className="font-medium w-24 text-slate-700 min-w-[6rem]">Màn hình:</span> <span>{product.screen}</span></div>
+                            )}
+                        </div>
+                        {product.specifications && (
+                            <div className="text-sm text-slate-600 bg-slate-50 p-3 rounded-lg">
+                                <span className="font-medium text-slate-700 block mb-1">Thông số khác:</span> 
+                                {product.specifications}
+                            </div>
+                        )}
+                        <p className="text-slate-600 leading-relaxed mt-4 whitespace-pre-wrap">
+                            {product.description}
+                        </p>
+                    </div>
 
                     <div className="flex space-x-4">
                         <Button
@@ -173,6 +200,25 @@ const ProductDetailPage = () => {
                     </div>
                 </div>
             </div>
+
+            {/* ─── Nội dung chi tiết ─── */}
+            {product.content && (
+                <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-100">
+                    <h2 className="text-2xl font-bold text-slate-900 mb-6">Nội dung chi tiết</h2>
+                    <div
+                        dangerouslySetInnerHTML={{ __html: product.content }}
+                        style={{
+                            lineHeight: '1.8',
+                            fontSize: '15px',
+                            color: '#374151',
+                            wordBreak: 'break-word',
+                            overflowWrap: 'break-word',
+                            overflow: 'hidden',
+                        }}
+                        className="product-content"
+                    />
+                </div>
+            )}
 
             <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-100">
                 <div className="flex justify-between items-center mb-6">

@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 public class ProductRequest {
 
     private String name;
+    private Integer categoryId;
     private String categoryName;
     private String description;
     private String specifications;
@@ -27,5 +28,6 @@ public class ProductRequest {
     private String storage;
     private String screen;
     private String status;
+    private String content;
 
 }

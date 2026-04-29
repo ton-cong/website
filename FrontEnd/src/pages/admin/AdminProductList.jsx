@@ -151,7 +151,9 @@ const AdminProductList = () => {
                                     Giá {getSortIcon('price')}
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Danh mục</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Trạng thái</th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider cursor-pointer hover:text-indigo-600" onClick={() => handleSort('stock')}>
+                                    Số lượng {getSortIcon('stock')}
+                                </th>
                                 <th className="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Hành động</th>
                             </tr>
                         </thead>
@@ -170,9 +172,14 @@ const AdminProductList = () => {
                                     <td className="px-6 py-4 text-sm text-slate-700">{product.price?.toLocaleString()}đ</td>
                                     <td className="px-6 py-4 text-sm text-slate-500">{product.categoryName}</td>
                                     <td className="px-6 py-4">
-                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${product.status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                                            }`}>
-                                            {product.status}
+                                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${
+                                            product.stock === 0
+                                                ? 'bg-red-100 text-red-700'
+                                                : product.stock <= 5
+                                                ? 'bg-orange-100 text-orange-700'
+                                                : 'bg-green-100 text-green-700'
+                                        }`}>
+                                            {product.stock === 0 ? 'Hết hàng' : `${product.stock} sản phẩm`}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-right">
@@ -185,7 +192,7 @@ const AdminProductList = () => {
                                             </button>
                                             <button
                                                 onClick={() => handleDelete(product.id)}
-                                                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                                             >
                                                 <TrashIcon className="h-4 w-4" />
                                             </button>

@@ -52,10 +52,10 @@ public class SecurityConfig {
                         ).permitAll()
 
 
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/products/**", "/api/category/**").hasRole("ADMIN")
-                        .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/products/**", "/api/category/**").hasRole("ADMIN")
-                        .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/products/**", "/api/category/**").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/products/**", "/api/category/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
+                        .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/products/**", "/api/category/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
+                        .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/products/**", "/api/category/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
 
                         .requestMatchers("/api/auth/changePass").authenticated()
                         .requestMatchers("/api/auth/profile/update").authenticated()
