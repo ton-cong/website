@@ -1,0 +1,13 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "NIXPACKS",
+    "watchPatterns": ["BackEnd/**"]
+  },
+  "deploy": {
+    "startCommand": "cd BackEnd && ./mvnw spring-boot:run",
+    "healthcheckPath": "/v3/api-docs",
+    "healthcheckTimeout": 120,
+    "restartPolicyType": "ON_FAILURE"
+  }
+}
