@@ -70,7 +70,7 @@ const ContactPage = () => {
                                 </div>
                                 <div>
                                     <h4 className="text-lg font-semibold text-slate-900">Email hỗ trợ</h4>
-                                    <p className="mt-1 text-slate-600">support@lapton.vn<br />sales@lapton.vn</p>
+                                    <p className="mt-1 text-slate-600">support@tquad.vn<br />sales@tquad.vn</p>
                                 </div>
                             </div>
                         </div>

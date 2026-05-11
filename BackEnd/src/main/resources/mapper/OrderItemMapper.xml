@@ -7,37 +7,44 @@
     <resultMap id="OrderItemResultMap" type="com.example.demo.entity.OrderItem">
         <id property="id" column="id"/>
         <result property="orderId" column="order_id"/>
-        <result property="productId" column="product_id"/>
+        <result property="productVariantId" column="product_variant_id"/>
         <result property="quantity" column="quantity"/>
         <result property="price" column="price"/>
-        <association property="product" javaType="com.example.demo.entity.Product">
-            <id property="id" column="p_id"/>
-            <result property="name" column="p_name"/>
-            <result property="imageUrl" column="p_image_url"/>
+        <association property="productVariant" javaType="com.example.demo.entity.ProductVariant">
+            <id property="id" column="pv_id"/>
+            <result property="specifications" column="pv_specifications"/>
+            <association property="product" javaType="com.example.demo.entity.Product">
+                <id property="id" column="p_id"/>
+                <result property="name" column="p_name"/>
+                <result property="imageUrl" column="p_image_url"/>
+            </association>
         </association>
     </resultMap>
 
     <select id="findByOrderId" parameterType="int" resultMap="OrderItemResultMap">
-        SELECT oi.*, p.id AS p_id, p.name AS p_name, p.image_url AS p_image_url
+        SELECT oi.*, 
+               pv.id AS pv_id, pv.specifications AS pv_specifications,
+               p.id AS p_id, p.name AS p_name, p.image_url AS p_image_url
         FROM order_items oi
-        LEFT JOIN products p ON oi.product_id = p.id
+        LEFT JOIN product_variants pv ON oi.product_variant_id = pv.id
+        LEFT JOIN products p ON pv.product_id = p.id
         WHERE oi.order_id = #{orderId}
     </select>
 
     <insert id="insert" parameterType="com.example.demo.entity.OrderItem" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO order_items (order_id, product_id, quantity, price)
-        VALUES (#{orderId}, #{productId}, #{quantity}, #{price})
+        INSERT INTO order_items (order_id, product_variant_id, quantity, price)
+        VALUES (#{orderId}, #{productVariantId}, #{quantity}, #{price})
     </insert>
 
     <insert id="insertAll" parameterType="java.util.List">
-        INSERT INTO order_items (order_id, product_id, quantity, price) VALUES
+        INSERT INTO order_items (order_id, product_variant_id, quantity, price) VALUES
         <foreach collection="list" item="item" separator=",">
-            (#{item.orderId}, #{item.productId}, #{item.quantity}, #{item.price})
+            (#{item.orderId}, #{item.productVariantId}, #{item.quantity}, #{item.price})
         </foreach>
     </insert>
 
-    <delete id="deleteByProductId" parameterType="int">
-        DELETE FROM order_items WHERE product_id = #{productId}
+    <delete id="deleteByProductVariantId" parameterType="int">
+        DELETE FROM order_items WHERE product_variant_id = #{productVariantId}
     </delete>
 
 </mapper>

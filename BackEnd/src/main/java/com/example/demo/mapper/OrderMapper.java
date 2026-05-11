@@ -13,8 +13,10 @@ public interface OrderMapper {
     @Mapping(target = "items", source = "items")
     OrderResponse toResponse(Order order);
 
-    @Mapping(target = "productId", source = "productId")
-    @Mapping(target = "productName", source = "product.name")
-    @Mapping(target = "imageUrl", source = "product.imageUrl")
+    @Mapping(target = "productId", source = "productVariant.productId")
+    @Mapping(target = "productName", source = "productVariant.product.name")
+    @Mapping(target = "imageUrl", source = "productVariant.product.imageUrl")
+    @Mapping(target = "ram", source = "productVariant.ram")
+    @Mapping(target = "storage", source = "productVariant.storage")
     OrderItemResponse toItemResponse(OrderItem orderItem);
 }

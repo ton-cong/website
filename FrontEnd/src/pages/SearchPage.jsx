@@ -109,7 +109,65 @@ const SearchPage = () => {
                 page, size: pageSize, sortBy, sortDir,
             });
             const data = res?.result || res;
-            setProducts(data?.content || []);
+            
+            // Lọc ra các biến thể thoả mãn điều kiện
+            const productsData = data?.content || [];
+            let matchedVariants = [];
+            
+            productsData.forEach(p => {
+                if (p.status === 'INACTIVE') return;
+                if (p.variants && p.variants.length > 0) {
+                    p.variants.forEach(v => {
+                        let match = true;
+                        if (selectedCpu && (!v.cpu || !v.cpu.toLowerCase().includes(selectedCpu.toLowerCase()))) match = false;
+                        if (selectedRam && (!v.ram || !v.ram.toLowerCase().includes(selectedRam.toLowerCase()))) match = false;
+                        if (selectedStorage && (!v.storage || !v.storage.toLowerCase().includes(selectedStorage.toLowerCase()))) match = false;
+                        
+                        const vPrice = v.salePrice || v.price;
+                        if (appliedMin != null && vPrice < appliedMin) match = false;
+                        if (appliedMax != null && vPrice > appliedMax) match = false;
+
+                        if (match) {
+                            matchedVariants.push({
+                                ...v,
+                                productId: p.id,
+                                productName: p.name,
+                                categoryName: p.categoryName,
+                                imageUrl: p.imageUrl || 'https://via.placeholder.com/300',
+                                productStatus: p.status
+                            });
+                        }
+                    });
+                } else {
+                    let match = true;
+                    if (selectedCpu && (!p.cpu || !p.cpu.toLowerCase().includes(selectedCpu.toLowerCase()))) match = false;
+                    if (selectedRam && (!p.ram || !p.ram.toLowerCase().includes(selectedRam.toLowerCase()))) match = false;
+                    if (selectedStorage && (!p.storage || !p.storage.toLowerCase().includes(selectedStorage.toLowerCase()))) match = false;
+                    
+                    const pPrice = p.salePrice || p.price;
+                    if (appliedMin != null && pPrice < appliedMin) match = false;
+                    if (appliedMax != null && pPrice > appliedMax) match = false;
+                    
+                    if (match) {
+                        matchedVariants.push({
+                            id: p.id + '_default',
+                            productId: p.id,
+                            productName: p.name,
+                            categoryName: p.categoryName,
+                            imageUrl: p.imageUrl || 'https://via.placeholder.com/300',
+                            specifications: p.specifications,
+                            ram: p.ram,
+                            storage: p.storage,
+                            cpu: p.cpu,
+                            price: p.price,
+                            salePrice: p.salePrice,
+                            productStatus: p.status
+                        });
+                    }
+                }
+            });
+
+            setProducts(matchedVariants);
             setTotalPages(data?.totalPages || 0);
             setTotalElements(data?.totalElements || 0);
         } catch { toast.error('Không thể tải sản phẩm'); }
@@ -358,22 +416,35 @@ const SearchPage = () => {
                     ) : (
                         <>
                             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-                                {products.map(product => (
-                                    <Link key={product.id} to={`/products/${product.id}`}
-                                        className="group bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
-                                        <div className="aspect-square overflow-hidden bg-slate-50 p-3">
-                                            <img src={product.imageUrl || 'https://via.placeholder.com/300'} alt={product.name}
+                                {products.map(variant => (
+                                    <Link key={variant.id} to={`/products/${variant.productId}`}
+                                        className="group bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex flex-col">
+                                        <div className="aspect-square overflow-hidden bg-slate-50 p-3 relative">
+                                            <img src={variant.imageUrl} alt={variant.productName}
                                                 className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" />
+                                            {variant.productStatus === 'OUT_OF_STOCK' && (
+                                                <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center">
+                                                    <span className="bg-slate-900 text-white px-3 py-1 text-[10px] font-bold rounded-full uppercase tracking-wider">Hết hàng</span>
+                                                </div>
+                                            )}
                                         </div>
-                                        <div className="p-3">
-                                            <p className="text-[10px] text-blue-500 font-semibold mb-0.5 uppercase tracking-wide">{product.categoryName}</p>
-                                            <h3 className="text-sm font-semibold text-slate-800 mb-1 line-clamp-2 group-hover:text-blue-600 transition-colors leading-snug">{product.name}</h3>
+                                        <div className="p-3 flex flex-col flex-grow">
+                                            <p className="text-[10px] text-blue-500 font-semibold mb-0.5 uppercase tracking-wide">{variant.categoryName}</p>
+                                            <h3 className="text-sm font-semibold text-slate-800 mb-1 line-clamp-2 group-hover:text-blue-600 transition-colors leading-snug">
+                                                {variant.productName}
+                                            </h3>
+                                            <p className="text-xs text-slate-500 mb-2 truncate">
+                                                {variant.specifications || (variant.cpu && `${variant.cpu} | ${variant.ram} | ${variant.storage}`) || 'Bản tiêu chuẩn'}
+                                            </p>
                                             <div className="flex flex-wrap gap-1 mb-2">
-                                                {product.ram && <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded">{product.ram}</span>}
-                                                {product.storage && <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded">{product.storage}</span>}
+                                                {variant.ram && <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded">{variant.ram}</span>}
+                                                {variant.storage && <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded">{variant.storage}</span>}
                                             </div>
-                                            <div className="flex items-center justify-between">
-                                                <p className="text-base font-bold text-blue-600">{product.price?.toLocaleString('vi-VN')}đ</p>
+                                            <div className="flex items-center justify-between mt-auto">
+                                                <div className="flex flex-col">
+                                                    <p className="text-base font-bold text-blue-600">{(variant.salePrice || variant.price)?.toLocaleString('vi-VN')}đ</p>
+                                                    {variant.salePrice && <p className="text-[10px] text-slate-400 line-through">{variant.price?.toLocaleString('vi-VN')}đ</p>}
+                                                </div>
                                                 <div className="p-1.5 rounded-full bg-blue-50 text-blue-500 group-hover:bg-blue-600 group-hover:text-white transition-colors">
                                                     <ShoppingCartIcon className="h-4 w-4" />
                                                 </div>

@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import orderApi from '../../api/orderApi';
 import { toast } from 'react-toastify';
-import { MagnifyingGlassIcon, EyeIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, EyeIcon, XMarkIcon, DocumentArrowDownIcon, PrinterIcon } from '@heroicons/react/24/outline';
 import Pagination from '../../components/Pagination';
+import InvoiceTemplate from '../../components/admin/InvoiceTemplate';
+import { useRef } from 'react';
 
 const AdminOrderList = () => {
     const [orders, setOrders] = useState([]);
@@ -17,6 +19,9 @@ const AdminOrderList = () => {
     const [filteredOrders, setFilteredOrders] = useState([]);
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [loadingDetails, setLoadingDetails] = useState(false);
+    const [exporting, setExporting] = useState(false);
+    const [printOrder, setPrintOrder] = useState(null);
+    const invoiceRef = useRef();
 
     useEffect(() => {
         fetchOrders();
@@ -79,6 +84,35 @@ const AdminOrderList = () => {
         }
     };
 
+    const handleExportInvoice = async (orderId) => {
+        try {
+            setExporting(true);
+            const blob = await orderApi.exportInvoice(orderId);
+            const url = window.URL.createObjectURL(new Blob([blob]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `invoice_order_${orderId}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            toast.success('Đang tải hóa đơn...');
+        } catch (error) {
+            console.error(error);
+            toast.error('Không thể xuất PDF');
+        } finally {
+            setExporting(false);
+        }
+    };
+
+    const handlePrint = (order) => {
+        setPrintOrder(order);
+        // Tự động kích hoạt lệnh in sau khi modal đã render
+        setTimeout(() => {
+            window.print();
+        }, 300);
+    };
+
+
     const getStatusColor = (status) => {
         const colors = {
             'pending': 'bg-yellow-100 text-yellow-800',
@@ -132,15 +166,17 @@ const AdminOrderList = () => {
         <div>
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <h1 className="text-2xl font-bold text-slate-900 mb-0">Quản lý đơn hàng</h1>
-                <div className="relative w-full sm:w-auto">
-                    <MagnifyingGlassIcon className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
-                    <input
-                        type="text"
-                        placeholder="Tìm ID, tên, SĐT..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        className="pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-full sm:w-64"
-                    />
+                <div className="flex items-center gap-3 w-full sm:w-auto">
+                    <div className="relative flex-1 sm:flex-none">
+                        <MagnifyingGlassIcon className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+                        <input
+                            type="text"
+                            placeholder="Tìm ID, tên, SĐT..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-full sm:w-64"
+                        />
+                    </div>
                 </div>
             </div>
 
@@ -197,6 +233,21 @@ const AdminOrderList = () => {
                                             >
                                                 <EyeIcon className="h-5 w-5" />
                                             </button>
+                                            <button 
+                                                onClick={() => handleExportInvoice(order.id)}
+                                                disabled={exporting}
+                                                className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors disabled:opacity-50"
+                                                title="Tải PDF (Backend)"
+                                            >
+                                                <DocumentArrowDownIcon className="h-5 w-5" />
+                                            </button>
+                                            <button 
+                                                onClick={() => handlePrint(order)}
+                                                className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                                                title="In hóa đơn chuyên nghiệp"
+                                            >
+                                                <PrinterIcon className="h-5 w-5" />
+                                            </button>
                                             <select
                                                 value={order.status}
                                                 onChange={(e) => handleUpdateStatus(order.id, e.target.value)}
@@ -236,9 +287,19 @@ const AdminOrderList = () => {
                     <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
                         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
                             <h3 className="text-lg font-bold text-slate-900">Chi tiết đơn hàng #{selectedOrder.id}</h3>
-                            <button onClick={() => setSelectedOrder(null)} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-lg transition-colors">
-                                <XMarkIcon className="h-5 w-5" />
-                            </button>
+                            <div className="flex items-center gap-2">
+                                <button 
+                                    onClick={() => handleExportInvoice(selectedOrder.id)}
+                                    disabled={exporting}
+                                    title="Xuất hóa đơn PDF"
+                                    className="p-2 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-colors disabled:opacity-50"
+                                >
+                                    <DocumentArrowDownIcon className="h-5 w-5" />
+                                </button>
+                                <button onClick={() => setSelectedOrder(null)} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-lg transition-colors">
+                                    <XMarkIcon className="h-5 w-5" />
+                                </button>
+                            </div>
                         </div>
                         <div className="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-6">
                             {/* Thông tin giao hàng */}
@@ -302,6 +363,30 @@ const AdminOrderList = () => {
                                 Đóng
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+            {/* Modal In hóa đơn (Chỉ hiển thị khi in) */}
+            {printOrder && (
+                <div id="print-modal-root" className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 overflow-y-auto">
+                    <div className="flex flex-col items-center">
+                        <div className="bg-slate-800 rounded-2xl p-4 mb-4 flex gap-4 sticky top-0 z-10 shadow-2xl no-print">
+                        <button 
+                            onClick={() => window.print()}
+                            className="flex items-center gap-2 px-6 py-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors font-bold"
+                        >
+                            <PrinterIcon className="h-5 w-5" /> In ngay
+                        </button>
+                        <button 
+                            onClick={() => setPrintOrder(null)}
+                            className="flex items-center gap-2 px-6 py-2 bg-white/10 text-white rounded-xl hover:bg-white/20 transition-colors font-bold"
+                        >
+                            <XMarkIcon className="h-5 w-5" /> Đóng bản xem trước
+                        </button>
+                    </div>
+                    <div className="bg-white shadow-2xl origin-top scale-90 sm:scale-100">
+                        <InvoiceTemplate order={printOrder} />
+                    </div>
                     </div>
                 </div>
             )}

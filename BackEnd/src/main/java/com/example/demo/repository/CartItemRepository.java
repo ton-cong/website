@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
 import java.util.Optional;
+import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface CartItemRepository {
@@ -14,5 +15,5 @@ public interface CartItemRepository {
     void save(CartItem cartItem);
     void deleteById(Integer id);
     void deleteByCartId(Integer cartId);
-    void deleteByProductId(Integer productId);
+    void deleteByProductVariantId(@Param("productVariantId") Integer productVariantId);
 }

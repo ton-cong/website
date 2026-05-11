@@ -12,9 +12,9 @@ import lombok.NoArgsConstructor;
 public class OrderItem {
     private Integer id;
     private Integer orderId;
-    private Integer productId;
+    private Integer productVariantId;
     private Integer quantity;
     private Double price;
 
-    private Product product;
+    private ProductVariant productVariant;
 }

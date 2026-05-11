@@ -32,14 +32,9 @@ axiosClient.interceptors.response.use(
         if (response) {
             const errorMessage = response.data?.message || response.data?.error || 'Đã có lỗi xảy ra';
 
-            if (response.status !== 401) {
-                toast.error(errorMessage);
-            }
-
-            if (response.status === 401) {
+            if (response.status === 401 || response.status === 403) {
                 localStorage.removeItem('token');
-                if (window.location.pathname !== '/login') {
-                }
+                localStorage.removeItem('user');
             }
         } else if (error.request) {
             toast.error("Không thể kết nối đến server. Vui lòng kiểm tra mạng.");

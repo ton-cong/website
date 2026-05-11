@@ -8,9 +8,11 @@ DROP TABLE IF EXISTS cart_items;
 DROP TABLE IF EXISTS carts;
 DROP TABLE IF EXISTS order_items;
 DROP TABLE IF EXISTS orders;
+DROP TABLE IF EXISTS product_variants;
 DROP TABLE IF EXISTS products;
 DROP TABLE IF EXISTS categories;
 DROP TABLE IF EXISTS users;
+
 
 CREATE TABLE IF NOT EXISTS users (
                                      id INT AUTO_INCREMENT PRIMARY KEY,
@@ -68,62 +70,112 @@ CREATE TABLE IF NOT EXISTS products (
                                         name VARCHAR(255) NOT NULL,
                                         category_id INT,
                                         description TEXT,
-                                        specifications TEXT,
-                                        price DOUBLE NOT NULL,
-                                        sale_price DOUBLE,
-                                        stock INT DEFAULT 0,
                                         image_url VARCHAR(512),
                                         brand VARCHAR(100),
-                                        cpu VARCHAR(100),
-                                        ram VARCHAR(50),
-                                        storage VARCHAR(100),
-                                        screen VARCHAR(100),
                                         status ENUM('ACTIVE','INACTIVE','OUT_OF_STOCK') DEFAULT 'ACTIVE',
                                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                                         deleted TINYINT DEFAULT 0,
                                         FOREIGN KEY (category_id) REFERENCES categories(id)
 );
 
-INSERT INTO products (name, category_id, description, specifications, price, sale_price, stock, image_url, brand, cpu, ram, storage, screen, status) VALUES
-                                                                                                                                                         ('ASUS ROG Strix G15',          1, 'Powerful gaming with RTX 4070', 'RTX 4070, 144Hz IPS',     28990000, 26990000, 15, 'https://res.cloudinary.com/dquuquf93/image/upload/v1771863254/ASUS_ROG_Strix_G15_kyjxrm.jpg',          'ASUS',      'Intel Core i7-13650HX', '16GB DDR5',  '1TB NVMe SSD', '15.6" FHD 144Hz',  'ACTIVE'),
-                                                                                                                                                         ('MSI Katana GF66',             1, 'Budget gaming powerhouse',       'RTX 3060, 144Hz',         21990000, 20490000, 20, 'https://res.cloudinary.com/dquuquf93/image/upload/v1771863266/MSI_Katana_GF66_dgoz4h.jpg',             'MSI',       'Intel Core i5-12450H',  '8GB DDR4',   '512GB NVMe SSD', '15.6" FHD 144Hz', 'ACTIVE'),
-                                                                                                                                                         ('Lenovo Legion 5 Pro',         1, 'ProDisplay gaming laptop',       'RTX 4060, 165Hz',         24990000, 23490000, 12, 'https://res.cloudinary.com/dquuquf93/image/upload/v1771863262/Lenovo_Legion_5_Pro_jew1kh.jpg',         'Lenovo',    'AMD Ryzen 7 7745HX',    '16GB DDR5',  '1TB NVMe SSD', '16" WQXGA 165Hz',  'ACTIVE'),
-                                                                                                                                                         ('Acer Nitro 5 2023',           1, 'Entry-level gaming laptop',      'RTX 4050, 144Hz',         18990000, 17490000, 25, 'https://res.cloudinary.com/dquuquf93/image/upload/v1771863253/Acer_Nitro_5_2023_khwbw1.jpg',           'Acer',      'Intel Core i5-13420H',  '8GB DDR4',   '512GB SSD',     '15.6" FHD 144Hz',  'ACTIVE'),
-                                                                                                                                                         ('HP Victus 16',                1, 'Slim gaming notebook',           'RTX 3060, 144Hz',         22490000, 20990000, 18, 'https://res.cloudinary.com/dquuquf93/image/upload/v1771863257/HP_Victus_16_rd3ktb.jpg',                'HP',        'Intel Core i7-12700H',  '16GB DDR4',  '1TB NVMe SSD', '16.1" FHD 144Hz',  'ACTIVE'),
-                                                                                                                                                         ('ASUS TUF Gaming A15',         1, 'Durable gaming warrior',         'RTX 4060, 144Hz',         19990000, 18490000, 22, 'https://res.cloudinary.com/dquuquf93/image/upload/v1771863254/ASUS_TUF_Gaming_A15_rv1oqj.png',         'ASUS',      'AMD Ryzen 5 7535HS',    '8GB DDR5',   '512GB NVMe',    '15.6" FHD 144Hz',  'ACTIVE'),
-                                                                                                                                                         ('Gigabyte AORUS 15',           1, 'Premium gaming OLED notebook',   'RTX 4070, 240Hz OLED',   35990000, 33990000,  8, 'https://res.cloudinary.com/dquuquf93/image/upload/v1771863256/Gigabyte_AORUS_15_p9sbct.jpg',           'Gigabyte',  'Intel Core i9-13980HX', '32GB DDR5',  '2TB NVMe SSD', '15.6" FHD 240Hz',  'ACTIVE'),
-                                                                                                                                                         ('Razer Blade 15',              1, 'Premium ultra-slim gaming',      'RTX 4080, 240Hz',         55990000, 54990000,  5, 'https://res.cloudinary.com/dquuquf93/image/upload/v1771863267/Razer_Blade_15_acm694.jpg',              'Razer',     'Intel Core i9-13950HX', '32GB DDR5',  '1TB NVMe SSD', '15.6" FHD 240Hz',  'ACTIVE'),
-                                                                                                                                                         ('Dell G15 Gaming',             1, 'Value gaming laptop',            'RTX 3050, 120Hz',         17490000, 15990000, 30, 'https://res.cloudinary.com/dquuquf93/image/upload/v1771863255/Dell_G15_Gaming_dgsax2.png',             'Dell',      'Intel Core i5-12500H',  '8GB DDR4',   '256GB SSD',     '15.6" FHD 120Hz',  'ACTIVE'),
-                                                                                                                                                         ('MSI Raider GE76',             1, 'Elite gaming beast',             'RTX 4090, 360Hz',         62990000, 60990000,  3, 'https://res.cloudinary.com/dquuquf93/image/upload/v1771863266/MSI_Raider_GE76_aflgn3.jpg',             'MSI',       'Intel Core i9-13980HX', '64GB DDR5',  '4TB NVMe SSD', '17.3" FHD 360Hz',  'ACTIVE'),
-                                                                                                                                                         ('ASUS ROG Zephyrus G14',       1, 'Ultra-portable gaming',          'RTX 4060, 120Hz OLED',   29990000, 27990000, 10, 'https://res.cloudinary.com/dquuquf93/image/upload/v1771863258/ASUS_ROG_Zephyrus_G14_xmbrdk.jpg',       'ASUS',      'AMD Ryzen 9 7940HS',    '16GB LPDDR5','1TB NVMe SSD', '14" 2.8K 120Hz',   'ACTIVE'),
-                                                                                                                                                         ('Lenovo IdeaPad Gaming 3',     1, 'Entry gaming laptop',            'RTX 3050, 120Hz',         16990000, 15490000, 35, 'https://res.cloudinary.com/dquuquf93/image/upload/v1771863259/Lenovo_IdeaPad_Gaming_3_zzfmuk.jpg',     'Lenovo',    'AMD Ryzen 5 6600H',     '8GB DDR4',   '512GB SSD',     '15.6" FHD 120Hz',  'ACTIVE'),
-                                                                                                                                                         ('Acer Predator Helios 300',    1, 'Serious gaming performance',     'RTX 4070, 165Hz',         30990000, 29490000, 10, 'https://res.cloudinary.com/dquuquf93/image/upload/v1771863253/Acer_Predator_Helios_300_r0r5gg.jpg',    'Acer',      'Intel Core i7-13700H',  '16GB DDR5',  '1TB NVMe SSD', '15.6" FHD 165Hz',  'ACTIVE'),
-                                                                                                                                                         ('HP OMEN 16',                  1, 'Powerhouse gaming laptop',       'RTX 4080, 165Hz',         42990000, 40990000,  6, 'https://res.cloudinary.com/dquuquf93/image/upload/v1771863257/HP_OMEN_16_wvizfu.jpg',                  'HP',        'Intel Core i9-13900HX', '32GB DDR5',  '1TB NVMe SSD', '16.1" FHD 165Hz',  'ACTIVE'),
-                                                                                                                                                         ('Dell XPS 13 Plus',            2, 'Ultra-premium compact laptop',   'OLED Touchscreen',        34990000, 32990000,  8, 'https://res.cloudinary.com/dquuquf93/image/upload/v1771863256/Dell_XPS_13_Plus_wsfpal.jpg',            'Dell',      'Intel Core i7-1360P',   '16GB LPDDR5','512GB NVMe',    '13.4" OLED 3.5K',  'ACTIVE'),
-                                                                                                                                                         ('LG Gram 14',                  2, 'Ultra-light laptop under 1kg',   'MIL-SPEC durability',     24490000, 22490000, 12, 'https://res.cloudinary.com/dquuquf93/image/upload/v1771863264/LG_Gram_14_rwfafd.jpg',                  'LG',        'Intel Core i7-1360P',   '16GB LPDDR5','512GB NVMe',    '14" IPS FHD',       'ACTIVE'),
-                                                                                                                                                         ('HP Spectre x360 14',          2, 'Premium 2-in-1 ultrabook',       'OLED Touchscreen',        33490000, 31990000,  9, 'https://res.cloudinary.com/dquuquf93/image/upload/v1771863257/HP_Spectre_x360_14_a840dr.png',          'HP',        'Intel Core i7-1355U',   '16GB LPDDR5','512GB NVMe',    '13.5" OLED 3K2K',  'ACTIVE'),
-                                                                                                                                                         ('Lenovo Yoga Slim 7i',         2, 'Sleek everyday ultrabook',       'IPS anti-glare',          18990000, 17490000, 20, 'https://res.cloudinary.com/dquuquf93/image/upload/v1771863263/Lenovo_Yoga_Slim_7i_sninrd.jpg',         'Lenovo',    'Intel Core i5-1335U',   '16GB LPDDR5','512GB NVMe',    '14" IPS FHD',       'ACTIVE'),
-                                                                                                                                                         ('Samsung Galaxy Book3 Pro',    2, 'Ultra-thin AMOLED ultrabook',    'AMOLED 3K Display',       29990000, 27990000,  7, 'https://res.cloudinary.com/dquuquf93/image/upload/v1771863267/Samsung_Galaxy_Book3_Pro_qrvrsh.png',    'Samsung',   'Intel Core i7-1360P',   '16GB LPDDR5','512GB NVMe',    '14" AMOLED 3K',     'ACTIVE'),
-                                                                                                                                                         ('Apple MacBook Air M2',        3, 'Fanless silent performance',     'M2 chip, 18hr battery',   28990000, 27990000, 15, 'https://res.cloudinary.com/dquuquf93/image/upload/v1771863254/Apple_MacBook_Air_M2_mio1be.jpg',        'Apple',     'Apple M2',              '8GB Unified', '256GB SSD',    '13.6" Liquid Retina','ACTIVE'),
-                                                                                                                                                         ('Apple MacBook Pro 14 M3',     3, 'Pro content creation powerhouse','M3 Pro, 120Hz ProMotion', 52990000, 51990000,  6, 'https://res.cloudinary.com/dquuquf93/image/upload/v1771863254/Apple_MacBook_Pro_14_M3_j0vk2n.jpg',     'Apple',     'Apple M3 Pro',          '18GB Unified','512GB SSD',    '14.2" Liquid Retina','ACTIVE'),
-                                                                                                                                                         ('Apple MacBook Pro 16 M3 Max', 3, 'Ultimate Mac workstation',       'M3 Max chip',             79990000, 78990000,  3, 'https://res.cloudinary.com/dquuquf93/image/upload/v1771863255/Apple_MacBook_Pro_16_M3_Max_di7qqi.jpg', 'Apple',     'Apple M3 Max',          '36GB Unified','1TB SSD',      '16.2" Liquid Retina','ACTIVE'),
-                                                                                                                                                         ('Apple MacBook Air M1',        3, 'Best value Mac laptop',          'M1 chip, 18hr battery',   21990000, 19990000, 20, 'https://res.cloudinary.com/dquuquf93/image/upload/v1771863254/Apple_MacBook_Air_M1_jaojn2.jpg',        'Apple',     'Apple M1',              '8GB Unified', '256GB SSD',    '13.3" Retina',       'ACTIVE'),
-                                                                                                                                                         ('Lenovo ThinkPad X1 Carbon',   4, 'Business flagship ultrabook',    'Military-grade certified', 38990000, 36990000,  8, 'https://res.cloudinary.com/dquuquf93/image/upload/v1771863262/Lenovo_ThinkPad_X1_Carbon_tq0mom.jpg',   'Lenovo',   'Intel Core i7-1365U',   '16GB LPDDR5','512GB NVMe',    '14" IPS 2.8K',      'ACTIVE'),
-                                                                                                                                                         ('HP EliteBook 840 G9',         4, 'Business security laptop',       'Wolf Security built-in',   28490000, 26990000, 10, 'https://res.cloudinary.com/dquuquf93/image/upload/v1771863256/HP_EliteBook_840_G9_qrxzpl.jpg',         'HP',       'Intel Core i5-1245U',   '16GB DDR4',   '512GB NVMe',   '14" IPS FHD',       'ACTIVE'),
-                                                                                                                                                         ('Dell Latitude 5430',          4, 'Durable business laptop',        'TPM 2.0, IR Camera',       24990000, 22990000, 12, 'https://res.cloudinary.com/dquuquf93/image/upload/v1771863255/Dell_Latitude_5430_q5rzho.jpg',          'Dell',     'Intel Core i5-1245U',   '8GB DDR4',    '256GB NVMe',   '14" FHD',           'ACTIVE'),
-                                                                                                                                                         ('Panasonic Toughbook 55',      4, 'Rugged field laptop',            'IP65 certified, 40hr batt',55990000, 53990000,  4, 'https://res.cloudinary.com/dquuquf93/image/upload/v1771863267/Panasonic_Toughbook_55_uipnyz.jpg',      'Panasonic','Intel Core i5-1145G7',  '8GB DDR4',    '256GB SSD',    '14" HD Touchscreen','ACTIVE'),
-                                                                                                                                                         ('Acer Aspire 5 2023',          5, 'Best budget laptop for students','Full HD IPS, long battery', 10990000, 9990000,  40, 'https://res.cloudinary.com/dquuquf93/image/upload/v1771863253/Acer_Aspire_5_2023_bsqfdz.jpg',         'Acer',    'AMD Ryzen 5 5500U',     '8GB DDR4',    '512GB SSD',    '15.6" FHD IPS',     'ACTIVE'),
-                                                                                                                                                         ('Lenovo IdeaPad 3',            5, 'Affordable everyday laptop',     'Good all-rounder',          8990000,  7990000,  50, 'https://res.cloudinary.com/dquuquf93/image/upload/v1771863258/Lenovo_IdeaPad_3_wdnzch.jpg',           'Lenovo',  'Intel Core i3-1215U',   '4GB DDR4',    '256GB SSD',    '15.6" FHD',         'ACTIVE'),
-                                                                                                                                                         ('HP 15s-fq5000TU',             5, 'Entry-level HP laptop',          'Thin design, basic tasks',  9490000,  8490000,  45, 'https://res.cloudinary.com/dquuquf93/image/upload/v1771863256/HP_15s-fq5000TU_gsygku.jpg',            'HP',      'Intel Core i3-1215U',   '4GB DDR4',    '256GB NVMe',   '15.6" FHD IPS',     'ACTIVE'),
-                                                                                                                                                         ('ASUS VivoBook 15',            5, 'Slim affordable laptop',         'NanoEdge display',          9990000,  8990000,  35, 'https://res.cloudinary.com/dquuquf93/image/upload/v1771863253/ASUS_VivoBook_15_q8necy.jpg',           'ASUS',    'AMD Ryzen 5 5500U',     '8GB DDR4',    '512GB SSD',    '15.6" FHD',         'ACTIVE'),
-                                                                                                                                                         ('Dell Inspiron 15',            5, 'Reliable budget laptop',         'Wide port selection',        9290000,  8290000,  38, 'https://res.cloudinary.com/dquuquf93/image/upload/v1771863255/Dell_Inspiron_15_wowlgr.jpg',           'Dell',   'Intel Core i3-1215U',   '4GB DDR4',    '256GB HDD',    '15.6" FHD',         'ACTIVE'),
-                                                                                                                                                         ('Lenovo Yoga 9i',              6, 'Premium 2-in-1 convertible',     '4K OLED Touchscreen',      35990000, 33990000, 7,  'https://res.cloudinary.com/dquuquf93/image/upload/v1771863263/Lenovo_Yoga_9i_hsoh47.jpg',              'Lenovo',  'Intel Core i7-1360P',   '16GB LPDDR5', '1TB NVMe',     '14" 4K OLED Touch', 'ACTIVE'),
-                                                                                                                                                         ('HP Envy x360 13',             6, 'Compact 2-in-1 ultrabook',       'OLED display, S Pen',      24990000, 22490000, 11, 'https://res.cloudinary.com/dquuquf93/image/upload/v1771863257/HP_Envy_x360_13_aqcyyx.jpg',             'HP',      'AMD Ryzen 7 7730U',     '16GB DDR4',   '512GB NVMe',   '13.3" OLED Touch',  'ACTIVE'),
-                                                                                                                                                         ('Microsoft Surface Pro 9',     6, 'Tablet first 2-in-1',            'PixelSense Flow display',  37990000, 35990000, 6,  'https://res.cloudinary.com/dquuquf93/image/upload/v1771863266/Microsoft_Surface_Pro_9_pvs8mw.jpg',     'Microsoft','Intel Core i7-1255U',   '16GB LPDDR5', '512GB SSD',    '13" PixelSense',    'ACTIVE'),
-                                                                                                                                                         ('ASUS ZenBook Flip 14',        6, 'Flip 2-in-1 with stylus',        '90Hz OLED, stylus incl.',  21990000, 19990000, 14, 'https://res.cloudinary.com/dquuquf93/image/upload/v1771863255/ASUS_ZenBook_Flip_14_v0t05c.jpg',        'ASUS',   'Intel Core i5-1335U',   '8GB LPDDR4X', '512GB NVMe',   '14" OLED FHD Touch','ACTIVE'),
-                                                                                                                                                         ('Dell Precision 5480',         7, 'Creator workstation laptop',     'NVIDIA RTX A1000',         48990000, 46990000, 5,  'https://res.cloudinary.com/dquuquf93/image/upload/v1771863257/Dell_Precision_5480_ejpngi.jpg',         'Dell',    'Intel Core i7-13800H',  '32GB DDR5',   '1TB NVMe SSD', '14" FHD+ IPS',      'ACTIVE'),
-                                                                                                                                                         ('HP ZBook Fury 16 G10',        7, 'Mobile workstation beast',       'NVIDIA RTX A4000',         65990000, 63990000, 3,  'https://res.cloudinary.com/dquuquf93/image/upload/v1771863258/HP_ZBook_Fury_16_G10_o6stna.jpg',        'HP',      'Intel Core i9-13950HX', '64GB DDR5',   '2TB NVMe SSD', '16" DreamColor 4K', 'ACTIVE'),
-                                                                                                                                                         ('Lenovo ThinkPad P16',         7, 'Extreme workstation laptop',     'NVIDIA GeForce RTX 3000',  54990000, 52990000, 4,  'https://res.cloudinary.com/dquuquf93/image/upload/v1771863262/Lenovo_ThinkPad_P16_bxmzur.jpg',        'Lenovo',  'Intel Core i7-12850HX', '32GB DDR5',   '1TB NVMe SSD', '16" IPS 2560x1600', 'ACTIVE');
+INSERT INTO products (id, name, category_id, description, image_url, brand, status) VALUES
+(1,  'ASUS ROG Strix G15',          1, 'Powerful gaming with RTX 4070', 'https://res.cloudinary.com/dquuquf93/image/upload/v1771863254/ASUS_ROG_Strix_G15_kyjxrm.jpg',          'ASUS',      'ACTIVE'),
+(2,  'MSI Katana GF66',             1, 'Budget gaming powerhouse',       'https://res.cloudinary.com/dquuquf93/image/upload/v1771863266/MSI_Katana_GF66_dgoz4h.jpg',             'MSI',       'ACTIVE'),
+(3,  'Lenovo Legion 5 Pro',         1, 'ProDisplay gaming laptop',       'https://res.cloudinary.com/dquuquf93/image/upload/v1771863262/Lenovo_Legion_5_Pro_jew1kh.jpg',         'Lenovo',    'ACTIVE'),
+(4,  'Acer Nitro 5 2023',           1, 'Entry-level gaming laptop',      'https://res.cloudinary.com/dquuquf93/image/upload/v1771863253/Acer_Nitro_5_2023_khwbw1.jpg',           'Acer',      'ACTIVE'),
+(5,  'HP Victus 16',                1, 'Slim gaming notebook',           'https://res.cloudinary.com/dquuquf93/image/upload/v1771863257/HP_Victus_16_rd3ktb.jpg',                'HP',        'ACTIVE'),
+(6,  'ASUS TUF Gaming A15',         1, 'Durable gaming warrior',         'https://res.cloudinary.com/dquuquf93/image/upload/v1771863254/ASUS_TUF_Gaming_A15_rv1oqj.png',         'ASUS',      'ACTIVE'),
+(7,  'Gigabyte AORUS 15',           1, 'Premium gaming OLED notebook',   'https://res.cloudinary.com/dquuquf93/image/upload/v1771863256/Gigabyte_AORUS_15_p9sbct.jpg',           'Gigabyte',  'ACTIVE'),
+(8,  'Razer Blade 15',              1, 'Premium ultra-slim gaming',      'https://res.cloudinary.com/dquuquf93/image/upload/v1771863267/Razer_Blade_15_acm694.jpg',              'Razer',     'ACTIVE'),
+(9,  'Dell G15 Gaming',             1, 'Value gaming laptop',            'https://res.cloudinary.com/dquuquf93/image/upload/v1771863255/Dell_G15_Gaming_dgsax2.png',             'Dell',      'ACTIVE'),
+(10, 'MSI Raider GE76',             1, 'Elite gaming beast',             'https://res.cloudinary.com/dquuquf93/image/upload/v1771863266/MSI_Raider_GE76_aflgn3.jpg',             'MSI',       'ACTIVE'),
+(11, 'ASUS ROG Zephyrus G14',       1, 'Ultra-portable gaming',          'https://res.cloudinary.com/dquuquf93/image/upload/v1771863258/ASUS_ROG_Zephyrus_G14_xmbrdk.jpg',       'ASUS',      'ACTIVE'),
+(12, 'Lenovo IdeaPad Gaming 3',     1, 'Entry gaming laptop',            'https://res.cloudinary.com/dquuquf93/image/upload/v1771863259/Lenovo_IdeaPad_Gaming_3_zzfmuk.jpg',     'Lenovo',    'ACTIVE'),
+(13, 'Acer Predator Helios 300',    1, 'Serious gaming performance',     'https://res.cloudinary.com/dquuquf93/image/upload/v1771863253/Acer_Predator_Helios_300_r0r5gg.jpg',    'Acer',      'ACTIVE'),
+(14, 'HP OMEN 16',                  1, 'Powerhouse gaming laptop',       'https://res.cloudinary.com/dquuquf93/image/upload/v1771863257/HP_OMEN_16_wvizfu.jpg',                  'HP',        'ACTIVE'),
+(15, 'Dell XPS 13 Plus',            2, 'Ultra-premium compact laptop',   'https://res.cloudinary.com/dquuquf93/image/upload/v1771863256/Dell_XPS_13_Plus_wsfpal.jpg',            'Dell',      'ACTIVE'),
+(16, 'LG Gram 14',                  2, 'Ultra-light laptop under 1kg',   'https://res.cloudinary.com/dquuquf93/image/upload/v1771863264/LG_Gram_14_rwfafd.jpg',                  'LG',        'ACTIVE'),
+(17, 'HP Spectre x360 14',          2, 'Premium 2-in-1 ultrabook',       'https://res.cloudinary.com/dquuquf93/image/upload/v1771863257/HP_Spectre_x360_14_a840dr.png',          'HP',        'ACTIVE'),
+(18, 'Lenovo Yoga Slim 7i',         2, 'Sleek everyday ultrabook',       'https://res.cloudinary.com/dquuquf93/image/upload/v1771863263/Lenovo_Yoga_Slim_7i_sninrd.jpg',         'Lenovo',    'ACTIVE'),
+(19, 'Samsung Galaxy Book3 Pro',    2, 'Ultra-thin AMOLED ultrabook',    'https://res.cloudinary.com/dquuquf93/image/upload/v1771863267/Samsung_Galaxy_Book3_Pro_qrvrsh.png',    'Samsung',   'ACTIVE'),
+(20, 'Apple MacBook Air M2',        3, 'Fanless silent performance',     'https://res.cloudinary.com/dquuquf93/image/upload/v1771863254/Apple_MacBook_Air_M2_mio1be.jpg',        'Apple',     'ACTIVE'),
+(21, 'Apple MacBook Pro 14 M3',     3, 'Pro content creation powerhouse','https://res.cloudinary.com/dquuquf93/image/upload/v1771863254/Apple_MacBook_Pro_14_M3_j0vk2n.jpg',     'Apple',     'ACTIVE'),
+(22, 'Apple MacBook Pro 16 M3 Max', 3, 'Ultimate Mac workstation',       'https://res.cloudinary.com/dquuquf93/image/upload/v1771863255/Apple_MacBook_Pro_16_M3_Max_di7qqi.jpg', 'Apple',     'ACTIVE'),
+(23, 'Apple MacBook Air M1',        3, 'Best value Mac laptop',          'https://res.cloudinary.com/dquuquf93/image/upload/v1771863254/Apple_MacBook_Air_M1_jaojn2.jpg',        'Apple',     'ACTIVE'),
+(24, 'Lenovo ThinkPad X1 Carbon',   4, 'Business flagship ultrabook',    'https://res.cloudinary.com/dquuquf93/image/upload/v1771863262/Lenovo_ThinkPad_X1_Carbon_tq0mom.jpg',   'Lenovo',    'ACTIVE'),
+(25, 'HP EliteBook 840 G9',         4, 'Business security laptop',       'https://res.cloudinary.com/dquuquf93/image/upload/v1771863256/HP_EliteBook_840_G9_qrxzpl.jpg',         'HP',        'ACTIVE'),
+(26, 'Dell Latitude 5430',          4, 'Durable business laptop',        'https://res.cloudinary.com/dquuquf93/image/upload/v1771863255/Dell_Latitude_5430_q5rzho.jpg',          'Dell',      'ACTIVE'),
+(27, 'Panasonic Toughbook 55',      4, 'Rugged field laptop',            'https://res.cloudinary.com/dquuquf93/image/upload/v1771863267/Panasonic_Toughbook_55_uipnyz.jpg',      'Panasonic', 'ACTIVE'),
+(28, 'Acer Aspire 5 2023',          5, 'Best budget laptop for students','https://res.cloudinary.com/dquuquf93/image/upload/v1771863253/Acer_Aspire_5_2023_bsqfdz.jpg',         'Acer',      'ACTIVE'),
+(29, 'Lenovo IdeaPad 3',            5, 'Affordable everyday laptop',     'https://res.cloudinary.com/dquuquf93/image/upload/v1771863258/Lenovo_IdeaPad_3_wdnzch.jpg',           'Lenovo',    'ACTIVE'),
+(30, 'HP 15s-fq5000TU',             5, 'Entry-level HP laptop',          'https://res.cloudinary.com/dquuquf93/image/upload/v1771863256/HP_15s-fq5000TU_gsygku.jpg',            'HP',        'ACTIVE'),
+(31, 'ASUS VivoBook 15',            5, 'Slim affordable laptop',         'https://res.cloudinary.com/dquuquf93/image/upload/v1771863253/ASUS_VivoBook_15_q8necy.jpg',           'ASUS',      'ACTIVE'),
+(32, 'Dell Inspiron 15',            5, 'Reliable budget laptop',         'https://res.cloudinary.com/dquuquf93/image/upload/v1771863255/Dell_Inspiron_15_wowlgr.jpg',           'Dell',      'ACTIVE'),
+(33, 'Lenovo Yoga 9i',              6, 'Premium 2-in-1 convertible',     'https://res.cloudinary.com/dquuquf93/image/upload/v1771863263/Lenovo_Yoga_9i_hsoh47.jpg',              'Lenovo',    'ACTIVE'),
+(34, 'HP Envy x360 13',             6, 'Compact 2-in-1 ultrabook',       'https://res.cloudinary.com/dquuquf93/image/upload/v1771863257/HP_Envy_x360_13_aqcyyx.jpg',             'HP',        'ACTIVE'),
+(35, 'Microsoft Surface Pro 9',     6, 'Tablet first 2-in-1',            'https://res.cloudinary.com/dquuquf93/image/upload/v1771863266/Microsoft_Surface_Pro_9_pvs8mw.jpg',     'Microsoft', 'ACTIVE'),
+(36, 'ASUS ZenBook Flip 14',        6, 'Flip 2-in-1 with stylus',        'https://res.cloudinary.com/dquuquf93/image/upload/v1771863255/ASUS_ZenBook_Flip_14_v0t05c.jpg',        'ASUS',      'ACTIVE'),
+(37, 'Dell Precision 5480',         7, 'Creator workstation laptop',     'https://res.cloudinary.com/dquuquf93/image/upload/v1771863257/Dell_Precision_5480_ejpngi.jpg',         'Dell',      'ACTIVE'),
+(38, 'HP ZBook Fury 16 G10',        7, 'Mobile workstation beast',       'https://res.cloudinary.com/dquuquf93/image/upload/v1771863258/HP_ZBook_Fury_16_G10_o6stna.jpg',        'HP',        'ACTIVE'),
+(39, 'Lenovo ThinkPad P16',         7, 'Extreme workstation laptop',     'https://res.cloudinary.com/dquuquf93/image/upload/v1771863262/Lenovo_ThinkPad_P16_bxmzur.jpg',        'Lenovo',    'ACTIVE');
+
+
+CREATE TABLE IF NOT EXISTS product_variants (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    product_id INT NOT NULL,
+    specifications TEXT,
+    price DOUBLE NOT NULL,
+    sale_price DOUBLE,
+    stock INT DEFAULT 0,
+    cpu VARCHAR(100),
+    ram VARCHAR(50),
+    storage VARCHAR(100),
+    screen VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted TINYINT DEFAULT 0,
+    FOREIGN KEY (product_id) REFERENCES products(id)
+);
+
+INSERT INTO product_variants (product_id, specifications, price, sale_price, stock, cpu, ram, storage, screen) VALUES
+(1,  'RTX 4070, 144Hz IPS',     28990000, 26990000, 15, 'Intel Core i7-13650HX', '16GB DDR5',  '1TB NVMe SSD', '15.6" FHD 144Hz'),
+(2,  'RTX 3060, 144Hz',         21990000, 20490000, 20, 'Intel Core i5-12450H',  '8GB DDR4',   '512GB NVMe SSD', '15.6" FHD 144Hz'),
+(3,  'RTX 4060, 165Hz',         24990000, 23490000, 12, 'AMD Ryzen 7 7745HX',    '16GB DDR5',  '1TB NVMe SSD', '16" WQXGA 165Hz'),
+(4,  'RTX 4050, 144Hz',         18990000, 17490000, 25, 'Intel Core i5-13420H',  '8GB DDR4',   '512GB SSD',     '15.6" FHD 144Hz'),
+(5,  'RTX 3060, 144Hz',         22490000, 20990000, 18, 'Intel Core i7-12700H',  '16GB DDR4',  '1TB NVMe SSD', '16.1" FHD 144Hz'),
+(6,  'RTX 4060, 144Hz',         19990000, 18490000, 22, 'AMD Ryzen 5 7535HS',    '8GB DDR5',   '512GB NVMe',    '15.6" FHD 144Hz'),
+(7,  'RTX 4070, 240Hz OLED',   35990000, 33990000, 8,  'Intel Core i9-13980HX', '32GB DDR5',  '2TB NVMe SSD', '15.6" FHD 240Hz'),
+(8,  'RTX 4080, 240Hz',         55990000, 54990000, 5,  'Intel Core i9-13950HX', '32GB DDR5',  '1TB NVMe SSD', '15.6" FHD 240Hz'),
+(9,  'RTX 3050, 120Hz',         17490000, 15990000, 30, 'Intel Core i5-12500H',  '8GB DDR4',   '256GB SSD',     '15.6" FHD 120Hz'),
+(10, 'RTX 4090, 360Hz',         62990000, 60990000, 3,  'Intel Core i9-13980HX', '64GB DDR5',  '4TB NVMe SSD', '17.3" FHD 360Hz'),
+(11, 'RTX 4060, 120Hz OLED',   29990000, 27990000, 10, 'AMD Ryzen 9 7940HS',    '16GB LPDDR5','1TB NVMe SSD', '14" 2.8K 120Hz'),
+(12, 'RTX 3050, 120Hz',         16990000, 15490000, 35, 'AMD Ryzen 5 6600H',     '8GB DDR4',   '512GB SSD',     '15.6" FHD 120Hz'),
+(13, 'RTX 4070, 165Hz',         30990000, 29490000, 10, 'Intel Core i7-13700H',  '16GB DDR5',  '1TB NVMe SSD', '15.6" FHD 165Hz'),
+(14, 'RTX 4080, 165Hz',         42990000, 40990000, 6,  'Intel Core i9-13900HX', '32GB DDR5',  '1TB NVMe SSD', '16.1" FHD 165Hz'),
+(15, 'OLED Touchscreen',        34990000, 32990000, 8,  'Intel Core i7-1360P',   '16GB LPDDR5','512GB NVMe',    '13.4" OLED 3.5K'),
+(16, 'MIL-SPEC durability',     24490000, 22490000, 12, 'Intel Core i7-1360P',   '16GB LPDDR5','512GB NVMe',    '14" IPS FHD'),
+(17, 'OLED Touchscreen',        33490000, 31990000, 9,  'Intel Core i7-1355U',   '16GB LPDDR5','512GB NVMe',    '13.5" OLED 3K2K'),
+(18, 'IPS anti-glare',          18990000, 17490000, 20, 'Intel Core i5-1335U',   '16GB LPDDR5','512GB NVMe',    '14" IPS FHD'),
+(19, 'AMOLED 3K Display',       29990000, 27990000, 7,  'Intel Core i7-1360P',   '16GB LPDDR5','512GB NVMe',    '14" AMOLED 3K'),
+(20, 'M2 chip, 18hr battery',   28990000, 27990000, 15, 'Apple M2',              '8GB Unified', '256GB SSD',    '13.6" Liquid Retina'),
+(21, 'M3 Pro, 120Hz ProMotion', 52990000, 51990000, 6,  'Apple M3 Pro',          '18GB Unified','512GB SSD',    '14.2" Liquid Retina'),
+(22, 'M3 Max chip',             79990000, 78990000, 3,  'Apple M3 Max',          '36GB Unified','1TB SSD',      '16.2" Liquid Retina'),
+(23, 'M1 chip, 18hr battery',   21990000, 19990000, 20, 'Apple M1',              '8GB Unified', '256GB SSD',    '13.3" Retina'),
+(24, 'Military-grade certified', 38990000, 36990000, 8,  'Intel Core i7-1365U',   '16GB LPDDR5','512GB NVMe',    '14" IPS 2.8K'),
+(25, 'Wolf Security built-in',   28490000, 26990000, 10, 'Intel Core i5-1245U',   '16GB DDR4',   '512GB NVMe',   '14" IPS FHD'),
+(26, 'TPM 2.0, IR Camera',       24990000, 22990000, 12, 'Intel Core i5-1245U',   '8GB DDR4',    '256GB NVMe',   '14" FHD'),
+(27, 'IP65 certified, 40hr batt',55990000, 53990000, 4,  'Intel Core i5-1145G7',  '8GB DDR4',    '256GB SSD',    '14" HD Touchscreen'),
+(28, 'Full HD IPS, long battery', 10990000, 9990000,  40, 'AMD Ryzen 5 5500U',     '8GB DDR4',    '512GB SSD',    '15.6" FHD IPS'),
+(29, 'Good all-rounder',          8990000,  7990000,  50, 'Intel Core i3-1215U',   '4GB DDR4',    '256GB SSD',    '15.6" FHD'),
+(30, 'Thin design, basic tasks',  9490000,  8490000,  45, 'Intel Core i3-1215U',   '4GB DDR4',    '256GB NVMe',   '15.6" FHD IPS'),
+(31, 'NanoEdge display',          9990000,  8990000,  35, 'AMD Ryzen 5 5500U',     '8GB DDR4',    '512GB SSD',    '15.6" FHD'),
+(32, 'Wide port selection',        9290000,  8290000,  38, 'Intel Core i3-1215U',   '4GB DDR4',    '256GB HDD',    '15.6" FHD'),
+(33, '4K OLED Touchscreen',      35990000, 33990000, 7,  'Intel Core i7-1360P',   '16GB LPDDR5', '1TB NVMe',     '14" 4K OLED Touch'),
+(34, 'OLED display, S Pen',      24990000, 22490000, 11, 'AMD Ryzen 7 7730U',     '16GB DDR4',   '512GB NVMe',   '13.3" OLED Touch'),
+(35, 'PixelSense Flow display',  37990000, 35990000, 6,  'Intel Core i7-1255U',   '16GB LPDDR5', '512GB SSD',    '13" PixelSense'),
+(36, 'Flip 2-in-1 with stylus',  21990000, 19990000, 14, 'Intel Core i5-1335U',   '8GB LPDDR4X', '512GB NVMe',   '14" OLED FHD Touch'),
+(37, 'NVIDIA RTX A1000',         48990000, 46990000, 5,  'Intel Core i7-13800H',  '32GB DDR5',   '1TB NVMe SSD', '14" FHD+ IPS'),
+(38, 'NVIDIA RTX A4000',         65990000, 63990000, 3,  'Intel Core i9-13950HX', '64GB DDR5',   '2TB NVMe SSD', '16" DreamColor 4K'),
+(39, 'NVIDIA GeForce RTX 3000',  54990000, 52990000, 4,  'Intel Core i7-12850HX', '32GB DDR5',   '1TB NVMe SSD', '16" IPS 2560x1600');
 
 CREATE TABLE IF NOT EXISTS orders (
                                       id INT AUTO_INCREMENT PRIMARY KEY,
@@ -166,14 +218,14 @@ INSERT INTO orders (user_id, full_name, phone, address, note, total_price, statu
 CREATE TABLE IF NOT EXISTS order_items (
                                            id INT AUTO_INCREMENT PRIMARY KEY,
                                            order_id INT NOT NULL,
-                                           product_id INT NOT NULL,
+                                           product_variant_id INT NOT NULL,
                                            quantity INT NOT NULL,
                                            price DOUBLE NOT NULL,
                                            FOREIGN KEY (order_id) REFERENCES orders(id),
-                                           FOREIGN KEY (product_id) REFERENCES products(id)
+                                           FOREIGN KEY (product_variant_id) REFERENCES product_variants(id)
 );
 
-INSERT INTO order_items (order_id, product_id, quantity, price) VALUES
+INSERT INTO order_items (order_id, product_variant_id, quantity, price) VALUES
                                                                     (1,  1,  1, 28990000),
                                                                     (2,  2,  1, 21990000),
                                                                     (3,  3,  1, 24990000),
@@ -209,13 +261,13 @@ INSERT INTO carts (user_id) VALUES
 CREATE TABLE IF NOT EXISTS cart_items (
                                           id INT AUTO_INCREMENT PRIMARY KEY,
                                           cart_id INT NOT NULL,
-                                          product_id INT NOT NULL,
+                                          product_variant_id INT NOT NULL,
                                           quantity INT NOT NULL DEFAULT 1,
                                           FOREIGN KEY (cart_id) REFERENCES carts(id),
-                                          FOREIGN KEY (product_id) REFERENCES products(id)
+                                          FOREIGN KEY (product_variant_id) REFERENCES product_variants(id)
 );
 
-INSERT INTO cart_items (cart_id, product_id, quantity) VALUES
+INSERT INTO cart_items (cart_id, product_variant_id, quantity) VALUES
                                                            (1, 11,  1),
                                                            (2, 6,   2),
                                                            (3, 20,  1),
@@ -302,15 +354,7 @@ CREATE TABLE IF NOT EXISTS notifications (
 );
 ALTER TABLE products ADD COLUMN content LONGTEXT NULL COMMENT 'Nội dung rich text HTML';
 ALTER TABLE categories ADD COLUMN image_url VARCHAR(512) NULL;
--- Cập nhật content chuyên nghiệp cho tất cả sản phẩm
--- Database: lapton
-USE lapton;
 
--- ============================================================
--- GAMING LAPTOPS
--- ============================================================
-
--- ID 1: ASUS ROG Strix G15
 UPDATE products SET content = '
 <section class="product-overview">
   <h2>Tổng quan sản phẩm</h2>
@@ -1017,54 +1061,54 @@ SET name = 'Laptop cũ',
     image_url = 'https://res.cloudinary.com/dquuquf93/image/upload/v1777401508/lapcu_vt1zd4.jpg'
 WHERE id = 7;
 
-UPDATE products SET description = 'Laptop gaming mạnh mẽ với RTX 4070',       specifications = 'RTX 4070, màn 144Hz IPS'        WHERE id = 1;
-UPDATE products SET description = 'Laptop gaming tầm trung đáng tiền nhất',    specifications = 'RTX 3060, màn 144Hz'            WHERE id = 2;
-UPDATE products SET description = 'Laptop gaming màn ProDisplay đỉnh cao',     specifications = 'RTX 4060, màn 165Hz'            WHERE id = 3;
-UPDATE products SET description = 'Laptop gaming entry-level cho người mới',   specifications = 'RTX 4050, màn 144Hz'            WHERE id = 4;
-UPDATE products SET description = 'Laptop gaming mỏng nhẹ sang trọng',         specifications = 'RTX 3060, màn 144Hz'            WHERE id = 5;
-UPDATE products SET description = 'Chiến binh gaming bền bỉ chuẩn quân sự',   specifications = 'RTX 4060, màn 144Hz'            WHERE id = 6;
-UPDATE products SET description = 'Laptop gaming OLED cao cấp nhất',           specifications = 'RTX 4070, màn 240Hz OLED'       WHERE id = 7;
-UPDATE products SET description = 'Laptop gaming siêu mỏng hàng đầu',          specifications = 'RTX 4080, màn 240Hz'            WHERE id = 8;
-UPDATE products SET description = 'Laptop gaming giá trị tốt nhất',            specifications = 'RTX 3050, màn 120Hz'            WHERE id = 9;
-UPDATE products SET description = 'Quái vật gaming đỉnh cao nhất',             specifications = 'RTX 4090, màn 360Hz'            WHERE id = 10;
-UPDATE products SET description = 'Laptop gaming mỏng nhẹ di động',            specifications = 'RTX 4060, màn OLED 120Hz'       WHERE id = 11;
-UPDATE products SET description = 'Laptop gaming entry-level cho sinh viên',   specifications = 'RTX 3050, màn 120Hz'            WHERE id = 12;
-UPDATE products SET description = 'Hiệu năng gaming nghiêm túc tầm trung',    specifications = 'RTX 4070, màn 165Hz'            WHERE id = 13;
-UPDATE products SET description = 'Laptop gaming cao cấp dành cho pro',        specifications = 'RTX 4080, màn 165Hz'            WHERE id = 14;
+UPDATE products SET description = 'Laptop gaming mạnh mẽ với RTX 4070'        WHERE id = 1;
+UPDATE products SET description = 'Laptop gaming tầm trung đáng tiền nhất'    WHERE id = 2;
+UPDATE products SET description = 'Laptop gaming màn ProDisplay đỉnh cao'     WHERE id = 3;
+UPDATE products SET description = 'Laptop gaming entry-level cho người mới'   WHERE id = 4;
+UPDATE products SET description = 'Laptop gaming mỏng nhẹ sang trọng'         WHERE id = 5;
+UPDATE products SET description = 'Chiến binh gaming bền bỉ chuẩn quân sự'   WHERE id = 6;
+UPDATE products SET description = 'Laptop gaming OLED cao cấp nhất'           WHERE id = 7;
+UPDATE products SET description = 'Laptop gaming siêu mỏng hàng đầu'          WHERE id = 8;
+UPDATE products SET description = 'Laptop gaming giá trị tốt nhất'            WHERE id = 9;
+UPDATE products SET description = 'Quái vật gaming đỉnh cao nhất'             WHERE id = 10;
+UPDATE products SET description = 'Laptop gaming mỏng nhẹ di động'            WHERE id = 11;
+UPDATE products SET description = 'Laptop gaming entry-level cho sinh viên'   WHERE id = 12;
+UPDATE products SET description = 'Hiệu năng gaming nghiêm túc tầm trung'    WHERE id = 13;
+UPDATE products SET description = 'Laptop gaming cao cấp dành cho pro'        WHERE id = 14;
 
 -- Ultrabooks
-UPDATE products SET description = 'Ultrabook cao cấp màn OLED 3.5K',           specifications = 'Màn OLED cảm ứng, thiết kế tương lai' WHERE id = 15;
-UPDATE products SET description = 'Siêu nhẹ dưới 1kg, chuẩn quân sự',         specifications = 'Chứng nhận MIL-SPEC, pin 80Wh'        WHERE id = 16;
-UPDATE products SET description = 'Ultrabook 2-trong-1 cao cấp màn OLED',      specifications = 'Màn OLED cảm ứng, bút stylus'         WHERE id = 17;
-UPDATE products SET description = 'Ultrabook mỏng thanh lịch hàng ngày',       specifications = 'Màn IPS chống chói'                   WHERE id = 18;
-UPDATE products SET description = 'Ultrabook AMOLED siêu mỏng',                specifications = 'Màn AMOLED 3K độ sáng cao'            WHERE id = 19;
+UPDATE products SET description = 'Ultrabook cao cấp màn OLED 3.5K'           WHERE id = 15;
+UPDATE products SET description = 'Siêu nhẹ dưới 1kg, chuẩn quân sự'         WHERE id = 16;
+UPDATE products SET description = 'Ultrabook 2-trong-1 cao cấp màn OLED'      WHERE id = 17;
+UPDATE products SET description = 'Ultrabook mỏng thanh lịch hàng ngày'       WHERE id = 18;
+UPDATE products SET description = 'Ultrabook AMOLED siêu mỏng'                WHERE id = 19;
 
 -- MacBooks
-UPDATE products SET description = 'Hiệu năng M2 không tiếng ồn hoàn toàn',    specifications = 'Chip M2, pin 18 tiếng'                WHERE id = 20;
-UPDATE products SET description = 'Laptop sáng tạo chuyên nghiệp chip M3',    specifications = 'Chip M3 Pro, màn 120Hz ProMotion'     WHERE id = 21;
-UPDATE products SET description = 'Workstation Mac di động tối thượng',        specifications = 'Chip M3 Max'                          WHERE id = 22;
-UPDATE products SET description = 'MacBook giá tốt nhất, vẫn rất mạnh',       specifications = 'Chip M1, pin 18 tiếng'                WHERE id = 23;
+UPDATE products SET description = 'Hiệu năng M2 không tiếng ồn hoàn toàn'    WHERE id = 20;
+UPDATE products SET description = 'Laptop sáng tạo chuyên nghiệp chip M3'    WHERE id = 21;
+UPDATE products SET description = 'Workstation Mac di động tối thượng'        WHERE id = 22;
+UPDATE products SET description = 'MacBook giá tốt nhất, vẫn rất mạnh'       WHERE id = 23;
 
 -- Business Laptops
-UPDATE products SET description = 'Laptop doanh nghiệp cao cấp nhất ThinkPad',specifications = 'Chứng nhận quân sự, bàn phím huyền thoại' WHERE id = 24;
-UPDATE products SET description = 'Laptop doanh nghiệp bảo mật cao',          specifications = 'Wolf Security tích hợp sẵn'           WHERE id = 25;
-UPDATE products SET description = 'Laptop doanh nghiệp bền bỉ đáng tin',      specifications = 'TPM 2.0, camera IR nhận mặt'          WHERE id = 26;
-UPDATE products SET description = 'Laptop siêu bền dùng ngoài trời khắc nghiệt', specifications = 'Chuẩn IP65, pin 40 tiếng'         WHERE id = 27;
+UPDATE products SET description = 'Laptop doanh nghiệp cao cấp nhất ThinkPad' WHERE id = 24;
+UPDATE products SET description = 'Laptop doanh nghiệp bảo mật cao'          WHERE id = 25;
+UPDATE products SET description = 'Laptop doanh nghiệp bền bỉ đáng tin'      WHERE id = 26;
+UPDATE products SET description = 'Laptop siêu bền dùng ngoài trời khắc nghiệt' WHERE id = 27;
 
 -- Budget Laptops
-UPDATE products SET description = 'Laptop tầm trung tốt nhất cho sinh viên',  specifications = 'Màn FHD IPS, pin lâu'                 WHERE id = 28;
-UPDATE products SET description = 'Laptop giá rẻ cho mọi nhu cầu cơ bản',    specifications = 'Hiệu năng ổn định toàn diện'          WHERE id = 29;
-UPDATE products SET description = 'Laptop HP entry-level gọn nhẹ đẹp',        specifications = 'Thiết kế mỏng, phù hợp văn phòng'     WHERE id = 30;
-UPDATE products SET description = 'Laptop mỏng viền siêu mỏng NanoEdge',      specifications = 'Màn NanoEdge viền siêu mỏng'          WHERE id = 31;
-UPDATE products SET description = 'Laptop Dell phổ thông đáng tin cậy',       specifications = 'Nhiều cổng kết nối đa dạng'           WHERE id = 32;
+UPDATE products SET description = 'Laptop tầm trung tốt nhất cho sinh viên'  WHERE id = 28;
+UPDATE products SET description = 'Laptop giá rẻ cho mọi nhu cầu cơ bản'    WHERE id = 29;
+UPDATE products SET description = 'Laptop HP entry-level gọn nhẹ đẹp'        WHERE id = 30;
+UPDATE products SET description = 'Laptop mỏng viền siêu mỏng NanoEdge'      WHERE id = 31;
+UPDATE products SET description = 'Laptop Dell phổ thông đáng tin cậy'       WHERE id = 32;
 
 -- 2-in-1 Convertibles
-UPDATE products SET description = 'Laptop 2-trong-1 cao cấp màn 4K OLED',    specifications = 'Màn 4K OLED cảm ứng'                 WHERE id = 33;
-UPDATE products SET description = 'Ultrabook 2-trong-1 compact màn OLED',     specifications = 'Màn OLED, bút S Pen'                  WHERE id = 34;
-UPDATE products SET description = 'Máy tính bảng Windows mạnh nhất',          specifications = 'Màn PixelSense Flow 120Hz'            WHERE id = 35;
-UPDATE products SET description = 'Laptop gập màn OLED kèm bút stylus',       specifications = 'Màn OLED 90Hz, bút stylus tích hợp'  WHERE id = 36;
+UPDATE products SET description = 'Laptop 2-trong-1 cao cấp màn 4K OLED'    WHERE id = 33;
+UPDATE products SET description = 'Ultrabook 2-trong-1 compact màn OLED'     WHERE id = 34;
+UPDATE products SET description = 'Máy tính bảng Windows mạnh nhất'          WHERE id = 35;
+UPDATE products SET description = 'Laptop gập màn OLED kèm bút stylus'       WHERE id = 36;
 
 -- Workstation Laptops
-UPDATE products SET description = 'Workstation di động dành cho đồ họa',      specifications = 'GPU NVIDIA RTX A1000 chuyên nghiệp'   WHERE id = 37;
-UPDATE products SET description = 'Workstation di động cao cấp nhất',         specifications = 'GPU NVIDIA RTX A4000'                 WHERE id = 38;
-UPDATE products SET description = 'Workstation 16 inch hiệu năng cực mạnh',   specifications = 'NVIDIA GeForce RTX 3000 series'       WHERE id = 39;
+UPDATE products SET description = 'Workstation di động dành cho đồ họa'      WHERE id = 37;
+UPDATE products SET description = 'Workstation di động cao cấp nhất'         WHERE id = 38;
+UPDATE products SET description = 'Workstation 16 inch hiệu năng cực mạnh'   WHERE id = 39;

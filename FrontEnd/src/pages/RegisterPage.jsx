@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
@@ -51,7 +51,7 @@ const RegisterPage = () => {
                 {/* Left panel */}
                 <div className="hidden md:flex flex-col justify-between w-5/12 bg-gradient-to-br from-blue-600 to-blue-800 p-10 text-white">
                     <div>
-                        <img src="https://res.cloudinary.com/dquuquf93/image/upload/f_png,b_transparent/v1777365024/Gemini_Generated_Image_6jrdyv6jrdyv6jrd_2_toqfv3.png" alt="TQuad" className="h-12 w-auto object-contain mb-2" />
+                        <img src="https://res.cloudinary.com/dquuquf93/image/upload/v1777376204/logo_argrg0.png" alt="TQuad" className="h-20 w-auto object-contain mb-2" />
                         <div className="text-blue-200 text-sm">Tạo tài khoản miễn phí</div>
                     </div>
                     <div className="space-y-4">

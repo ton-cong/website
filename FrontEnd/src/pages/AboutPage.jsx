@@ -17,12 +17,12 @@ const AboutPage = () => {
             {/* Content Section */}
             <div className="mx-auto max-w-7xl px-6 lg:px-8 pb-24">
                 <div className="mx-auto max-w-3xl text-center mb-16">
-                    <h3 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">Sứ Mệnh Của LapTon</h3>
+                    <h3 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">Sứ Mệnh Của TQuad</h3>
                     <p className="mt-6 text-lg leading-8 text-slate-600 text-justify">
-                        LapTon được thành lập với tầm nhìn trở thành nhà bán lẻ laptop và thiết bị công nghệ hàng đầu tại Việt Nam. Chúng tôi tin rằng công nghệ là chìa khóa để mở khóa tiềm năng của mỗi cá nhân và doanh nghiệp. Sứ mệnh của chúng tôi không chỉ là bán sản phẩm, mà là cung cấp những giải pháp công nghệ tối ưu, giúp khách hàng đạt được hiệu suất cao nhất trong công việc và cuộc sống.
+                        TQuad được thành lập với tầm nhìn trở thành nhà bán lẻ laptop và thiết bị công nghệ hàng đầu tại Việt Nam. Chúng tôi tin rằng công nghệ là chìa khóa để mở khóa tiềm năng của mỗi cá nhân và doanh nghiệp. Sứ mệnh của chúng tôi không chỉ là bán sản phẩm, mà là cung cấp những giải pháp công nghệ tối ưu, giúp khách hàng đạt được hiệu suất cao nhất trong công việc và cuộc sống.
                     </p>
                     <p className="mt-4 text-lg leading-8 text-slate-600 text-justify">
-                        Với đội ngũ chuyên gia giàu kinh nghiệm, nhiệt huyết và am hiểu sâu sắc về công nghệ, LapTon cam kết mang đến trải nghiệm mua sắm tuyệt vời nhất, từ khâu tư vấn chọn sản phẩm đến dịch vụ hậu mãi chăm sóc khách hàng chuyên nghiệp.
+                        Với đội ngũ chuyên gia giàu kinh nghiệm, nhiệt huyết và am hiểu sâu sắc về công nghệ, TQuad cam kết mang đến trải nghiệm mua sắm tuyệt vời nhất, từ khâu tư vấn chọn sản phẩm đến dịch vụ hậu mãi chăm sóc khách hàng chuyên nghiệp.
                     </p>
                 </div>
 

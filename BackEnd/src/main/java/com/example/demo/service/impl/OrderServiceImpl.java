@@ -31,6 +31,7 @@ public class OrderServiceImpl implements OrderService {
     private final CartItemRepository cartItemRepository;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
+    private final ProductVariantRepository productVariantRepository;
     private final OrderMapper orderMapper;
     private final NotificationService notificationService;
     private final EmailService emailService;
@@ -56,8 +57,11 @@ public class OrderServiceImpl implements OrderService {
 
         double totalPrice = cartItems.stream()
                 .mapToDouble(item -> {
-                    Product product = item.getProduct();
-                    double price = product != null && product.getPrice() != null ? product.getPrice().doubleValue() : 0;
+                    ProductVariant productVariant = item.getProductVariant();
+                    if (productVariant == null) {
+                        productVariant = productVariantRepository.findById(item.getProductVariantId()).orElse(null);
+                    }
+                    double price = productVariant != null && productVariant.getPrice() != null ? productVariant.getPrice().doubleValue() : 0;
                     return price * item.getQuantity();
                 })
                 .sum();
@@ -77,21 +81,21 @@ public class OrderServiceImpl implements OrderService {
 
         List<OrderItem> orderItems = new ArrayList<>();
         for (CartItem cartItem : cartItems) {
-            Product product = productRepository.findById(cartItem.getProductId())
-                    .orElseThrow(() -> new RuntimeException("Product not found"));
+            ProductVariant variant = productVariantRepository.findById(cartItem.getProductVariantId())
+                    .orElseThrow(() -> new RuntimeException("Product variant not found"));
                     
-            if (product.getStock() < cartItem.getQuantity()) {
-                throw new RuntimeException("Not enough stock for product: " + product.getName());
+            if (variant.getStock() < cartItem.getQuantity()) {
+                throw new RuntimeException("Not enough stock for product variant: " + variant.getId());
             }
             
             // Deduct stock
-            product.setStock(product.getStock() - cartItem.getQuantity());
-            productRepository.save(product);
+            variant.setStock(variant.getStock() - cartItem.getQuantity());
+            productVariantRepository.save(variant);
 
-            double price = product.getPrice() != null ? product.getPrice().doubleValue() : 0;
+            double price = variant.getPrice() != null ? variant.getPrice().doubleValue() : 0;
             OrderItem orderItem = OrderItem.builder()
                     .orderId(order.getId())
-                    .productId(product.getId())
+                    .productVariantId(variant.getId())
                     .quantity(cartItem.getQuantity())
                     .price(price)
                     .build();
@@ -145,7 +149,7 @@ public class OrderServiceImpl implements OrderService {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User currentUser = userRepository.findByEmail(email).orElse(null);
         
-        if (currentUser != null && !currentUser.getRole().name().equals("ADMIN")) {
+        if (currentUser != null && !currentUser.getRole().name().equals("ADMIN") && !currentUser.getRole().name().equals("SUPER_ADMIN")) {
             if (!order.getUserId().equals(currentUser.getId())) {
                 throw new RuntimeException("Access denied");
             }
@@ -164,10 +168,10 @@ public class OrderServiceImpl implements OrderService {
         if (status == OrderStatus.cancelled && order.getStatus() != OrderStatus.cancelled) {
             List<OrderItem> items = orderItemRepository.findByOrderId(orderId);
             for (OrderItem item : items) {
-                Product product = productRepository.findById(item.getProductId()).orElse(null);
-                if (product != null) {
-                    product.setStock(product.getStock() + item.getQuantity());
-                    productRepository.save(product);
+                ProductVariant variant = productVariantRepository.findById(item.getProductVariantId()).orElse(null);
+                if (variant != null) {
+                    variant.setStock(variant.getStock() + item.getQuantity());
+                    productVariantRepository.save(variant);
                 }
             }
         }

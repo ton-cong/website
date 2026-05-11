@@ -13,6 +13,8 @@ const orderApi = {
         }
     }),
     updateStatus: (orderId, status) => axiosClient.put(`/orders/${orderId}/status?status=${status}`),
+    exportInvoice: (id) => axiosClient.get(`/orders/${id}/export`, { responseType: 'blob' }),
 };
+
 
 export default orderApi;

@@ -7,23 +7,29 @@
     <resultMap id="CartItemResultMap" type="com.example.demo.entity.CartItem">
         <id property="id" column="id"/>
         <result property="cartId" column="cart_id"/>
-        <result property="productId" column="product_id"/>
+        <result property="productVariantId" column="product_variant_id"/>
         <result property="quantity" column="quantity"/>
-        <association property="product" javaType="com.example.demo.entity.Product">
-            <id property="id" column="p_id"/>
-            <result property="name" column="p_name"/>
-            <result property="price" column="p_price"/>
-            <result property="salePrice" column="p_sale_price"/>
-            <result property="imageUrl" column="p_image_url"/>
-            <result property="stock" column="p_stock"/>
+        <association property="productVariant" javaType="com.example.demo.entity.ProductVariant">
+            <id property="id" column="pv_id"/>
+            <result property="price" column="pv_price"/>
+            <result property="salePrice" column="pv_sale_price"/>
+            <result property="stock" column="pv_stock"/>
+            <result property="specifications" column="pv_specifications"/>
+            <association property="product" javaType="com.example.demo.entity.Product">
+                <id property="id" column="p_id"/>
+                <result property="name" column="p_name"/>
+                <result property="imageUrl" column="p_image_url"/>
+            </association>
         </association>
     </resultMap>
 
     <sql id="selectWithProduct">
-        SELECT ci.*, p.id AS p_id, p.name AS p_name, p.price AS p_price,
-               p.sale_price AS p_sale_price, p.image_url AS p_image_url, p.stock AS p_stock
+        SELECT ci.*, 
+               pv.id AS pv_id, pv.price AS pv_price, pv.sale_price AS pv_sale_price, pv.stock AS pv_stock, pv.specifications AS pv_specifications,
+               p.id AS p_id, p.name AS p_name, p.image_url AS p_image_url
         FROM cart_items ci
-        LEFT JOIN products p ON ci.product_id = p.id
+        LEFT JOIN product_variants pv ON ci.product_variant_id = pv.id
+        LEFT JOIN products p ON pv.product_id = p.id
     </sql>
 
     <select id="findById" parameterType="int" resultMap="CartItemResultMap">
@@ -37,8 +43,8 @@
     </select>
 
     <insert id="insert" parameterType="com.example.demo.entity.CartItem" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO cart_items (cart_id, product_id, quantity)
-        VALUES (#{cartId}, #{productId}, #{quantity})
+        INSERT INTO cart_items (cart_id, product_variant_id, quantity)
+        VALUES (#{cartId}, #{productVariantId}, #{quantity})
     </insert>
 
     <update id="save" parameterType="com.example.demo.entity.CartItem">
@@ -52,8 +58,8 @@
     <delete id="deleteByCartId" parameterType="int">
         DELETE FROM cart_items WHERE cart_id = #{cartId}
     </delete>
-    <delete id="deleteByProductId" parameterType="int">
-        DELETE FROM cart_items WHERE product_id = #{productId}
+    <delete id="deleteByProductVariantId" parameterType="int">
+        DELETE FROM cart_items WHERE product_variant_id = #{productVariantId}
     </delete>
 
 </mapper>

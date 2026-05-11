@@ -6,8 +6,8 @@ import org.springframework.scheduling.annotation.EnableAsync;
 
 @SpringBootApplication
 @EnableAsync
-public class LapTonApplication {
+public class TQuadApplication {
     public static void main(String[] args) {
-        SpringApplication.run(LapTonApplication.class, args);
+        SpringApplication.run(TQuadApplication.class, args);
     }
 }

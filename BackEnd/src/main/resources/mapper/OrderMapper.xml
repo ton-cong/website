@@ -20,25 +20,32 @@
         <collection property="items" ofType="com.example.demo.entity.OrderItem">
             <id property="id" column="oi_id"/>
             <result property="orderId" column="oi_order_id"/>
-            <result property="productId" column="oi_product_id"/>
+            <result property="productVariantId" column="oi_product_variant_id"/>
             <result property="quantity" column="oi_quantity"/>
             <result property="price" column="oi_price"/>
-            <association property="product" javaType="com.example.demo.entity.Product">
-                <id property="id" column="p_id"/>
-                <result property="name" column="p_name"/>
-                <result property="imageUrl" column="p_image_url"/>
+            <association property="productVariant" javaType="com.example.demo.entity.ProductVariant">
+                <id property="id" column="pv_id"/>
+                <result property="ram" column="pv_ram"/>
+                <result property="storage" column="pv_storage"/>
+                <association property="product" javaType="com.example.demo.entity.Product">
+                    <id property="id" column="p_id"/>
+                    <result property="name" column="p_name"/>
+                    <result property="imageUrl" column="p_image_url"/>
+                </association>
             </association>
         </collection>
     </resultMap>
 
     <sql id="selectOrderWithItems">
         SELECT o.*,
-               oi.id AS oi_id, oi.order_id AS oi_order_id, oi.product_id AS oi_product_id,
+               oi.id AS oi_id, oi.order_id AS oi_order_id, oi.product_variant_id AS oi_product_variant_id,
                oi.quantity AS oi_quantity, oi.price AS oi_price,
+               pv.id AS pv_id, pv.ram AS pv_ram, pv.storage AS pv_storage,
                p.id AS p_id, p.name AS p_name, p.image_url AS p_image_url
         FROM orders o
         LEFT JOIN order_items oi ON o.id = oi.order_id
-        LEFT JOIN products p ON oi.product_id = p.id
+        LEFT JOIN product_variants pv ON oi.product_variant_id = pv.id
+        LEFT JOIN products p ON pv.product_id = p.id
     </sql>
 
     <select id="findById" parameterType="int" resultMap="OrderResultMap">
@@ -60,8 +67,9 @@
 
     <select id="findAllPaged" resultMap="OrderResultMap">
         SELECT o_page.*,
-               oi.id AS oi_id, oi.order_id AS oi_order_id, oi.product_id AS oi_product_id,
+               oi.id AS oi_id, oi.order_id AS oi_order_id, oi.product_variant_id AS oi_product_variant_id,
                oi.quantity AS oi_quantity, oi.price AS oi_price,
+               pv.id AS pv_id, pv.ram AS pv_ram, pv.storage AS pv_storage,
                p.id AS p_id, p.name AS p_name, p.image_url AS p_image_url
         FROM (
             SELECT * FROM orders WHERE deleted = 0
@@ -69,7 +77,8 @@
             LIMIT #{limit} OFFSET #{offset}
         ) o_page
         LEFT JOIN order_items oi ON o_page.id = oi.order_id
-        LEFT JOIN products p ON oi.product_id = p.id
+        LEFT JOIN product_variants pv ON oi.product_variant_id = pv.id
+        LEFT JOIN products p ON pv.product_id = p.id
     </select>
 
     <select id="count" resultType="long">

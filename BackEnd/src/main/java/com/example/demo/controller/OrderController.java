@@ -5,6 +5,7 @@ import com.example.demo.dto.request.OrderRequest;
 import com.example.demo.dto.response.OrderResponse;
 import com.example.demo.enums.OrderStatus;
 import com.example.demo.service.OrderService;
+import com.example.demo.service.PdfService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,6 +25,7 @@ import java.util.List;
 public class OrderController {
 
     private final OrderService orderService;
+    private final PdfService pdfService;
 
     @PostMapping
     @Operation(summary = "Create a new order from cart")
@@ -48,6 +50,19 @@ public class OrderController {
         response.setResult(orderService.getOrderById(orderId));
         return response;
     }
+
+    @GetMapping("/{orderId}/export")
+    @Operation(summary = "Export order invoice to PDF")
+    public void exportOrderInvoice(@PathVariable Integer orderId, jakarta.servlet.http.HttpServletResponse response) throws java.io.IOException {
+        response.setContentType("application/pdf");
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment; filename=invoice_order_" + orderId + ".pdf";
+        response.setHeader(headerKey, headerValue);
+
+        OrderResponse order = orderService.getOrderById(orderId);
+        pdfService.exportOrderInvoice(order, response);
+    }
+
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")

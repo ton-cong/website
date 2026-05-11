@@ -63,6 +63,8 @@ public class JwtUtil {
 
             return extractEmail(token).equals(email) && !isTokenExpired(token);
         } catch (Exception e) {
+            System.err.println("❌ Token validation error: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }

@@ -76,6 +76,11 @@ const CartPage = () => {
                                             className="font-semibold text-slate-900 hover:text-blue-600 transition-colors line-clamp-1 text-sm">
                                             {item.productName}
                                         </Link>
+                                        {(item.ram || item.storage) && (
+                                            <p className="text-xs text-slate-500 mt-0.5">
+                                                Cấu hình: {item.ram}{item.ram && item.storage ? ' / ' : ''}{item.storage}
+                                            </p>
+                                        )}
                                         <p className="text-blue-600 font-bold text-base mt-0.5">{item.price?.toLocaleString('vi-VN')}đ</p>
                                         
                                         <div className="flex items-center gap-3 mt-2">

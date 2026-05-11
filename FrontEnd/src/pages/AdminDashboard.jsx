@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import productApi from '../api/productApi';
 import orderApi from '../api/orderApi';
 import adminApi from '../api/adminApi';
+import { toast } from 'react-toastify';
 import EChart from '../components/EChart';
 import {
     Squares2X2Icon,
@@ -22,6 +23,8 @@ import AdminUserList from './admin/AdminUserList';
 import AdminCategoryList from './admin/AdminCategoryList';
 import AdminReviewList from './admin/AdminReviewList';
 import AdminChat from './admin/AdminChat';
+import AdminVariantList from './admin/AdminVariantList';
+import AdminProductVariantManager from './admin/AdminProductVariantManager';
 
 const AdminDashboard = () => {
     const { user, isAuthenticated, isAdmin, loading } = useAuth();
@@ -41,6 +44,7 @@ const AdminDashboard = () => {
         { name: 'Tổng quan', path: '/admin', icon: Squares2X2Icon },
         { name: 'Sản phẩm', path: '/admin/products', icon: CubeIcon },
         { name: 'Đơn hàng', path: '/admin/orders', icon: ShoppingBagIcon },
+        { name: 'Biến thể', path: '/admin/variants', icon: CurrencyDollarIcon },
         { name: 'Người dùng', path: '/admin/users', icon: UsersIcon },
         { name: 'Danh mục', path: '/admin/categories', icon: TagIcon },
         { name: 'Đánh giá', path: '/admin/reviews', icon: StarIcon },
@@ -86,6 +90,8 @@ const AdminDashboard = () => {
                     <Route path="products" element={<AdminProductList />} />
                     <Route path="products/create" element={<AdminProductForm />} />
                     <Route path="products/edit/:id" element={<AdminProductForm />} />
+                    <Route path="products/:productId/variants" element={<AdminProductVariantManager />} />
+                    <Route path="variants" element={<AdminVariantList />} />
                     <Route path="orders" element={<AdminOrderList />} />
                     <Route path="users" element={<AdminUserList />} />
                     <Route path="categories" element={<AdminCategoryList />} />
@@ -156,9 +162,7 @@ const DashboardHome = () => {
 
             const pmMap = {};
             orderData.forEach(o => {
-                // Normalize VNPAY (cũ) về BANK_TRANSFER
                 let pm = o.paymentMethod || 'COD';
-                if (pm === 'VNPAY') pm = 'BANK_TRANSFER';
                 pmMap[pm] = (pmMap[pm] || 0) + 1;
             });
             setPaymentStats(Object.entries(pmMap).map(([k, v]) => ({ method: k, count: v })));
@@ -192,6 +196,7 @@ const DashboardHome = () => {
         } catch (e) { console.error(e); }
         finally { setLoading(false); }
     };
+
 
     const fmtM = n => n >= 1000000 ? (n / 1000000).toFixed(1) + 'M' : n >= 1000 ? (n / 1000).toFixed(0) + 'K' : String(n);
 
@@ -308,9 +313,11 @@ const DashboardHome = () => {
                     <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
                     <p className="text-sm text-slate-400 mt-0.5">Tổng quan hệ thống TQuad</p>
                 </div>
-                <span className="text-xs text-slate-400 bg-white px-3 py-2 rounded-xl border border-slate-200 shadow-sm">
-                    {new Date().toLocaleDateString('vi-VN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-                </span>
+                <div className="flex items-center gap-3">
+                    <span className="text-xs text-slate-400 bg-white px-3 py-2 rounded-xl border border-slate-200 shadow-sm">
+                        {new Date().toLocaleDateString('vi-VN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                    </span>
+                </div>
             </div>
 
             <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
@@ -440,7 +447,7 @@ const DashboardHome = () => {
                                         <td className="px-4 py-3.5 text-slate-400 text-xs max-w-xs truncate">{order.address || ''}</td>
                                         <td className="px-4 py-3.5">
                                             <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">
-                                                {['BANK_TRANSFER','VNPAY'].includes(order.paymentMethod) ? 'VietQR' : 'COD'}
+                                                {order.paymentMethod === 'BANK_TRANSFER' ? 'VietQR' : 'COD'}
                                             </span>
                                         </td>
                                         <td className="px-4 py-3.5 text-right font-bold text-slate-900 text-xs">

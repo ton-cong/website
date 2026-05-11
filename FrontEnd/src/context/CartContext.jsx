@@ -37,13 +37,13 @@ export const CartProvider = ({ children }) => {
         }
     }, [isAuthenticated, authLoading]);
 
-    const addToCart = async (productId, quantity = 1) => {
+    const addToCart = async (productVariantId, quantity = 1) => {
         if (!isAuthenticated) {
             toast.warning("Vui lòng đăng nhập để thêm vào giỏ hàng");
             return false;
         }
         try {
-            await cartApi.addToCart({ productId, quantity });
+            await cartApi.addToCart({ productVariantId, quantity });
             toast.success("Đã thêm vào giỏ hàng!");
             fetchCart();
             return true;

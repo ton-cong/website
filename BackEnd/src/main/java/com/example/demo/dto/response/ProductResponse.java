@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -22,18 +23,20 @@ public class ProductResponse implements Serializable {
     private Integer id;
     private String name;
     private String description;
-    private BigDecimal price;
-    private BigDecimal salePrice;
+    private BigDecimal price; // Derived from first variant
+    private BigDecimal salePrice; // Derived from first variant
     private String imageUrl;
     private String brand;
-    private String cpu;
-    private String ram;
-    private String storage;
-    private String screen;
+    private String cpu; // Derived from first variant
+    private String ram; // Derived from first variant
+    private String storage; // Derived from first variant
+    private String screen; // Derived from first variant
     private ProductStatus status;
     private Integer categoryId;
     private String categoryName;
-    private Integer stock;
-    private String specifications;
+    private Integer stock; // Derived from first variant
+    private String specifications; // Derived from first variant
     private String content;
+
+    private List<ProductVariantResponse> variants;
 }

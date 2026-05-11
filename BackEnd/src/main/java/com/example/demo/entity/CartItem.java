@@ -12,8 +12,8 @@ import lombok.NoArgsConstructor;
 public class CartItem {
     private Integer id;
     private Integer cartId;
-    private Integer productId;
+    private Integer productVariantId;
     private Integer quantity;
 
-    private Product product;
+    private ProductVariant productVariant;
 }

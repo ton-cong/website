@@ -6,8 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -18,20 +18,13 @@ public class Product {
     private String name;
     private Integer categoryId;
     private String description;
-    private String specifications;
-    private BigDecimal price;
-    private BigDecimal salePrice;
-    private Integer stock;
     private String imageUrl;
     private String brand;
-    private String cpu;
-    private String ram;
-    private String storage;
-    private String screen;
     private ProductStatus status;
     private Timestamp createdAt;
     private Boolean deleted;
     private String content;
 
     private Category category;
+    private List<ProductVariant> variants;
 }

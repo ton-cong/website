@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import productApi from '../api/productApi';
 import reviewApi from '../api/reviewApi';
 import { useCart } from '../context/CartContext';
@@ -12,19 +12,23 @@ import { toast } from 'react-toastify';
 
 const ProductDetailPage = () => {
     const { id } = useParams();
-    const [product, setProduct] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [reviews, setReviews] = useState([]);
-    const [reviewLoading, setReviewLoading] = useState(false);
+    const navigate = useNavigate();
     const { addToCart } = useCart();
-    const { isAuthenticated, user } = useAuth();
-
-    const [showReviewForm, setShowReviewForm] = useState(false);
+    const { isAuthenticated } = useAuth();
+    
+    const [product, setProduct] = useState(null);
+    const [selectedVariant, setSelectedVariant] = useState(null);
+    const [reviews, setReviews] = useState([]);
+    const [loading, setLoading] = useState(true);
+    
     const [rating, setRating] = useState(5);
     const [hoverRating, setHoverRating] = useState(0);
     const [comment, setComment] = useState('');
-    const [replyingTo, setReplyingTo] = useState(null);
+    const [showReviewForm, setShowReviewForm] = useState(false);
+    const [reviewLoading, setReviewLoading] = useState(false);
+    
     const [replyComment, setReplyComment] = useState('');
+    const [replyingTo, setReplyingTo] = useState(null);
 
     useEffect(() => {
         fetchProduct();
@@ -34,7 +38,16 @@ const ProductDetailPage = () => {
     const fetchProduct = async () => {
         try {
             const data = await productApi.getById(id);
-            setProduct(data?.result || data);
+            const prod = data?.result || data;
+            if (prod.status === 'INACTIVE') {
+                toast.error("Sản phẩm này hiện không kinh doanh");
+                navigate('/');
+                return;
+            }
+            setProduct(prod);
+            if (prod.variants && prod.variants.length > 0) {
+                setSelectedVariant(prod.variants[0]);
+            }
         } catch (error) {
         } finally {
             setLoading(false);
@@ -50,7 +63,11 @@ const ProductDetailPage = () => {
     };
 
     const handleAddToCart = () => {
-        addToCart(product.id, 1);
+        if (selectedVariant) {
+            addToCart(selectedVariant.id, 1);
+        } else {
+            toast.warning("Vui lòng chọn cấu hình");
+        }
     };
 
     const handleSubmitReview = async (e) => {
@@ -111,6 +128,10 @@ const ProductDetailPage = () => {
     if (loading) return <div className="text-center py-20">Đang tải...</div>;
     if (!product) return <div className="text-center py-20">Không tìm thấy sản phẩm.</div>;
 
+    const displayPrice = selectedVariant ? selectedVariant.price : product.price;
+    const isOutOfStock = product.status === 'OUT_OF_STOCK' || (selectedVariant ? selectedVariant.stock <= 0 : product.stock <= 0);
+    const displayStock = selectedVariant ? selectedVariant.stock : product.stock;
+
     return (
         <div className="space-y-12">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 animate-fade-in-up">
@@ -132,12 +153,12 @@ const ProductDetailPage = () => {
                             <span className="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full text-sm font-semibold">
                                 {product.category || 'Sản phẩm'}
                             </span>
-                            {product.status !== 'OUT_OF_STOCK' ? (
+                            {!isOutOfStock ? (
                                 <span className="text-green-600 flex items-center text-sm font-medium">
-                                    <CheckCircleIcon className="w-4 h-4 mr-1" /> Còn hàng
+                                    <CheckCircleIcon className="w-4 h-4 mr-1" /> Còn hàng ({displayStock})
                                 </span>
                             ) : (
-                                <span className="text-blue-500 text-sm font-medium">Hết hàng</span>
+                                <span className="text-red-500 text-sm font-medium">Hết hàng</span>
                             )}
                         </div>
                         <h1 className="text-3xl font-extrabold text-slate-900">{product.name}</h1>
@@ -153,8 +174,30 @@ const ProductDetailPage = () => {
                     </div>
 
                     <div className="text-4xl font-bold text-slate-900">
-                        {product.price?.toLocaleString()}đ
+                        {displayPrice?.toLocaleString()}đ
                     </div>
+
+                    {/* Variant Selection */}
+                    {product.variants && product.variants.length > 1 && (
+                        <div className="space-y-3">
+                            <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wider">Chọn cấu hình:</h3>
+                            <div className="flex flex-wrap gap-2">
+                                {product.variants.map((v) => (
+                                    <button
+                                        key={v.id}
+                                        onClick={() => setSelectedVariant(v)}
+                                        className={`px-4 py-2 rounded-xl text-sm font-medium border-2 transition-all ${
+                                            selectedVariant?.id === v.id
+                                                ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
+                                                : 'border-slate-100 bg-slate-50 text-slate-600 hover:border-slate-200'
+                                        }`}
+                                    >
+                                        {v.ram} / {v.storage}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                     {/* Laptop Specifications */}
                     <div className="border-t border-b border-slate-100 py-6 space-y-4">
@@ -163,23 +206,23 @@ const ProductDetailPage = () => {
                             {product.brand && (
                                 <div className="flex bg-slate-50 p-3 rounded-lg"><span className="font-medium w-24 text-slate-700 min-w-[6rem]">Thương hiệu:</span> <span>{product.brand}</span></div>
                             )}
-                            {product.cpu && (
-                                <div className="flex bg-slate-50 p-3 rounded-lg"><span className="font-medium w-24 text-slate-700 min-w-[6rem]">CPU:</span> <span>{product.cpu}</span></div>
+                            {(selectedVariant?.cpu || product.cpu) && (
+                                <div className="flex bg-slate-50 p-3 rounded-lg"><span className="font-medium w-24 text-slate-700 min-w-[6rem]">CPU:</span> <span>{selectedVariant?.cpu || product.cpu}</span></div>
                             )}
-                            {product.ram && (
-                                <div className="flex bg-slate-50 p-3 rounded-lg"><span className="font-medium w-24 text-slate-700 min-w-[6rem]">RAM:</span> <span>{product.ram}</span></div>
+                            {(selectedVariant?.ram || product.ram) && (
+                                <div className="flex bg-slate-50 p-3 rounded-lg"><span className="font-medium w-24 text-slate-700 min-w-[6rem]">RAM:</span> <span>{selectedVariant?.ram || product.ram}</span></div>
                             )}
-                            {product.storage && (
-                                <div className="flex bg-slate-50 p-3 rounded-lg"><span className="font-medium w-24 text-slate-700 min-w-[6rem]">Ổ cứng:</span> <span>{product.storage}</span></div>
+                            {(selectedVariant?.storage || product.storage) && (
+                                <div className="flex bg-slate-50 p-3 rounded-lg"><span className="font-medium w-24 text-slate-700 min-w-[6rem]">Ổ cứng:</span> <span>{selectedVariant?.storage || product.storage}</span></div>
                             )}
-                            {product.screen && (
-                                <div className="flex bg-slate-50 p-3 rounded-lg"><span className="font-medium w-24 text-slate-700 min-w-[6rem]">Màn hình:</span> <span>{product.screen}</span></div>
+                            {(selectedVariant?.screen || product.screen) && (
+                                <div className="flex bg-slate-50 p-3 rounded-lg"><span className="font-medium w-24 text-slate-700 min-w-[6rem]">Màn hình:</span> <span>{selectedVariant?.screen || product.screen}</span></div>
                             )}
                         </div>
-                        {product.specifications && (
+                        {(selectedVariant?.specifications || product.specifications) && (
                             <div className="text-sm text-slate-600 bg-slate-50 p-3 rounded-lg">
                                 <span className="font-medium text-slate-700 block mb-1">Thông số khác:</span> 
-                                {product.specifications}
+                                {selectedVariant?.specifications || product.specifications}
                             </div>
                         )}
                         <p className="text-slate-600 leading-relaxed mt-4 whitespace-pre-wrap">
@@ -191,7 +234,7 @@ const ProductDetailPage = () => {
                         <Button
                             size="lg"
                             onClick={handleAddToCart}
-                            disabled={product.status === 'OUT_OF_STOCK'}
+                            disabled={isOutOfStock}
                             className="flex-1 py-4 text-lg flex items-center justify-center space-x-2"
                         >
                             <ShoppingBagIcon className="h-6 w-6" />

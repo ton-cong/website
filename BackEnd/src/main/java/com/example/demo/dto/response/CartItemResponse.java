@@ -16,4 +16,7 @@ public class CartItemResponse {
     private Double price;
     private Integer quantity;
     private String imageUrl;
+    private String ram;
+    private String storage;
+    private String specifications;
 }

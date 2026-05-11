@@ -18,12 +18,12 @@ public class SwaggerConfig {
 
         return new OpenAPI()
                 .info(new Info()
-                        .title("LapTon E-Commerce API")
+                        .title("TQuad E-Commerce API")
                         .version("1.0.0")
-                        .description("API documentation for LapTon E-Commerce Platform. "
+                        .description("API documentation for TQuad E-Commerce Platform. "
                                 + "Includes Product Management, User Authentication, Shopping Cart, Orders, Reviews, and Category Management.")
                         .contact(new Contact()
-                                .name("LapTon Team")
+                                .name("TQuad Team")
                                 .email("vucongton9@gmail.com")))
                 .addSecurityItem(new SecurityRequirement().addList(securitySchemeName))
                 .components(new Components()

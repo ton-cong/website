@@ -5,12 +5,12 @@ import com.example.demo.dto.response.CartItemResponse;
 import com.example.demo.dto.response.CartResponse;
 import com.example.demo.entity.Cart;
 import com.example.demo.entity.CartItem;
-import com.example.demo.entity.Product;
+import com.example.demo.entity.ProductVariant;
 import com.example.demo.entity.User;
 import com.example.demo.mapper.CartMapper;
 import com.example.demo.repository.CartItemRepository;
 import com.example.demo.repository.CartRepository;
-import com.example.demo.repository.ProductRepository;
+import com.example.demo.repository.ProductVariantRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.CartService;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ public class CartServiceImpl implements CartService {
 
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
-    private final ProductRepository productRepository;
+    private final ProductVariantRepository productVariantRepository;
     private final UserRepository userRepository;
     private final CartMapper cartMapper;
 
@@ -52,14 +52,17 @@ public class CartServiceImpl implements CartService {
         List<CartItem> items = cartItemRepository.findByCartId(cart.getId());
         List<CartItemResponse> itemResponses = items.stream()
                 .map(item -> {
-                    Product product = item.getProduct();
+                    ProductVariant productVariant = item.getProductVariant();
                     return CartItemResponse.builder()
                             .id(item.getId())
-                            .productId(item.getProductId())
-                            .productName(product != null ? product.getName() : null)
-                            .price(product != null && product.getPrice() != null ? product.getPrice().doubleValue() : 0)
+                            .productId(productVariant != null ? productVariant.getProductId() : null)
+                            .productName(productVariant != null && productVariant.getProduct() != null ? productVariant.getProduct().getName() : null)
+                            .price(productVariant != null && productVariant.getPrice() != null ? productVariant.getPrice().doubleValue() : 0)
                             .quantity(item.getQuantity())
-                            .imageUrl(product != null ? product.getImageUrl() : null)
+                            .imageUrl(productVariant != null && productVariant.getProduct() != null ? productVariant.getProduct().getImageUrl() : null)
+                            .ram(productVariant != null ? productVariant.getRam() : null)
+                            .storage(productVariant != null ? productVariant.getStorage() : null)
+                            .specifications(productVariant != null ? productVariant.getSpecifications() : null)
                             .build();
                 })
                 .collect(Collectors.toList());
@@ -88,12 +91,12 @@ public class CartServiceImpl implements CartService {
         User user = getCurrentUser();
         Cart cart = getOrCreateCart(user);
 
-        productRepository.findById(request.getProductId())
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+        productVariantRepository.findById(request.getProductVariantId())
+                .orElseThrow(() -> new RuntimeException("Product variant not found"));
 
         List<CartItem> existingItems = cartItemRepository.findByCartId(cart.getId());
         CartItem existing = existingItems.stream()
-                .filter(i -> i.getProductId().equals(request.getProductId()))
+                .filter(i -> i.getProductVariantId().equals(request.getProductVariantId()))
                 .findFirst()
                 .orElse(null);
 
@@ -103,7 +106,7 @@ public class CartServiceImpl implements CartService {
         } else {
             CartItem newItem = CartItem.builder()
                     .cartId(cart.getId())
-                    .productId(request.getProductId())
+                    .productVariantId(request.getProductVariantId())
                     .quantity(request.getQuantity())
                     .build();
             cartItemRepository.insert(newItem);

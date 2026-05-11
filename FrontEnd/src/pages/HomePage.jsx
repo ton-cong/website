@@ -47,9 +47,9 @@ const HomePage = () => {
             ]);
             setCategories(catRes?.result || catRes || []);
             const prodData = prodRes?.result || prodRes;
-            setFeaturedProducts(prodData?.content || []);
+            setFeaturedProducts((prodData?.content || []).filter(p => p.status !== 'INACTIVE'));
             const hotData = hotRes?.result || hotRes;
-            setHotDeals(hotData?.content || []);
+            setHotDeals((hotData?.content || []).filter(p => p.status !== 'INACTIVE'));
         } catch (e) {
             console.error(e);
         } finally {
@@ -197,9 +197,14 @@ const ProductCard = ({ product, badge }) => (
             <img src={product.imageUrl || 'https://via.placeholder.com/300'} alt={product.name}
                 className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" />
             {badge && (
-                <span className="absolute top-2 left-2 bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                <span className="absolute top-2 left-2 bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full z-10">
                     {badge}
                 </span>
+            )}
+            {product.status === 'OUT_OF_STOCK' && (
+                <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center">
+                    <span className="bg-slate-900 text-white px-3 py-1 text-[10px] font-bold rounded-full uppercase tracking-wider">Hết hàng</span>
+                </div>
             )}
         </div>
         <div className="p-3">

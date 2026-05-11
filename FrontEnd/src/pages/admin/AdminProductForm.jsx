@@ -5,7 +5,7 @@ import categoryApi from '../../api/categoryApi';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
 import { toast } from 'react-toastify';
-import { ArrowLeftIcon, PhotoIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, PhotoIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 
@@ -19,7 +19,6 @@ const AdminProductForm = () => {
     const [imagePreview, setImagePreview] = useState(null);
     const quillRef = useRef(null);
 
-    // Upload ảnh: click nút image trong toolbar
     const imageHandler = useCallback(() => {
         const input = document.createElement('input');
         input.setAttribute('type', 'file');
@@ -31,7 +30,6 @@ const AdminProductForm = () => {
             try {
                 const res = await productApi.uploadEditorImage(file);
                 const url = res?.url || res?.data?.url || res;
-                // react-quill-new: quillRef.current là Quill instance trực tiếp
                 const quill = quillRef.current;
                 if (quill) {
                     const range = quill.getSelection(true);
@@ -44,9 +42,7 @@ const AdminProductForm = () => {
         };
     }, []);
 
-    // Paste ảnh Ctrl+V vào editor
     useEffect(() => {
-        // Đợi editor mount xong
         const timer = setTimeout(() => {
             const quill = quillRef.current;
             if (!quill || !quill.root) return;
@@ -74,7 +70,6 @@ const AdminProductForm = () => {
             };
 
             quill.root.addEventListener('paste', handlePaste);
-            // lưu cleanup
             quillRef._pasteCleanup = () => quill.root.removeEventListener('paste', handlePaste);
         }, 300);
 
@@ -87,7 +82,6 @@ const AdminProductForm = () => {
         };
     }, []);
 
-    // Memo modules: tránh re-render vô tận khi imageHandler thay đổi
     const quillModules = useMemo(() => ({
         toolbar: {
             container: [
@@ -106,15 +100,7 @@ const AdminProductForm = () => {
         name: '',
         categoryId: '',
         description: '',
-        specifications: '',
-        price: '',
-        salePrice: '',
-        stock: '',
         brand: '',
-        cpu: '',
-        ram: '',
-        storage: '',
-        screen: '',
         status: 'ACTIVE',
         image: null,
         content: '',
@@ -131,24 +117,16 @@ const AdminProductForm = () => {
         try {
             const response = await categoryApi.getAll();
             let categoriesData = response?.result || response || [];
-
             if (categoriesData && typeof categoriesData === 'object' && !Array.isArray(categoriesData)) {
                 categoriesData = categoriesData.result || categoriesData.data || [];
             }
+            if (!Array.isArray(categoriesData)) categoriesData = [];
 
-            if (!Array.isArray(categoriesData)) {
-                categoriesData = [];
-            }
-
-            const normalizedCategories = categoriesData.map((cat) => {
-                const categoryId = cat.id || cat.categoryId || cat.ID || cat.CategoryId;
-                return {
-                    ...cat,
-                    id: categoryId,
-                    name: cat.name || cat.categoryName || cat.Name
-                };
-            });
-
+            const normalizedCategories = categoriesData.map((cat) => ({
+                ...cat,
+                id: cat.id || cat.categoryId || cat.ID || cat.CategoryId,
+                name: cat.name || cat.categoryName || cat.Name
+            }));
             setCategories(normalizedCategories);
         } catch (error) {
             toast.error("Không thể tải danh mục");
@@ -163,15 +141,7 @@ const AdminProductForm = () => {
                 name: product.name || '',
                 categoryId: product.categoryId || product.category?.id || '',
                 description: product.description || '',
-                specifications: product.specifications || '',
-                price: product.price || '',
-                salePrice: product.salePrice || '',
-                stock: product.stock || '',
                 brand: product.brand || '',
-                cpu: product.cpu || '',
-                ram: product.ram || '',
-                storage: product.storage || '',
-                screen: product.screen || '',
                 status: product.status || 'ACTIVE',
                 image: null,
                 content: product.content || '',
@@ -197,18 +167,12 @@ const AdminProductForm = () => {
         }
     };
 
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (!formData.categoryId || formData.categoryId === '') {
             toast.error("Vui lòng chọn danh mục sản phẩm");
-            return;
-        }
-
-        const priceNum = parseFloat(formData.price);
-
-        if (!formData.price || isNaN(priceNum) || priceNum <= 0) {
-            toast.error("Vui lòng nhập giá sản phẩm hợp lệ");
             return;
         }
 
@@ -219,24 +183,7 @@ const AdminProductForm = () => {
             data.append('name', formData.name);
             data.append('categoryId', formData.categoryId);
             data.append('description', formData.description || '');
-            data.append('specifications', formData.specifications || '');
-            data.append('price', priceNum);
-
-            if (formData.salePrice) {
-                const salePriceNum = parseFloat(formData.salePrice);
-                if (!isNaN(salePriceNum) && salePriceNum > 0) {
-                    data.append('salePrice', salePriceNum);
-                }
-            }
-
-            const stockNum = parseInt(formData.stock || 0, 10);
-            data.append('stock', isNaN(stockNum) ? 0 : stockNum);
-
             data.append('brand', formData.brand || '');
-            data.append('cpu', formData.cpu || '');
-            data.append('ram', formData.ram || '');
-            data.append('storage', formData.storage || '');
-            data.append('screen', formData.screen || '');
             data.append('status', formData.status);
             data.append('content', formData.content || '');
 
@@ -278,7 +225,7 @@ const AdminProductForm = () => {
 
                     <div className="lg:col-span-2 space-y-6">
                         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
-                            <h2 className="text-lg font-semibold text-slate-900 mb-4">Thông tin cơ bản</h2>
+                            <h2 className="text-lg font-semibold text-slate-900 mb-4">Thông tin chung</h2>
                             <div className="space-y-4">
                                 <Input
                                     label="Tên sản phẩm *"
@@ -292,9 +239,6 @@ const AdminProductForm = () => {
                                     <div>
                                         <label className="block text-sm font-medium text-slate-700 mb-1">
                                             Danh mục *
-                                            <span className="ml-2 text-xs text-gray-500">
-                                                ({categories.length} danh mục)
-                                            </span>
                                         </label>
                                         <select
                                             name="categoryId"
@@ -320,25 +264,14 @@ const AdminProductForm = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-1">Mô tả</label>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">Mô tả ngắn</label>
                                     <textarea
                                         name="description"
                                         value={formData.description}
                                         onChange={handleChange}
                                         rows={3}
                                         className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none"
-                                        placeholder="Mô tả chi tiết sản phẩm..."
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-1">Thông số kỹ thuật</label>
-                                    <textarea
-                                        name="specifications"
-                                        value={formData.specifications}
-                                        onChange={handleChange}
-                                        rows={2}
-                                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none"
-                                        placeholder="VD: Chip M3, 18GB RAM, 512GB SSD"
+                                        placeholder="Mô tả ngắn gọn sản phẩm..."
                                     />
                                 </div>
                             </div>
@@ -347,7 +280,6 @@ const AdminProductForm = () => {
                         {/* Rich Text Content */}
                         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
                             <h2 className="text-lg font-semibold text-slate-900 mb-2">Nội dung chi tiết</h2>
-                            <p className="text-xs text-slate-400 mb-3">Soạn mô tả chi tiết, thêm ảnh minh hoạ, định dạng văn bản...</p>
                             <div style={{ minHeight: '300px' }}>
                                 <ReactQuill
                                     theme="snow"
@@ -358,22 +290,12 @@ const AdminProductForm = () => {
                                 />
                             </div>
                         </div>
-
-                        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
-                            <h2 className="text-lg font-semibold text-slate-900 mb-4">Thông số chi tiết</h2>
-                            <div className="grid grid-cols-2 gap-4">
-                                <Input label="CPU" name="cpu" value={formData.cpu} onChange={handleChange} placeholder="VD: Intel Core i7" />
-                                <Input label="RAM" name="ram" value={formData.ram} onChange={handleChange} placeholder="VD: 16GB DDR5" />
-                                <Input label="Bộ nhớ" name="storage" value={formData.storage} onChange={handleChange} placeholder="VD: 512GB SSD" />
-                                <Input label="Màn hình" name="screen" value={formData.screen} onChange={handleChange} placeholder="VD: 14 inch Retina" />
-                            </div>
-                        </div>
                     </div>
 
                     <div className="space-y-6">
 
                         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
-                            <h2 className="text-lg font-semibold text-slate-900 mb-4">Hình ảnh</h2>
+                            <h2 className="text-lg font-semibold text-slate-900 mb-4">Hình ảnh đại diện</h2>
                             <div className="border-2 border-dashed border-slate-300 rounded-lg p-4 text-center hover:border-indigo-500 transition-colors">
                                 {imagePreview ? (
                                     <div className="relative">
@@ -396,49 +318,25 @@ const AdminProductForm = () => {
                                     type="file"
                                     accept="image/*"
                                     onChange={handleImageChange}
-                                    className="mt-4 text-sm"
+                                    className="mt-4 text-sm w-full"
                                 />
                             </div>
                         </div>
 
                         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
-                            <h2 className="text-lg font-semibold text-slate-900 mb-4">Giá & Kho</h2>
+                            <h2 className="text-lg font-semibold text-slate-900 mb-4">Cài đặt</h2>
                             <div className="space-y-4">
-                                <Input
-                                    label="Giá bán (VNĐ) *"
-                                    name="price"
-                                    type="number"
-                                    value={formData.price}
-                                    onChange={handleChange}
-                                    required
-                                    placeholder="VD: 25000000"
-                                />
-                                <Input
-                                    label="Giá khuyến mãi (VNĐ)"
-                                    name="salePrice"
-                                    type="number"
-                                    value={formData.salePrice}
-                                    onChange={handleChange}
-                                    placeholder="Để trống nếu không KM"
-                                />
-                                <Input
-                                    label="Số lượng trong kho"
-                                    name="stock"
-                                    type="number"
-                                    value={formData.stock}
-                                    onChange={handleChange}
-                                    placeholder="0"
-                                />
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-1">Trạng thái</label>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">Trạng thái hiển thị</label>
                                     <select
                                         name="status"
                                         value={formData.status}
                                         onChange={handleChange}
                                         className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none"
                                     >
-                                        <option value="ACTIVE">Còn hàng</option>
-                                        <option value="OUT_OF_STOCK">Hết hàng</option>
+                                        <option value="ACTIVE">Hiển thị (Active)</option>
+                                        <option value="INACTIVE">Ẩn (Inactive)</option>
+                                        <option value="OUT_OF_STOCK">Hết hàng toàn bộ</option>
                                     </select>
                                 </div>
                             </div>

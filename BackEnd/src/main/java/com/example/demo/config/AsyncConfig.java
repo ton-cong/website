@@ -19,7 +19,7 @@ public class AsyncConfig implements AsyncConfigurer {
         executor.setCorePoolSize(5); 
         executor.setMaxPoolSize(10);
         executor.setQueueCapacity(500); 
-        executor.setThreadNamePrefix("LapTonAsync-"); 
+        executor.setThreadNamePrefix("TQuadAsync-"); 
         executor.initialize();
         return executor;
     }

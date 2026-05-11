@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import orderApi from '../api/orderApi';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { ShoppingBagIcon, ClockIcon, CheckCircleIcon, TruckIcon, XCircleIcon, CogIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { ShoppingBagIcon, ClockIcon, CheckCircleIcon, TruckIcon, XCircleIcon, CogIcon, XMarkIcon, DocumentArrowDownIcon } from '@heroicons/react/24/outline';
 
 const STATUS_CONFIG = {
     pending:    { label: 'Chờ xác nhận', cls: 'bg-amber-50 text-amber-700 border border-amber-200',   icon: ClockIcon,       dot: 'bg-amber-400' },
@@ -50,6 +50,7 @@ const OrdersPage = () => {
             setLoadingDetails(false);
         }
     };
+
 
     if (loading) return (
         <div className="flex items-center justify-center min-h-[400px]">
@@ -133,6 +134,11 @@ const OrdersPage = () => {
                                                 className="w-12 h-12 object-contain bg-slate-50 rounded-lg p-1" />
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-sm font-medium text-slate-900 line-clamp-1">{item.productName}</p>
+                                                {(item.ram || item.storage) && (
+                                                    <p className="text-[10px] text-slate-400">
+                                                        {item.ram}{item.ram && item.storage ? ' / ' : ''}{item.storage}
+                                                    </p>
+                                                )}
                                                 <p className="text-xs text-slate-400">{item.price?.toLocaleString('vi-VN')}đ × {item.quantity}</p>
                                             </div>
                                             <p className="text-sm font-semibold text-slate-900 flex-shrink-0">
@@ -215,6 +221,11 @@ const OrdersPage = () => {
                                                 className="w-16 h-16 object-contain bg-slate-50 rounded-lg p-1" />
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-sm font-medium text-slate-900 line-clamp-2">{item.productName}</p>
+                                                {(item.ram || item.storage) && (
+                                                    <p className="text-xs text-slate-500 mt-0.5">
+                                                        Cấu hình: {item.ram}{item.ram && item.storage ? ' / ' : ''}{item.storage}
+                                                    </p>
+                                                )}
                                                 <p className="text-xs text-slate-500 mt-1">Đơn giá: {item.price?.toLocaleString('vi-VN')}đ × {item.quantity}</p>
                                             </div>
                                             <p className="text-sm font-bold text-blue-600 flex-shrink-0">

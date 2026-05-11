@@ -1,4 +1,4 @@
-# 🖥️ LapTon — Website Bán Laptop
+# 🖥️ TQuad — Website Bán Laptop
 
 > Website thương mại điện tử chuyên bán laptop, xây dựng fullstack với **Spring Boot** & **React** và tích hợp các tính năng **Real-time**.
 
@@ -20,7 +20,6 @@
 | Cloudinary | 1.33 | Upload & lưu trữ ảnh |
 | Redis | - | Caching (Spring Data Redis) |
 | WebSocket & STOMP| - | Real-time Chat & Notifications |
-| VNPay API | - | Tích hợp thanh toán trực tuyến |
 | Java Threads | - | Xử lý tác vụ ngầm (Multithreading) |
 | Spring Mail | - | Gửi email (quên mật khẩu) |
 | Springdoc OpenAPI | 2.8.6 | Tự động tạo Swagger UI |
@@ -49,7 +48,7 @@
 ### 🙋 Khách hàng (User)
 - **Đăng ký / Đăng nhập** — JWT token, xác thực Role, quên mật khẩu gửi qua email.
 - **Mua sắm nội thất** — Tìm kiếm, lọc sản phẩm, xem chi tiết và thêm vào giỏ hàng.
-- **Thanh toán trực tuyến** — Hỗ trợ thanh toán bằng **Tiền mặt (COD)** hoặc thẻ qua **cổng thanh toán VNPAY**.
+- **Thanh toán trực tuyến** — Hỗ trợ thanh toán bằng **Tiền mặt (COD)** hoặc thẻ qua **cổng thanh toán điện tử**.
 - **Đánh giá & Bình luận** — Chấm điểm sao, viết nhận xét và có thể **trả lời (reply) các đánh giá khác**.
 - **Chat Real-time** — Widget Chat giúp khách hàng nhắn tin trực tiếp với cửa hàng (hỗ trợ tự động kết nối lại và bảo mật tin nhắn theo User).
 - **Thông báo Real-time** — Nhận thông báo đẩy (tin nhắn mới, trạng thái đơn hàng thay đổi) ngay trên thanh Navbar mà không cần tải lại trang.
@@ -108,7 +107,7 @@ users ──< notifications
 project/
 ├── BackEnd/
 │   ├── src/main/java/com/example/demo/
-│   │   ├── config/          # SecurityConfig, CorsConfig, SwaggerConfig, CloudinaryConfig, VNPayConfig, WebSocketConfig
+│   │   ├── config/          # SecurityConfig, CorsConfig, SwaggerConfig, CloudinaryConfig, WebSocketConfig
 │   │   ├── controller/      # Auth, Product, Category, Cart, Order, Review, Admin, Chat, Notification, Payment
 │   │   ├── dto/             # 25+ Request & Response DTOs
 │   │   ├── entity/          # User, Product, Category, Cart, CartItem, Order, OrderItem, Review, Conversation, ChatMessage, Notification
@@ -116,7 +115,7 @@ project/
 │   │   ├── filter/          # JwtAuthenticationFilter
 │   │   ├── mapper/          # MapStruct Mappers
 │   │   ├── repository/      # MyBatis Mapper Interfaces
-│   │   └── service/         # Service layer (auth, chat, notif, vnpay, etc...)
+│   │   └── service/         # Service layer (auth, chat, notif, etc...)
 │   ├── src/main/resources/
 │   │   ├── mapper/          # MyBatis XML Mapper files
 │   │   ├── data.sql         # Seed data mới nhất
@@ -125,7 +124,7 @@ project/
 │
 └── FrontEnd/
     ├── src/
-    │   ├── api/             # API handlers (axios, chatApi, notifApi, vnpayApi, v.v...)
+    │   ├── api/             # API handlers (axios, chatApi, notifApi, v.v...)
     │   ├── components/      # Navbar (có Notification dropdown), ChatWidget, Button, v.v...
     │   ├── context/         # AuthContext, CartContext
     │   └── pages/
@@ -154,7 +153,7 @@ CREATE DATABASE lapton;
 ```bash
 cd BackEnd
 
-# Cấu hình application.properties (MySQL connection, VNPay keys, Cloudinary)
+# Cấu hình application.properties (MySQL connection, Cloudinary)
 # ...
 
 mvn spring-boot:run
@@ -170,5 +169,5 @@ npm run dev
 ### 4. Tài khoản mặc định
 | Role | Email | Password |
 |------|-------|----------|
-| Admin | admin@gmail.com | 123456 |
+| Super Admin | admin@gmail.com | 123456 |
 | User | user@gmail.com | 123456 |

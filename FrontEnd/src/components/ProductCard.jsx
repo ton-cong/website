@@ -27,7 +27,7 @@ const ProductCard = ({ product }) => {
                 )}
                 {product.status === 'OUT_OF_STOCK' && (
                     <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center">
-                        <span className="bg-slate-900 text-white px-3 py-1 text-xs font-bold rounded-full uppercase tracking-wider">Out of Stock</span>
+                        <span className="bg-slate-900 text-white px-3 py-1 text-xs font-bold rounded-full uppercase tracking-wider">Hết hàng</span>
                     </div>
                 )}
             </div>

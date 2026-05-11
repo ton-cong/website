@@ -85,7 +85,7 @@ public class ChatServiceImpl implements ChatService {
         // Update last message in conversation
         conversation.setLastMessage(message.getContent());
         conversation.setLastMessageAt(new Timestamp(System.currentTimeMillis()));
-        if (com.example.demo.enums.Role.ADMIN == currentUser.getRole()) {
+        if (currentUser.getRole() == com.example.demo.enums.Role.ADMIN || currentUser.getRole() == com.example.demo.enums.Role.SUPER_ADMIN) {
             conversation.setAdminId(currentUser.getId());
         }
         conversationRepository.updateLastMessage(conversation);
@@ -94,14 +94,14 @@ public class ChatServiceImpl implements ChatService {
         message.setSender(currentUser);
 
         // Trigger Notification
-        if (com.example.demo.enums.Role.ADMIN == currentUser.getRole()) {
+        if (currentUser.getRole() == com.example.demo.enums.Role.ADMIN || currentUser.getRole() == com.example.demo.enums.Role.SUPER_ADMIN) {
             String content = "Bạn có tin nhắn mới từ Cửa hàng";
             notificationService.createAndSendNotification(conversation.getUserId(), "message", content);
         } else {
             // Notify all admins (for a scalable app, query by role in DB, here we filter findAll)
             String content = "Tin nhắn mới từ khách hàng " + currentUser.getFullName();
             userRepository.findAll().stream()
-                .filter(u -> com.example.demo.enums.Role.ADMIN == u.getRole())
+                .filter(u -> u.getRole() == com.example.demo.enums.Role.ADMIN || u.getRole() == com.example.demo.enums.Role.SUPER_ADMIN)
                 .forEach(admin -> 
                     notificationService.createAndSendNotification(admin.getId(), "message", content)
                 );
@@ -130,7 +130,7 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public List<ConversationResponse> getConversations() {
         User currentUser = getCurrentUser();
-        if (com.example.demo.enums.Role.ADMIN == currentUser.getRole()) {
+        if (currentUser.getRole() == com.example.demo.enums.Role.ADMIN || currentUser.getRole() == com.example.demo.enums.Role.SUPER_ADMIN) {
             return conversationRepository.findAll().stream()
                     .map(chatMapper::toConversationResponse)
                     .collect(Collectors.toList());

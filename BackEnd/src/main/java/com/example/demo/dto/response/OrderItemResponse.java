@@ -16,4 +16,6 @@ public class OrderItemResponse {
     private Integer quantity;
     private Double price;
     private String imageUrl;
+    private String ram;
+    private String storage;
 }

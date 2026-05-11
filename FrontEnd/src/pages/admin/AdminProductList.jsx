@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import productApi from '../../api/productApi';
 import { toast } from 'react-toastify';
-import { PencilSquareIcon, TrashIcon, PlusIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { PencilSquareIcon, TrashIcon, PlusIcon, MagnifyingGlassIcon, AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline';
 import Pagination from '../../components/Pagination';
 
 const AdminProductList = () => {
@@ -150,6 +150,7 @@ const AdminProductList = () => {
                                 <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider cursor-pointer hover:text-indigo-600" onClick={() => handleSort('price')}>
                                     Giá {getSortIcon('price')}
                                 </th>
+                                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Biến thể</th>
                                 <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Danh mục</th>
                                 <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider cursor-pointer hover:text-indigo-600" onClick={() => handleSort('stock')}>
                                     Số lượng {getSortIcon('stock')}
@@ -169,21 +170,42 @@ const AdminProductList = () => {
                                         />
                                     </td>
                                     <td className="px-6 py-4 text-sm font-medium text-slate-900 max-w-[200px] truncate">{product.name}</td>
-                                    <td className="px-6 py-4 text-sm text-slate-700">{product.price?.toLocaleString()}đ</td>
+                                    <td className="px-6 py-4 text-sm text-slate-700 font-bold text-indigo-600">
+                                        {product.price ? `${product.price.toLocaleString()}đ` : 'Chưa có giá'}
+                                    </td>
+                                    <td className="px-6 py-4 text-sm text-slate-500">
+                                        <span className="bg-slate-100 px-2 py-1 rounded text-xs font-medium">
+                                            {product.variants?.length || 0} cấu hình
+                                        </span>
+                                    </td>
                                     <td className="px-6 py-4 text-sm text-slate-500">{product.categoryName}</td>
                                     <td className="px-6 py-4">
-                                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${
-                                            product.stock === 0
-                                                ? 'bg-red-100 text-red-700'
-                                                : product.stock <= 5
-                                                ? 'bg-orange-100 text-orange-700'
-                                                : 'bg-green-100 text-green-700'
-                                        }`}>
-                                            {product.stock === 0 ? 'Hết hàng' : `${product.stock} sản phẩm`}
-                                        </span>
+                                        {(() => {
+                                            const totalStock = product.variants && product.variants.length > 0 
+                                                ? product.variants.reduce((sum, v) => sum + (v.stock || 0), 0)
+                                                : (product.stock || 0);
+                                            return (
+                                                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${
+                                                    totalStock === 0
+                                                        ? 'bg-red-100 text-red-700'
+                                                        : totalStock <= 5
+                                                        ? 'bg-orange-100 text-orange-700'
+                                                        : 'bg-green-100 text-green-700'
+                                                }`}>
+                                                    {totalStock === 0 ? 'Hết hàng' : `${totalStock} sản phẩm`}
+                                                </span>
+                                            );
+                                        })()}
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2">
+                                            <button
+                                                onClick={() => navigate(`/admin/products/${product.id}/variants`)}
+                                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                title="Quản lý cấu hình"
+                                            >
+                                                <AdjustmentsHorizontalIcon className="h-4 w-4" />
+                                            </button>
                                             <button
                                                 onClick={() => navigate(`/admin/products/edit/${product.id}`)}
                                                 className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
@@ -192,7 +214,7 @@ const AdminProductList = () => {
                                             </button>
                                             <button
                                                 onClick={() => handleDelete(product.id)}
-                                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                             >
                                                 <TrashIcon className="h-4 w-4" />
                                             </button>

@@ -384,6 +384,11 @@ const CheckoutPage = () => {
                                             className="w-12 h-12 object-contain bg-slate-50 rounded-lg p-1 flex-shrink-0" />
                                         <div className="flex-1 min-w-0">
                                             <p className="text-sm font-medium text-slate-900 line-clamp-1">{item.productName}</p>
+                                            {(item.ram || item.storage) && (
+                                                <p className="text-[10px] text-slate-400">
+                                                    {item.ram}{item.ram && item.storage ? ' / ' : ''}{item.storage}
+                                                </p>
+                                            )}
                                             <p className="text-xs text-slate-400">{item.price?.toLocaleString('vi-VN')}đ × {item.quantity}</p>
                                         </div>
                                         <p className="text-sm font-semibold text-slate-900 flex-shrink-0">
