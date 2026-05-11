@@ -1,10 +1,17 @@
 services:
-  # MySQL Database
-  - type: database
+  # MySQL Database (Running as a Docker service)
+  - type: web
     name: lapton-db
-    databaseName: lapton
-    user: root
+    env: image
+    image: mysql:8.0
     plan: free
+    envVars:
+      - key: MYSQL_ROOT_PASSWORD
+        value: 123456
+      - key: MYSQL_DATABASE
+        value: lapton
+      - key: MYSQL_TCP_PORT
+        value: 3306
 
   # Spring Boot Backend
   - type: web
@@ -15,17 +22,11 @@ services:
     plan: free
     envVars:
       - key: SPRING_DATASOURCE_URL
-        fromDatabase:
-          name: lapton-db
-          property: connectionString
+        value: jdbc:mysql://lapton-db:3306/lapton?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       - key: SPRING_DATASOURCE_USERNAME
-        fromDatabase:
-          name: lapton-db
-          property: user
+        value: root
       - key: SPRING_DATASOURCE_PASSWORD
-        fromDatabase:
-          name: lapton-db
-          property: password
+        value: 123456
       - key: MAIL_USERNAME
         sync: false
       - key: MAIL_PASSWORD
